@@ -17,7 +17,6 @@ class SeatsResource
         string $seatType,
         int $count,
         ?string $customerId = null,
-        ?string $externalId = null,
         ?string $idempotencyKey = null,
     ): ApiResponse {
         return $this->http->post(
@@ -26,7 +25,6 @@ class SeatsResource
                 'seat_type' => $seatType,
                 'count' => $count,
                 'customer_id' => $customerId,
-                'external_id' => $externalId,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -36,7 +34,6 @@ class SeatsResource
         string $seatType,
         int $count,
         ?string $customerId = null,
-        ?string $externalId = null,
         ?string $idempotencyKey = null,
     ): ApiResponse {
         return $this->http->delete(
@@ -45,7 +42,6 @@ class SeatsResource
                 'seat_type' => $seatType,
                 'count' => $count,
                 'customer_id' => $customerId,
-                'external_id' => $externalId,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -55,7 +51,6 @@ class SeatsResource
         string $seatType,
         int $count,
         ?string $customerId = null,
-        ?string $externalId = null,
         ?string $idempotencyKey = null,
     ): ApiResponse {
         return $this->http->put(
@@ -64,7 +59,6 @@ class SeatsResource
                 'seat_type' => $seatType,
                 'count' => $count,
                 'customer_id' => $customerId,
-                'external_id' => $externalId,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -76,7 +70,6 @@ class SeatsResource
     public function setAll(
         array $seats,
         ?string $customerId = null,
-        ?string $externalId = null,
         ?string $idempotencyKey = null,
     ): ApiResponse {
         return $this->http->put(
@@ -84,7 +77,6 @@ class SeatsResource
             HttpClient::buildBody([
                 'seats' => $seats,
                 'customer_id' => $customerId,
-                'external_id' => $externalId,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -93,27 +85,23 @@ class SeatsResource
     public function getBalance(
         string $seatType,
         ?string $customerId = null,
-        ?string $externalId = null,
     ): ApiResponse {
         return $this->http->get(
             '/seats/balance',
             HttpClient::buildBody([
                 'seat_type' => $seatType,
                 'customer_id' => $customerId,
-                'external_id' => $externalId,
             ]),
         );
     }
 
     public function getAllBalances(
         ?string $customerId = null,
-        ?string $externalId = null,
     ): ApiResponse {
         return $this->http->get(
             '/seats/balances',
             HttpClient::buildBody([
                 'customer_id' => $customerId,
-                'external_id' => $externalId,
             ]),
         );
     }

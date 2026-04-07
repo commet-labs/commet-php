@@ -13,14 +13,14 @@ class FeaturesResource
         private readonly HttpClient $http,
     ) {}
 
-    public function get(string $code, string $externalId): ApiResponse
+    public function get(string $code, string $customerId): ApiResponse
     {
-        return $this->http->get("/features/{$code}", ['external_id' => $externalId]);
+        return $this->http->get("/features/{$code}", ['customer_id' => $customerId]);
     }
 
-    public function check(string $code, string $externalId): ApiResponse
+    public function check(string $code, string $customerId): ApiResponse
     {
-        $result = $this->http->get("/features/{$code}", ['external_id' => $externalId]);
+        $result = $this->http->get("/features/{$code}", ['customer_id' => $customerId]);
 
         if (!$result->success || $result->data === null) {
             return new ApiResponse(
@@ -37,16 +37,16 @@ class FeaturesResource
         );
     }
 
-    public function canUse(string $code, string $externalId): ApiResponse
+    public function canUse(string $code, string $customerId): ApiResponse
     {
         return $this->http->get(
             "/features/{$code}",
-            ['external_id' => $externalId, 'action' => 'canUse'],
+            ['customer_id' => $customerId, 'action' => 'canUse'],
         );
     }
 
-    public function list(string $externalId): ApiResponse
+    public function list(string $customerId): ApiResponse
     {
-        return $this->http->get('/features', ['external_id' => $externalId]);
+        return $this->http->get('/features', ['customer_id' => $customerId]);
     }
 }

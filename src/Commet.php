@@ -64,10 +64,10 @@ class Commet
         $this->webhooks = new Webhooks();
     }
 
-    public function customer(string $externalId): CustomerContext
+    public function customer(string $customerId): CustomerContext
     {
         return new CustomerContext(
-            $externalId,
+            $customerId,
             features: $this->features,
             seats: $this->seats,
             usage: $this->usage,

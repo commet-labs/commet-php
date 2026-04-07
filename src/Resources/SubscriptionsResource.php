@@ -18,7 +18,6 @@ class SubscriptionsResource
      */
     public function create(
         ?string $customerId = null,
-        ?string $externalId = null,
         ?string $planCode = null,
         ?string $planId = null,
         ?string $billingInterval = null,
@@ -33,7 +32,6 @@ class SubscriptionsResource
             '/subscriptions',
             HttpClient::buildBody([
                 'customer_id' => $customerId,
-                'external_id' => $externalId,
                 'plan_code' => $planCode,
                 'plan_id' => $planId,
                 'billing_interval' => $billingInterval,
@@ -47,9 +45,9 @@ class SubscriptionsResource
         );
     }
 
-    public function get(string $externalId): ApiResponse
+    public function get(string $customerId): ApiResponse
     {
-        return $this->http->get('/subscriptions/active', ['external_id' => $externalId]);
+        return $this->http->get('/subscriptions/active', ['customer_id' => $customerId]);
     }
 
     public function cancel(

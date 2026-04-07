@@ -15,7 +15,6 @@ class PortalResource
 
     public function getUrl(
         ?string $customerId = null,
-        ?string $externalId = null,
         ?string $email = null,
         ?string $idempotencyKey = null,
     ): ApiResponse {
@@ -23,7 +22,6 @@ class PortalResource
             '/portal/request-access',
             HttpClient::buildBody([
                 'customer_id' => $customerId,
-                'external_id' => $externalId,
                 'email' => $email,
             ]),
             idempotencyKey: $idempotencyKey,

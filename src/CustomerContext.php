@@ -19,18 +19,18 @@ class CustomerContext
     public readonly CustomerPortal $portal;
 
     public function __construct(
-        private readonly string $externalId,
+        private readonly string $customerId,
         FeaturesResource $features,
         SeatsResource $seats,
         UsageResource $usage,
         SubscriptionsResource $subscriptions,
         PortalResource $portal,
     ) {
-        $this->features = new CustomerFeatures($externalId, $features);
-        $this->seats = new CustomerSeats($externalId, $seats);
-        $this->usage = new CustomerUsage($externalId, $usage);
-        $this->subscription = new CustomerSubscription($externalId, $subscriptions);
-        $this->portal = new CustomerPortal($externalId, $portal);
+        $this->features = new CustomerFeatures($customerId, $features);
+        $this->seats = new CustomerSeats($customerId, $seats);
+        $this->usage = new CustomerUsage($customerId, $usage);
+        $this->subscription = new CustomerSubscription($customerId, $subscriptions);
+        $this->portal = new CustomerPortal($customerId, $portal);
     }
 }
 
@@ -38,28 +38,28 @@ class CustomerContext
 class CustomerFeatures
 {
     public function __construct(
-        private readonly string $externalId,
+        private readonly string $customerId,
         private readonly FeaturesResource $resource,
     ) {}
 
     public function get(string $code): ApiResponse
     {
-        return $this->resource->get($code, $this->externalId);
+        return $this->resource->get($code, $this->customerId);
     }
 
     public function check(string $code): ApiResponse
     {
-        return $this->resource->check($code, $this->externalId);
+        return $this->resource->check($code, $this->customerId);
     }
 
     public function canUse(string $code): ApiResponse
     {
-        return $this->resource->canUse($code, $this->externalId);
+        return $this->resource->canUse($code, $this->customerId);
     }
 
     public function list(): ApiResponse
     {
-        return $this->resource->list($this->externalId);
+        return $this->resource->list($this->customerId);
     }
 }
 
@@ -67,28 +67,28 @@ class CustomerFeatures
 class CustomerSeats
 {
     public function __construct(
-        private readonly string $externalId,
+        private readonly string $customerId,
         private readonly SeatsResource $resource,
     ) {}
 
     public function add(string $seatType, int $count = 1): ApiResponse
     {
-        return $this->resource->add($seatType, $count, externalId: $this->externalId);
+        return $this->resource->add($seatType, $count, customerId: $this->customerId);
     }
 
     public function remove(string $seatType, int $count = 1): ApiResponse
     {
-        return $this->resource->remove($seatType, $count, externalId: $this->externalId);
+        return $this->resource->remove($seatType, $count, customerId: $this->customerId);
     }
 
     public function set(string $seatType, int $count): ApiResponse
     {
-        return $this->resource->set($seatType, $count, externalId: $this->externalId);
+        return $this->resource->set($seatType, $count, customerId: $this->customerId);
     }
 
     public function getBalance(string $seatType): ApiResponse
     {
-        return $this->resource->getBalance($seatType, externalId: $this->externalId);
+        return $this->resource->getBalance($seatType, customerId: $this->customerId);
     }
 }
 
@@ -96,7 +96,7 @@ class CustomerSeats
 class CustomerUsage
 {
     public function __construct(
-        private readonly string $externalId,
+        private readonly string $customerId,
         private readonly UsageResource $resource,
     ) {}
 
@@ -110,7 +110,7 @@ class CustomerUsage
     ): ApiResponse {
         return $this->resource->track(
             feature: $feature,
-            externalId: $this->externalId,
+            customerId: $this->customerId,
             value: $value,
             properties: $properties,
         );
@@ -121,13 +121,13 @@ class CustomerUsage
 class CustomerSubscription
 {
     public function __construct(
-        private readonly string $externalId,
+        private readonly string $customerId,
         private readonly SubscriptionsResource $resource,
     ) {}
 
     public function get(): ApiResponse
     {
-        return $this->resource->get($this->externalId);
+        return $this->resource->get($this->customerId);
     }
 }
 
@@ -135,12 +135,12 @@ class CustomerSubscription
 class CustomerPortal
 {
     public function __construct(
-        private readonly string $externalId,
+        private readonly string $customerId,
         private readonly PortalResource $resource,
     ) {}
 
     public function getUrl(): ApiResponse
     {
-        return $this->resource->getUrl(externalId: $this->externalId);
+        return $this->resource->getUrl(customerId: $this->customerId);
     }
 }

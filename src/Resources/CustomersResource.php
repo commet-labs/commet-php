@@ -82,6 +82,7 @@ class CustomersResource
 
     /**
      * @param array<string, mixed>|null $metadata
+     * @param array<string, string>|null $address
      */
     public function update(
         string $customerId,
@@ -94,6 +95,7 @@ class CustomersResource
         ?string $language = null,
         ?string $industry = null,
         ?array $metadata = null,
+        ?array $address = null,
         ?string $idempotencyKey = null,
     ): ApiResponse {
         return $this->http->put(
@@ -108,13 +110,14 @@ class CustomersResource
                 'language' => $language,
                 'industry' => $industry,
                 'metadata' => $metadata,
+                'address' => $address,
             ]),
             idempotencyKey: $idempotencyKey,
         );
     }
 
     public function list(
-        ?string $externalId = null,
+        ?string $customerId = null,
         ?bool $isActive = null,
         ?string $search = null,
         ?int $limit = null,
@@ -123,7 +126,7 @@ class CustomersResource
         return $this->http->get(
             '/customers',
             HttpClient::buildBody([
-                'external_id' => $externalId,
+                'customer_id' => $customerId,
                 'is_active' => $isActive,
                 'search' => $search,
                 'limit' => $limit,
