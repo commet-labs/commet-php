@@ -19,7 +19,7 @@ class CustomersResource
      */
     public function create(
         string $email,
-        ?string $externalId = null,
+        ?string $id = null,
         ?string $fullName = null,
         ?string $domain = null,
         ?string $website = null,
@@ -34,7 +34,7 @@ class CustomersResource
             '/customers',
             HttpClient::buildBody([
                 'billing_email' => $email,
-                'external_id' => $externalId,
+                'external_id' => $id,
                 'full_name' => $fullName,
                 'domain' => $domain,
                 'website' => $website,
@@ -57,7 +57,7 @@ class CustomersResource
     ): ApiResponse {
         $mapped = array_map(fn(array $customer) => HttpClient::buildBody([
             'billing_email' => $customer['email'] ?? null,
-            'external_id' => $customer['external_id'] ?? null,
+            'external_id' => $customer['id'] ?? null,
             'full_name' => $customer['full_name'] ?? null,
             'domain' => $customer['domain'] ?? null,
             'website' => $customer['website'] ?? null,
@@ -87,7 +87,6 @@ class CustomersResource
     public function update(
         string $customerId,
         ?string $email = null,
-        ?string $externalId = null,
         ?string $fullName = null,
         ?string $domain = null,
         ?string $website = null,
@@ -102,7 +101,6 @@ class CustomersResource
             "/customers/{$customerId}",
             HttpClient::buildBody([
                 'billing_email' => $email,
-                'external_id' => $externalId,
                 'full_name' => $fullName,
                 'domain' => $domain,
                 'website' => $website,
