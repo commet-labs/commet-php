@@ -6,6 +6,7 @@ namespace Commet\Resources;
 
 use Commet\ApiResponse;
 use Commet\HttpClient;
+use Commet\Models\Customer;
 
 class CustomersResource
 {
@@ -16,6 +17,7 @@ class CustomersResource
     /**
      * @param array<string, mixed>|null $metadata
      * @param array<string, string>|null $address
+     * @return ApiResponse<Customer>
      */
     public function create(
         string $email,
@@ -30,7 +32,7 @@ class CustomersResource
         ?array $address = null,
         ?string $idempotencyKey = null,
     ): ApiResponse {
-        return $this->http->post(
+        $response = $this->http->post(
             '/customers',
             HttpClient::buildBody([
                 'billing_email' => $email,
@@ -46,10 +48,13 @@ class CustomersResource
             ]),
             idempotencyKey: $idempotencyKey,
         );
+
+        return self::toTyped($response);
     }
 
     /**
      * @param list<array<string, mixed>> $customers
+     * @return ApiResponse<array{successful: Customer[], failed: array<int, array{index: int, error: string}>}>
      */
     public function createBatch(
         array $customers,
@@ -68,21 +73,44 @@ class CustomersResource
             'address' => $customer['address'] ?? null,
         ]), $customers);
 
-        return $this->http->post(
+        $response = $this->http->post(
             '/customers/batch',
             ['customers' => $mapped],
             idempotencyKey: $idempotencyKey,
         );
+
+        if ($response->success && is_array($response->data)) {
+            $successful = array_map(
+                fn(array $c) => Customer::fromArray($c),
+                $response->data['successful'] ?? [],
+            );
+
+            return new ApiResponse(
+                success: true,
+                data: [
+                    'successful' => $successful,
+                    'failed' => $response->data['failed'] ?? [],
+                ],
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
     }
 
+    /**
+     * @return ApiResponse<Customer>
+     */
     public function get(string $customerId): ApiResponse
     {
-        return $this->http->get("/customers/{$customerId}");
+        return self::toTyped($this->http->get("/customers/{$customerId}"));
     }
 
     /**
      * @param array<string, mixed>|null $metadata
      * @param array<string, string>|null $address
+     * @return ApiResponse<Customer>
      */
     public function update(
         string $customerId,
@@ -97,7 +125,7 @@ class CustomersResource
         ?array $address = null,
         ?string $idempotencyKey = null,
     ): ApiResponse {
-        return $this->http->put(
+        $response = $this->http->put(
             "/customers/{$customerId}",
             HttpClient::buildBody([
                 'billing_email' => $email,
@@ -112,8 +140,13 @@ class CustomersResource
             ]),
             idempotencyKey: $idempotencyKey,
         );
+
+        return self::toTyped($response);
     }
 
+    /**
+     * @return ApiResponse<Customer[]>
+     */
     public function list(
         ?string $customerId = null,
         ?bool $isActive = null,
@@ -121,7 +154,7 @@ class CustomersResource
         ?int $limit = null,
         ?string $cursor = null,
     ): ApiResponse {
-        return $this->http->get(
+        $response = $this->http->get(
             '/customers',
             HttpClient::buildBody([
                 'customer_id' => $customerId,
@@ -131,14 +164,54 @@ class CustomersResource
                 'cursor' => $cursor,
             ]),
         );
+
+        if ($response->success && is_array($response->data)) {
+            $customers = array_map(
+                fn(array $item) => Customer::fromArray($item),
+                $response->data,
+            );
+
+            return new ApiResponse(
+                success: true,
+                data: $customers,
+                code: $response->code,
+                message: $response->message,
+                hasMore: $response->hasMore,
+                nextCursor: $response->nextCursor,
+            );
+        }
+
+        return $response;
     }
 
+    /**
+     * @return ApiResponse<Customer>
+     */
     public function archive(string $customerId, ?string $idempotencyKey = null): ApiResponse
     {
-        return $this->http->put(
-            "/customers/{$customerId}",
-            ['is_active' => false],
-            idempotencyKey: $idempotencyKey,
+        return self::toTyped(
+            $this->http->put(
+                "/customers/{$customerId}",
+                ['is_active' => false],
+                idempotencyKey: $idempotencyKey,
+            ),
         );
+    }
+
+    /**
+     * @return ApiResponse<Customer>
+     */
+    private static function toTyped(ApiResponse $response): ApiResponse
+    {
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: Customer::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
     }
 }

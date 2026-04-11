@@ -4,8 +4,14 @@ declare(strict_types=1);
 
 namespace Commet;
 
+/**
+ * @template T
+ */
 class ApiResponse
 {
+    /**
+     * @param T $data
+     */
     public function __construct(
         public readonly bool $success,
         public readonly mixed $data = null,

@@ -42,21 +42,33 @@ class CustomerFeatures
         private readonly FeaturesResource $resource,
     ) {}
 
+    /**
+     * @return ApiResponse<\Commet\Models\Feature>
+     */
     public function get(string $code): ApiResponse
     {
         return $this->resource->get($code, $this->customerId);
     }
 
+    /**
+     * @return ApiResponse<\Commet\Models\FeatureAccess>
+     */
     public function check(string $code): ApiResponse
     {
         return $this->resource->check($code, $this->customerId);
     }
 
+    /**
+     * @return ApiResponse<\Commet\Models\CanUseResult>
+     */
     public function canUse(string $code): ApiResponse
     {
         return $this->resource->canUse($code, $this->customerId);
     }
 
+    /**
+     * @return ApiResponse<\Commet\Models\Feature[]>
+     */
     public function list(): ApiResponse
     {
         return $this->resource->list($this->customerId);
@@ -71,21 +83,33 @@ class CustomerSeats
         private readonly SeatsResource $resource,
     ) {}
 
+    /**
+     * @return ApiResponse<\Commet\Models\SeatEvent>
+     */
     public function add(string $seatType, int $count = 1): ApiResponse
     {
         return $this->resource->add($seatType, $count, customerId: $this->customerId);
     }
 
+    /**
+     * @return ApiResponse<\Commet\Models\SeatEvent>
+     */
     public function remove(string $seatType, int $count = 1): ApiResponse
     {
         return $this->resource->remove($seatType, $count, customerId: $this->customerId);
     }
 
+    /**
+     * @return ApiResponse<\Commet\Models\SeatEvent>
+     */
     public function set(string $seatType, int $count): ApiResponse
     {
         return $this->resource->set($seatType, $count, customerId: $this->customerId);
     }
 
+    /**
+     * @return ApiResponse<\Commet\Models\SeatBalance>
+     */
     public function getBalance(string $seatType): ApiResponse
     {
         return $this->resource->getBalance($seatType, customerId: $this->customerId);
@@ -102,6 +126,7 @@ class CustomerUsage
 
     /**
      * @param array<string, string>|null $properties
+     * @return ApiResponse<\Commet\Models\UsageEvent>
      */
     public function track(
         string $feature,
@@ -125,6 +150,9 @@ class CustomerSubscription
         private readonly SubscriptionsResource $resource,
     ) {}
 
+    /**
+     * @return ApiResponse<\Commet\Models\Subscription|null>
+     */
     public function get(): ApiResponse
     {
         return $this->resource->get($this->customerId);
@@ -139,6 +167,9 @@ class CustomerPortal
         private readonly PortalResource $resource,
     ) {}
 
+    /**
+     * @return ApiResponse<\Commet\Models\PortalSession>
+     */
     public function getUrl(): ApiResponse
     {
         return $this->resource->getUrl(customerId: $this->customerId);

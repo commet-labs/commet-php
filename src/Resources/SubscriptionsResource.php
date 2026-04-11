@@ -6,6 +6,7 @@ namespace Commet\Resources;
 
 use Commet\ApiResponse;
 use Commet\HttpClient;
+use Commet\Models\Subscription;
 
 class SubscriptionsResource
 {
@@ -15,6 +16,7 @@ class SubscriptionsResource
 
     /**
      * @param array<string, int>|null $initialSeats
+     * @return ApiResponse<Subscription>
      */
     public function create(
         ?string $customerId = null,
@@ -28,7 +30,7 @@ class SubscriptionsResource
         ?string $successUrl = null,
         ?string $idempotencyKey = null,
     ): ApiResponse {
-        return $this->http->post(
+        $response = $this->http->post(
             '/subscriptions',
             HttpClient::buildBody([
                 'customer_id' => $customerId,
@@ -43,20 +45,39 @@ class SubscriptionsResource
             ]),
             idempotencyKey: $idempotencyKey,
         );
+
+        return self::toTyped($response);
     }
 
+    /**
+     * @return ApiResponse<Subscription|null>
+     */
     public function get(string $customerId): ApiResponse
     {
-        return $this->http->get('/subscriptions/active', ['customer_id' => $customerId]);
+        $response = $this->http->get('/subscriptions/active', ['customer_id' => $customerId]);
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: Subscription::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
     }
 
+    /**
+     * @return ApiResponse<Subscription>
+     */
     public function cancel(
         string $subscriptionId,
         ?string $reason = null,
         ?bool $immediate = null,
         ?string $idempotencyKey = null,
     ): ApiResponse {
-        return $this->http->post(
+        $response = $this->http->post(
             "/subscriptions/{$subscriptionId}/cancel",
             HttpClient::buildBody([
                 'reason' => $reason,
@@ -64,5 +85,24 @@ class SubscriptionsResource
             ]),
             idempotencyKey: $idempotencyKey,
         );
+
+        return self::toTyped($response);
+    }
+
+    /**
+     * @return ApiResponse<Subscription>
+     */
+    private static function toTyped(ApiResponse $response): ApiResponse
+    {
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: Subscription::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
     }
 }

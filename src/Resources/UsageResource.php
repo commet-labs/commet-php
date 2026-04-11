@@ -6,6 +6,7 @@ namespace Commet\Resources;
 
 use Commet\ApiResponse;
 use Commet\HttpClient;
+use Commet\Models\UsageEvent;
 
 class UsageResource
 {
@@ -15,6 +16,7 @@ class UsageResource
 
     /**
      * @param array<string, string>|null $properties
+     * @return ApiResponse<UsageEvent>
      */
     public function track(
         string $feature,
@@ -57,7 +59,17 @@ class UsageResource
             $body['value'] = $value;
         }
 
-        return $this->http->post('/usage/events', $body, idempotencyKey: $idempotencyKey);
-    }
+        $response = $this->http->post('/usage/events', $body, idempotencyKey: $idempotencyKey);
 
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: UsageEvent::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
+    }
 }

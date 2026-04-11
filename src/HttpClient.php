@@ -19,7 +19,7 @@ class HttpClient
 
     private const RETRYABLE_STATUS_CODES = [408, 429, 500, 502, 503, 504];
 
-    private const VERSION = '0.1.0';
+    private const VERSION = '1.9.0';
 
     private Client $client;
 
@@ -185,9 +185,6 @@ class HttpClient
             try {
                 $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
             } catch (\JsonException) {
-                if ($statusCode === 404) {
-                    return new ApiResponse(success: false, code: 'not_found', message: 'Resource not found');
-                }
                 throw new ApiException(
                     "Invalid JSON response: {$statusCode}",
                     statusCode: $statusCode,
@@ -203,9 +200,6 @@ class HttpClient
         try {
             $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
-            if ($response->getStatusCode() === 404) {
-                return new ApiResponse(success: false, code: 'not_found', message: 'Resource not found');
-            }
             throw new ApiException(
                 "Invalid JSON response: {$response->getStatusCode()}",
                 statusCode: $response->getStatusCode(),
@@ -257,7 +251,8 @@ class HttpClient
     private function wait(int $attempt): void
     {
         $delay = min(1.0 * (2 ** ($attempt - 1)), 8.0);
-        usleep((int) ($delay * 1_000_000));
+        $jitter = random_int(50, 150) / 100.0;
+        usleep((int) ($delay * $jitter * 1_000_000));
     }
 
     public static function toCamelCase(string $name): string
