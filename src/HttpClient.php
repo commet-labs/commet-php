@@ -19,7 +19,7 @@ class HttpClient
 
     private const RETRYABLE_STATUS_CODES = [408, 429, 500, 502, 503, 504];
 
-    private const VERSION = '1.9.0';
+    private const VERSION = '1.10.0';
 
     private Client $client;
 
