@@ -15,8 +15,6 @@ use Commet\Resources\UsageResource;
 
 class Commet
 {
-    private const VALID_ENVIRONMENTS = ['sandbox', 'production'];
-
     public readonly CustomersResource $customers;
     public readonly PlansResource $plans;
     public readonly SubscriptionsResource $subscriptions;
@@ -27,11 +25,8 @@ class Commet
     public readonly CreditPacksResource $creditPacks;
     public readonly Webhooks $webhooks;
 
-    private string $environment;
-
     public function __construct(
         string $apiKey,
-        string $environment = 'sandbox',
         float $timeout = 30.0,
         int $retries = 3,
     ) {
@@ -43,15 +38,7 @@ class Commet
             throw new \InvalidArgumentException('Commet SDK: Invalid API key format. Expected format: ck_xxx...');
         }
 
-        if (!in_array($environment, self::VALID_ENVIRONMENTS, true)) {
-            throw new \InvalidArgumentException(
-                "Commet SDK: Invalid environment '{$environment}'. Must be 'sandbox' or 'production'"
-            );
-        }
-
-        $this->environment = $environment;
-
-        $http = new HttpClient($apiKey, $environment, $timeout, $retries);
+        $http = new HttpClient($apiKey, $timeout, $retries);
 
         $this->customers = new CustomersResource($http);
         $this->plans = new PlansResource($http);
@@ -74,20 +61,5 @@ class Commet
             subscriptions: $this->subscriptions,
             portal: $this->portal,
         );
-    }
-
-    public function getEnvironment(): string
-    {
-        return $this->environment;
-    }
-
-    public function isSandbox(): bool
-    {
-        return $this->environment === 'sandbox';
-    }
-
-    public function isProduction(): bool
-    {
-        return $this->environment === 'production';
     }
 }

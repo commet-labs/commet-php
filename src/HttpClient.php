@@ -12,14 +12,11 @@ use GuzzleHttp\Exception\RequestException;
 
 class HttpClient
 {
-    private const BASE_URLS = [
-        'production' => 'https://commet.co',
-        'sandbox' => 'https://sandbox.commet.co',
-    ];
+    private const BASE_URL = 'https://commet.co';
 
     private const RETRYABLE_STATUS_CODES = [408, 429, 500, 502, 503, 504];
 
-    private const VERSION = '1.10.0';
+    private const VERSION = '2.0.0';
 
     private Client $client;
 
@@ -27,14 +24,11 @@ class HttpClient
 
     public function __construct(
         string $apiKey,
-        string $environment,
         float $timeout = 30.0,
         int $retries = 3,
     ) {
-        $baseUrl = self::BASE_URLS[$environment];
-
         $this->client = new Client([
-            'base_uri' => $baseUrl . '/api',
+            'base_uri' => self::BASE_URL . '/api',
             'timeout' => $timeout,
             'headers' => [
                 'x-api-key' => $apiKey,

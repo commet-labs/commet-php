@@ -13,7 +13,7 @@ composer require commet/commet-php
 ```php
 use Commet\Commet;
 
-$commet = new Commet(apiKey: 'ck_xxx', environment: 'production');
+$commet = new Commet(apiKey: 'ck_xxx');
 
 // Create a customer
 $commet->customers->create(email: 'user@example.com', externalId: 'user_123');
@@ -67,14 +67,6 @@ if ($payload === null) {
 if ($payload['event'] === 'subscription.activated') {
     // handle activation
 }
-```
-
-## Environments
-
-The SDK defaults to `sandbox`. Set `environment: 'production'` for live operations:
-
-```php
-$commet = new Commet(apiKey: 'ck_xxx', environment: 'production');
 ```
 
 ## License

@@ -9,11 +9,11 @@ use PHPUnit\Framework\TestCase;
 
 class CommetTest extends TestCase
 {
-    public function testValidKeyWithSandboxDefaults(): void
+    public function testValidKey(): void
     {
         $commet = new Commet('ck_test_abc123');
 
-        $this->assertTrue($commet->isSandbox());
+        $this->assertInstanceOf(Commet::class, $commet);
     }
 
     public function testRejectsEmptyApiKey(): void
