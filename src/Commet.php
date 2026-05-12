@@ -27,6 +27,7 @@ class Commet
 
     public function __construct(
         string $apiKey,
+        string $apiVersion = HttpClient::API_VERSION,
         float $timeout = 30.0,
         int $retries = 3,
     ) {
@@ -38,7 +39,7 @@ class Commet
             throw new \InvalidArgumentException('Commet SDK: Invalid API key format. Expected format: ck_xxx...');
         }
 
-        $http = new HttpClient($apiKey, $timeout, $retries);
+        $http = new HttpClient($apiKey, $apiVersion, $timeout, $retries);
 
         $this->customers = new CustomersResource($http);
         $this->plans = new PlansResource($http);

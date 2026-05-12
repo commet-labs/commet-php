@@ -16,22 +16,30 @@ class HttpClient
 
     private const RETRYABLE_STATUS_CODES = [408, 429, 500, 502, 503, 504];
 
-    private const VERSION = '2.0.0';
+    public const API_VERSION = '2026-05-01';
+
+    private const VERSION = '3.0.0';
 
     private Client $client;
 
     private int $maxRetries;
 
+    private string $apiVersion;
+
     public function __construct(
         string $apiKey,
+        string $apiVersion = self::API_VERSION,
         float $timeout = 30.0,
         int $retries = 3,
     ) {
+        $this->apiVersion = $apiVersion;
+
         $this->client = new Client([
-            'base_uri' => self::BASE_URL . '/api',
+            'base_uri' => self::BASE_URL . '/api/v1',
             'timeout' => $timeout,
             'headers' => [
                 'x-api-key' => $apiKey,
+                'commet-version' => $apiVersion,
                 'Content-Type' => 'application/json',
                 'User-Agent' => 'commet-php/' . self::VERSION,
             ],
@@ -46,6 +54,7 @@ class HttpClient
     public function get(
         string $endpoint,
         ?array $params = null,
+        ?string $apiVersion = null,
         ?string $idempotencyKey = null,
         ?float $timeout = null,
     ): ApiResponse {
@@ -59,7 +68,7 @@ class HttpClient
             }
         }
 
-        return $this->request('GET', $endpoint, params: $cleanParams, idempotencyKey: $idempotencyKey, timeout: $timeout);
+        return $this->request('GET', $endpoint, params: $cleanParams, apiVersion: $apiVersion, idempotencyKey: $idempotencyKey, timeout: $timeout);
     }
 
     /**
@@ -68,10 +77,11 @@ class HttpClient
     public function post(
         string $endpoint,
         ?array $body = null,
+        ?string $apiVersion = null,
         ?string $idempotencyKey = null,
         ?float $timeout = null,
     ): ApiResponse {
-        return $this->request('POST', $endpoint, body: $body, idempotencyKey: $idempotencyKey, timeout: $timeout);
+        return $this->request('POST', $endpoint, body: $body, apiVersion: $apiVersion, idempotencyKey: $idempotencyKey, timeout: $timeout);
     }
 
     /**
@@ -80,10 +90,11 @@ class HttpClient
     public function put(
         string $endpoint,
         ?array $body = null,
+        ?string $apiVersion = null,
         ?string $idempotencyKey = null,
         ?float $timeout = null,
     ): ApiResponse {
-        return $this->request('PUT', $endpoint, body: $body, idempotencyKey: $idempotencyKey, timeout: $timeout);
+        return $this->request('PUT', $endpoint, body: $body, apiVersion: $apiVersion, idempotencyKey: $idempotencyKey, timeout: $timeout);
     }
 
     /**
@@ -92,10 +103,11 @@ class HttpClient
     public function delete(
         string $endpoint,
         ?array $body = null,
+        ?string $apiVersion = null,
         ?string $idempotencyKey = null,
         ?float $timeout = null,
     ): ApiResponse {
-        return $this->request('DELETE', $endpoint, body: $body, idempotencyKey: $idempotencyKey, timeout: $timeout);
+        return $this->request('DELETE', $endpoint, body: $body, apiVersion: $apiVersion, idempotencyKey: $idempotencyKey, timeout: $timeout);
     }
 
     /**
@@ -107,10 +119,14 @@ class HttpClient
         string $endpoint,
         ?array $body = null,
         ?array $params = null,
+        ?string $apiVersion = null,
         ?string $idempotencyKey = null,
         ?float $timeout = null,
     ): ApiResponse {
         $headers = [];
+        if ($apiVersion !== null) {
+            $headers['commet-version'] = $apiVersion;
+        }
         if ($method === 'POST') {
             $headers['Idempotency-Key'] = $idempotencyKey ?? 'sdk_' . bin2hex(random_bytes(16));
         }
