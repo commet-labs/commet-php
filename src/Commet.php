@@ -30,6 +30,7 @@ class Commet
         string $apiVersion = HttpClient::API_VERSION,
         float $timeout = 30.0,
         int $retries = 3,
+        bool $telemetry = true,
     ) {
         if ($apiKey === '') {
             throw new \InvalidArgumentException('Commet SDK: API key is required');
@@ -39,7 +40,7 @@ class Commet
             throw new \InvalidArgumentException('Commet SDK: Invalid API key format. Expected format: ck_xxx...');
         }
 
-        $http = new HttpClient($apiKey, $apiVersion, $timeout, $retries);
+        $http = new HttpClient($apiKey, $apiVersion, $timeout, $retries, $telemetry);
 
         $this->customers = new CustomersResource($http);
         $this->plans = new PlansResource($http);

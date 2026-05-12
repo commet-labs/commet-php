@@ -18,7 +18,7 @@ class HttpClient
 
     public const API_VERSION = '2026-05-01';
 
-    private const VERSION = '3.0.0';
+    private const VERSION = '3.1.0';
 
     private Client $client;
 
@@ -26,23 +26,59 @@ class HttpClient
 
     private string $apiVersion;
 
+    private bool $telemetryEnabled;
+
+    private ?array $lastRequestMetrics = null;
+
+    private string $userAgent;
+
+    private ?string $clientInfoHeader;
+
     public function __construct(
         string $apiKey,
         string $apiVersion = self::API_VERSION,
         float $timeout = 30.0,
         int $retries = 3,
+        bool $telemetry = true,
     ) {
         $this->apiVersion = $apiVersion;
+        $this->telemetryEnabled = $telemetry;
+
+        $this->userAgent = sprintf(
+            'commet-php/%s php/%s %s/%s',
+            self::VERSION,
+            PHP_VERSION,
+            PHP_OS_FAMILY === 'Windows' ? 'windows' : strtolower(PHP_OS_FAMILY),
+            php_uname('m'),
+        );
+
+        $headers = [
+            'x-api-key' => $apiKey,
+            'commet-version' => $apiVersion,
+            'Content-Type' => 'application/json',
+            'User-Agent' => $this->userAgent,
+        ];
+
+        if ($telemetry) {
+            $this->clientInfoHeader = json_encode([
+                'sdk' => 'commet-php',
+                'sdk_version' => self::VERSION,
+                'lang' => 'php',
+                'lang_version' => PHP_VERSION,
+                'platform' => PHP_OS_FAMILY === 'Windows' ? 'windows' : strtolower(PHP_OS_FAMILY),
+                'arch' => php_uname('m'),
+                'runtime' => 'php',
+                'runtime_version' => PHP_VERSION,
+            ], JSON_THROW_ON_ERROR);
+            $headers['commet-client-info'] = $this->clientInfoHeader;
+        } else {
+            $this->clientInfoHeader = null;
+        }
 
         $this->client = new Client([
             'base_uri' => self::BASE_URL . '/api/v1',
             'timeout' => $timeout,
-            'headers' => [
-                'x-api-key' => $apiKey,
-                'commet-version' => $apiVersion,
-                'Content-Type' => 'application/json',
-                'User-Agent' => 'commet-php/' . self::VERSION,
-            ],
+            'headers' => $headers,
         ]);
 
         $this->maxRetries = $retries;
@@ -150,6 +186,14 @@ class HttpClient
         ?float $timeout = null,
         int $attempt = 1,
     ): ApiResponse {
+        if ($this->telemetryEnabled && $this->lastRequestMetrics !== null) {
+            $headers['commet-client-telemetry'] = json_encode([
+                'last_request_metrics' => $this->lastRequestMetrics,
+            ], JSON_THROW_ON_ERROR);
+            $this->lastRequestMetrics = null;
+        }
+
+        $requestStart = hrtime(true);
         $options = ['headers' => $headers];
 
         if ($jsonBody !== null) {
@@ -215,6 +259,15 @@ class HttpClient
                 statusCode: $response->getStatusCode(),
                 code: 'INVALID_JSON',
             );
+        }
+
+        if ($this->telemetryEnabled) {
+            $durationMs = (int) ((hrtime(true) - $requestStart) / 1_000_000);
+            $requestId = $response->getHeaderLine('x-request-id') ?: ('req_' . time());
+            $this->lastRequestMetrics = [
+                'request_id' => $requestId,
+                'duration_ms' => $durationMs,
+            ];
         }
 
         $converted = self::convertKeys($data, [self::class, 'toSnakeCase']);
