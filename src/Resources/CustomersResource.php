@@ -149,7 +149,6 @@ class CustomersResource
      */
     public function list(
         ?string $customerId = null,
-        ?bool $isActive = null,
         ?string $search = null,
         ?int $limit = null,
         ?string $cursor = null,
@@ -158,7 +157,6 @@ class CustomersResource
             '/customers',
             HttpClient::buildBody([
                 'customer_id' => $customerId,
-                'is_active' => $isActive,
                 'search' => $search,
                 'limit' => $limit,
                 'cursor' => $cursor,
@@ -182,20 +180,6 @@ class CustomersResource
         }
 
         return $response;
-    }
-
-    /**
-     * @return ApiResponse<Customer>
-     */
-    public function archive(string $customerId, ?string $idempotencyKey = null): ApiResponse
-    {
-        return self::toTyped(
-            $this->http->put(
-                "/customers/{$customerId}",
-                ['is_active' => false],
-                idempotencyKey: $idempotencyKey,
-            ),
-        );
     }
 
     /**

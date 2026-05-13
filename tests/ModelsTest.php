@@ -27,7 +27,6 @@ class ModelsTest extends TestCase
             'id' => 'cust_123',
             'organization_id' => 'org_456',
             'billing_email' => 'test@example.com',
-            'is_active' => true,
             'created_at' => '2024-01-01T00:00:00Z',
             'updated_at' => '2024-01-02T00:00:00Z',
             'external_id' => 'user_789',
@@ -37,7 +36,6 @@ class ModelsTest extends TestCase
         $this->assertSame('cust_123', $customer->id);
         $this->assertSame('org_456', $customer->organizationId);
         $this->assertSame('test@example.com', $customer->billingEmail);
-        $this->assertTrue($customer->isActive);
         $this->assertSame('user_789', $customer->externalId);
         $this->assertSame('John Doe', $customer->fullName);
         $this->assertNull($customer->domain);
