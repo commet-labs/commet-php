@@ -10,6 +10,8 @@ class SeatEvent
         public readonly string $id,
         public readonly string $organizationId,
         public readonly string $customerId,
+        public readonly string $featureCode,
+        /** @deprecated Use $featureCode instead. */
         public readonly string $seatType,
         public readonly string $eventType,
         public readonly int $quantity,
@@ -28,7 +30,8 @@ class SeatEvent
             id: $data['id'],
             organizationId: $data['organization_id'],
             customerId: $data['customer_id'],
-            seatType: $data['seat_type'],
+            featureCode: $data['feature_code'] ?? $data['seat_type'] ?? '',
+            seatType: $data['seat_type'] ?? '',
             eventType: $data['event_type'],
             quantity: $data['quantity'],
             newBalance: $data['new_balance'],

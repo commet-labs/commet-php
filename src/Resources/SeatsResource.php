@@ -15,19 +15,32 @@ class SeatsResource
         private readonly HttpClient $http,
     ) {}
 
+    private static function resolveCode(?string $featureCode, ?string $seatType): string
+    {
+        $code = $featureCode ?? $seatType;
+        if ($code === null) {
+            throw new \InvalidArgumentException('Either $featureCode or $seatType must be provided');
+        }
+        return $code;
+    }
+
     /**
+     * @param string|null $featureCode The feature code identifying the seat type.
+     * @param string|null $seatType Deprecated. Use $featureCode instead.
      * @return ApiResponse<SeatEvent>
      */
     public function add(
-        string $seatType,
-        int $count,
+        ?string $featureCode = null,
+        int $count = 0,
         ?string $customerId = null,
         ?string $idempotencyKey = null,
+        ?string $seatType = null,
     ): ApiResponse {
+        $code = self::resolveCode($featureCode, $seatType);
         $response = $this->http->post(
             '/seats',
             HttpClient::buildBody([
-                'seat_type' => $seatType,
+                'seat_type' => $code,
                 'count' => $count,
                 'customer_id' => $customerId,
             ]),
@@ -38,18 +51,22 @@ class SeatsResource
     }
 
     /**
+     * @param string|null $featureCode The feature code identifying the seat type.
+     * @param string|null $seatType Deprecated. Use $featureCode instead.
      * @return ApiResponse<SeatEvent>
      */
     public function remove(
-        string $seatType,
-        int $count,
+        ?string $featureCode = null,
+        int $count = 0,
         ?string $customerId = null,
         ?string $idempotencyKey = null,
+        ?string $seatType = null,
     ): ApiResponse {
+        $code = self::resolveCode($featureCode, $seatType);
         $response = $this->http->delete(
             '/seats',
             HttpClient::buildBody([
-                'seat_type' => $seatType,
+                'seat_type' => $code,
                 'count' => $count,
                 'customer_id' => $customerId,
             ]),
@@ -60,18 +77,22 @@ class SeatsResource
     }
 
     /**
+     * @param string|null $featureCode The feature code identifying the seat type.
+     * @param string|null $seatType Deprecated. Use $featureCode instead.
      * @return ApiResponse<SeatEvent>
      */
     public function set(
-        string $seatType,
-        int $count,
+        ?string $featureCode = null,
+        int $count = 0,
         ?string $customerId = null,
         ?string $idempotencyKey = null,
+        ?string $seatType = null,
     ): ApiResponse {
+        $code = self::resolveCode($featureCode, $seatType);
         $response = $this->http->put(
             '/seats',
             HttpClient::buildBody([
-                'seat_type' => $seatType,
+                'seat_type' => $code,
                 'count' => $count,
                 'customer_id' => $customerId,
             ]),
@@ -117,16 +138,20 @@ class SeatsResource
     }
 
     /**
+     * @param string|null $featureCode The feature code identifying the seat type.
+     * @param string|null $seatType Deprecated. Use $featureCode instead.
      * @return ApiResponse<SeatBalance>
      */
     public function getBalance(
-        string $seatType,
+        ?string $featureCode = null,
         ?string $customerId = null,
+        ?string $seatType = null,
     ): ApiResponse {
+        $code = self::resolveCode($featureCode, $seatType);
         $response = $this->http->get(
             '/seats/balance',
             HttpClient::buildBody([
-                'seat_type' => $seatType,
+                'seat_type' => $code,
                 'customer_id' => $customerId,
             ]),
         );
