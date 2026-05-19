@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
+use Commet\Enums\FeatureType;
+
 class Feature
 {
     public function __construct(
         public readonly string $code,
         public readonly string $name,
-        public readonly string $type,
+        public readonly FeatureType $type,
         public readonly bool $allowed,
         public readonly ?bool $enabled = null,
         public readonly ?int $current = null,
@@ -29,7 +31,7 @@ class Feature
         return new self(
             code: $data['code'],
             name: $data['name'],
-            type: $data['type'],
+            type: FeatureType::from($data['type']),
             allowed: $data['allowed'],
             enabled: $data['enabled'] ?? null,
             current: $data['current'] ?? null,

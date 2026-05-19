@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
+use Commet\Enums\FeatureType;
+
 class PlanFeature
 {
     public function __construct(
         public readonly string $code,
         public readonly string $name,
-        public readonly string $type,
+        public readonly FeatureType $type,
         public readonly ?string $unitName = null,
         public readonly ?bool $enabled = null,
         public readonly ?int $includedAmount = null,
@@ -26,7 +28,7 @@ class PlanFeature
         return new self(
             code: $data['code'],
             name: $data['name'],
-            type: $data['type'],
+            type: FeatureType::from($data['type']),
             unitName: $data['unit_name'] ?? null,
             enabled: $data['enabled'] ?? null,
             includedAmount: $data['included_amount'] ?? null,

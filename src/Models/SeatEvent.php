@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
+use Commet\Enums\SeatEventType;
+
 class SeatEvent
 {
     public function __construct(
@@ -13,7 +15,7 @@ class SeatEvent
         public readonly string $featureCode,
         /** @deprecated Use $featureCode instead. */
         public readonly string $seatType,
-        public readonly string $eventType,
+        public readonly SeatEventType $eventType,
         public readonly int $quantity,
         public readonly int $newBalance,
         public readonly string $ts,
@@ -32,7 +34,7 @@ class SeatEvent
             customerId: $data['customer_id'],
             featureCode: $data['feature_code'] ?? $data['seat_type'] ?? '',
             seatType: $data['seat_type'] ?? '',
-            eventType: $data['event_type'],
+            eventType: SeatEventType::from($data['event_type']),
             quantity: $data['quantity'],
             newBalance: $data['new_balance'],
             ts: $data['ts'],

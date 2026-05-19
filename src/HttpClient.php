@@ -18,7 +18,7 @@ class HttpClient
 
     public const API_VERSION = '2026-05-18';
 
-    private const VERSION = '4.1.0';
+    private const VERSION = '4.3.0';
 
     private Client $client;
 
