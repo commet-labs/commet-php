@@ -92,6 +92,22 @@ class SubscriptionsResource
     /**
      * @return ApiResponse<Subscription>
      */
+    public function uncancel(
+        string $subscriptionId,
+        ?string $idempotencyKey = null,
+    ): ApiResponse {
+        $response = $this->http->post(
+            "/subscriptions/{$subscriptionId}/uncancel",
+            [],
+            idempotencyKey: $idempotencyKey,
+        );
+
+        return self::toTyped($response);
+    }
+
+    /**
+     * @return ApiResponse<Subscription>
+     */
     private static function toTyped(ApiResponse $response): ApiResponse
     {
         if ($response->success && is_array($response->data)) {
