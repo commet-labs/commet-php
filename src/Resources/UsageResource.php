@@ -72,4 +72,19 @@ class UsageResource
 
         return $response;
     }
+
+    /**
+     * @return ApiResponse<array<string, mixed>>
+     */
+    public function check(
+        string $customerId,
+        string $featureCode,
+        int $quantity,
+    ): ApiResponse {
+        return $this->http->post('/usage/check', [
+            'customer_id' => $customerId,
+            'feature_code' => $featureCode,
+            'quantity' => $quantity,
+        ]);
+    }
 }

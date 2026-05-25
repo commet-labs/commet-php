@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Commet;
 
+use Commet\Resources\AddonsResource;
 use Commet\Resources\CreditPacksResource;
 use Commet\Resources\CustomersResource;
 use Commet\Resources\FeaturesResource;
@@ -15,6 +16,7 @@ use Commet\Resources\UsageResource;
 
 class Commet
 {
+    public readonly AddonsResource $addons;
     public readonly CustomersResource $customers;
     public readonly PlansResource $plans;
     public readonly SubscriptionsResource $subscriptions;
@@ -42,6 +44,7 @@ class Commet
 
         $http = new HttpClient($apiKey, $apiVersion, $timeout, $retries, $telemetry);
 
+        $this->addons = new AddonsResource($http);
         $this->customers = new CustomersResource($http);
         $this->plans = new PlansResource($http);
         $this->subscriptions = new SubscriptionsResource($http);

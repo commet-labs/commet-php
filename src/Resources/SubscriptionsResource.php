@@ -108,6 +108,27 @@ class SubscriptionsResource
     /**
      * @return ApiResponse<Subscription>
      */
+    public function changePlan(
+        string $subscriptionId,
+        ?string $newPlanId = null,
+        ?string $newBillingInterval = null,
+        ?string $idempotencyKey = null,
+    ): ApiResponse {
+        $response = $this->http->post(
+            "/subscriptions/{$subscriptionId}/change-plan",
+            HttpClient::buildBody([
+                'new_plan_id' => $newPlanId,
+                'new_billing_interval' => $newBillingInterval,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        return self::toTyped($response);
+    }
+
+    /**
+     * @return ApiResponse<Subscription>
+     */
     private static function toTyped(ApiResponse $response): ApiResponse
     {
         if ($response->success && is_array($response->data)) {
