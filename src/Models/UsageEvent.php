@@ -11,6 +11,8 @@ class UsageEvent
      */
     public function __construct(
         public readonly string $id,
+        public readonly string $object,
+        public readonly bool $livemode,
         public readonly string $organizationId,
         public readonly string $customerId,
         public readonly string $feature,
@@ -32,6 +34,8 @@ class UsageEvent
 
         return new self(
             id: $data['id'],
+            object: $data['object'] ?? 'usage_event',
+            livemode: $data['livemode'] ?? false,
             organizationId: $data['organization_id'],
             customerId: $data['customer_id'],
             feature: $data['feature'],

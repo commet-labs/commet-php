@@ -8,6 +8,8 @@ class FeatureAccess
 {
     public function __construct(
         public readonly bool $allowed,
+        public readonly bool $willBeCharged,
+        public readonly ?string $reason = null,
     ) {}
 
     /**
@@ -17,6 +19,8 @@ class FeatureAccess
     {
         return new self(
             allowed: $data['allowed'],
+            willBeCharged: $data['will_be_charged'],
+            reason: $data['reason'] ?? null,
         );
     }
 }

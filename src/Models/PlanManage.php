@@ -4,27 +4,28 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class Plan
+class PlanManage
 {
     /**
-     * @param PlanPrice[] $prices
-     * @param PlanFeature[] $features
+     * @param array<string, mixed>|null $metadata
      */
     public function __construct(
         public readonly string $id,
         public readonly string $object,
         public readonly bool $livemode,
-        public readonly string $code,
         public readonly string $name,
+        public readonly string $code,
         public readonly bool $isPublic,
         public readonly bool $isDefault,
+        public readonly bool $isFree,
+        public readonly bool $blockOnExhaustion,
         public readonly int $sortOrder,
-        public readonly array $prices,
-        public readonly array $features,
         public readonly string $createdAt,
+        public readonly string $updatedAt,
         public readonly ?string $description = null,
-        public readonly ?bool $isFree = null,
-        public readonly ?string $updatedAt = null,
+        public readonly ?string $consumptionModel = null,
+        public readonly ?string $planGroupId = null,
+        public readonly ?array $metadata = null,
     ) {}
 
     /**
@@ -32,31 +33,23 @@ class Plan
      */
     public static function fromArray(array $data): self
     {
-        $prices = array_map(
-            fn(array $price) => PlanPrice::fromArray($price),
-            $data['prices'] ?? [],
-        );
-
-        $features = array_map(
-            fn(array $feature) => PlanFeature::fromArray($feature),
-            $data['features'] ?? [],
-        );
-
         return new self(
             id: $data['id'],
             object: $data['object'] ?? 'plan',
             livemode: $data['livemode'] ?? false,
-            code: $data['code'],
             name: $data['name'],
+            code: $data['code'],
             isPublic: $data['is_public'],
             isDefault: $data['is_default'],
+            isFree: $data['is_free'],
+            blockOnExhaustion: $data['block_on_exhaustion'],
             sortOrder: $data['sort_order'],
-            prices: $prices,
-            features: $features,
             createdAt: $data['created_at'],
+            updatedAt: $data['updated_at'],
             description: $data['description'] ?? null,
-            isFree: $data['is_free'] ?? null,
-            updatedAt: $data['updated_at'] ?? null,
+            consumptionModel: $data['consumption_model'] ?? null,
+            planGroupId: $data['plan_group_id'] ?? null,
+            metadata: $data['metadata'] ?? null,
         );
     }
 }

@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-use Commet\Enums\Currency;
-
-class CreditPack
+class WebhookEndpoint
 {
+    /**
+     * @param string[] $events
+     */
     public function __construct(
         public readonly string $id,
         public readonly string $object,
         public readonly bool $livemode,
-        public readonly string $name,
-        public readonly int $credits,
-        public readonly int $price,
-        public readonly Currency $currency,
+        public readonly string $url,
+        public readonly array $events,
+        public readonly bool $isActive,
+        public readonly string $createdAt,
         public readonly ?string $description = null,
+        public readonly ?string $secretKey = null,
     ) {}
 
     /**
@@ -26,13 +28,14 @@ class CreditPack
     {
         return new self(
             id: $data['id'],
-            object: $data['object'] ?? 'credit_pack',
+            object: $data['object'] ?? 'webhook_endpoint',
             livemode: $data['livemode'] ?? false,
-            name: $data['name'],
-            credits: $data['credits'],
-            price: $data['price'],
-            currency: Currency::from($data['currency']),
+            url: $data['url'],
+            events: $data['events'],
+            isActive: $data['is_active'],
+            createdAt: $data['created_at'],
             description: $data['description'] ?? null,
+            secretKey: $data['secret_key'] ?? null,
         );
     }
 }

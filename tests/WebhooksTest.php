@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Commet\Tests;
 
-use Commet\Webhooks;
+use Commet\Resources\WebhooksResource;
 use PHPUnit\Framework\TestCase;
 
 class WebhooksTest extends TestCase
 {
-    private Webhooks $webhooks;
+    private WebhooksResource $webhooks;
     private string $secret;
     private string $payload;
     private string $validSignature;
 
     protected function setUp(): void
     {
-        $this->webhooks = new Webhooks();
+        $this->webhooks = new WebhooksResource();
         $this->secret = 'whsec_test_secret_key';
         $this->payload = '{"event":"subscription.created","data":{"id":"sub_123"}}';
         $this->validSignature = hash_hmac('sha256', $this->payload, $this->secret);

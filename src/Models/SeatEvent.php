@@ -10,11 +10,11 @@ class SeatEvent
 {
     public function __construct(
         public readonly string $id,
+        public readonly string $object,
+        public readonly bool $livemode,
         public readonly string $organizationId,
         public readonly string $customerId,
         public readonly string $featureCode,
-        /** @deprecated Use $featureCode instead. */
-        public readonly string $seatType,
         public readonly SeatEventType $eventType,
         public readonly int $quantity,
         public readonly int $newBalance,
@@ -30,10 +30,11 @@ class SeatEvent
     {
         return new self(
             id: $data['id'],
+            object: $data['object'] ?? 'seat',
+            livemode: $data['livemode'] ?? false,
             organizationId: $data['organization_id'],
             customerId: $data['customer_id'],
-            featureCode: $data['feature_code'] ?? $data['seat_type'] ?? '',
-            seatType: $data['seat_type'] ?? '',
+            featureCode: $data['feature_code'],
             eventType: SeatEventType::from($data['event_type']),
             quantity: $data['quantity'],
             newBalance: $data['new_balance'],

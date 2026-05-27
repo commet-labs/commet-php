@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-use Commet\Enums\Currency;
-
-class CreditPack
+class CreditPackDetail
 {
     public function __construct(
         public readonly string $id,
@@ -15,7 +13,9 @@ class CreditPack
         public readonly string $name,
         public readonly int $credits,
         public readonly int $price,
-        public readonly Currency $currency,
+        public readonly bool $isActive,
+        public readonly string $createdAt,
+        public readonly string $updatedAt,
         public readonly ?string $description = null,
     ) {}
 
@@ -31,7 +31,9 @@ class CreditPack
             name: $data['name'],
             credits: $data['credits'],
             price: $data['price'],
-            currency: Currency::from($data['currency']),
+            isActive: $data['is_active'],
+            createdAt: $data['created_at'],
+            updatedAt: $data['updated_at'],
             description: $data['description'] ?? null,
         );
     }

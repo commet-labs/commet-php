@@ -16,6 +16,8 @@ class Subscription
      */
     public function __construct(
         public readonly string $id,
+        public readonly string $object,
+        public readonly bool $livemode,
         public readonly string $customerId,
         public readonly string $name,
         public readonly SubscriptionStatus $status,
@@ -43,6 +45,10 @@ class Subscription
         public readonly ?array $credits = null,
         /** @var array{remaining: int, included: int, currency: string}|null */
         public readonly ?array $balance = null,
+        /** @var array{scheduled_at: string, reason: string|null, effective_at: string}|null */
+        public readonly ?array $cancellation = null,
+        /** @var array{type: string, value: int, name: string|null, ends_at: string|null}|null */
+        public readonly ?array $discount = null,
         public readonly ?string $introOfferEndsAt = null,
         public readonly ?DiscountType $introOfferDiscountType = null,
         public readonly ?int $introOfferDiscountValue = null,
@@ -60,6 +66,8 @@ class Subscription
 
         return new self(
             id: $data['id'],
+            object: $data['object'] ?? 'subscription',
+            livemode: $data['livemode'] ?? false,
             customerId: $data['customer_id'],
             name: $data['name'],
             status: SubscriptionStatus::from($data['status']),
@@ -83,6 +91,8 @@ class Subscription
             features: $features,
             credits: $data['credits'] ?? null,
             balance: $data['balance'] ?? null,
+            cancellation: $data['cancellation'] ?? null,
+            discount: $data['discount'] ?? null,
             introOfferEndsAt: $data['intro_offer_ends_at'] ?? null,
             introOfferDiscountType: isset($data['intro_offer_discount_type']) ? DiscountType::from($data['intro_offer_discount_type']) : null,
             introOfferDiscountValue: $data['intro_offer_discount_value'] ?? null,

@@ -4,19 +4,18 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-use Commet\Enums\Currency;
-
-class CreditPack
+class ApiKey
 {
     public function __construct(
         public readonly string $id,
         public readonly string $object,
         public readonly bool $livemode,
         public readonly string $name,
-        public readonly int $credits,
-        public readonly int $price,
-        public readonly Currency $currency,
-        public readonly ?string $description = null,
+        public readonly string $prefix,
+        public readonly string $createdAt,
+        public readonly ?string $expiresAt = null,
+        public readonly ?string $lastUsedAt = null,
+        public readonly ?string $apiKey = null,
     ) {}
 
     /**
@@ -26,13 +25,14 @@ class CreditPack
     {
         return new self(
             id: $data['id'],
-            object: $data['object'] ?? 'credit_pack',
+            object: $data['object'] ?? 'api_key',
             livemode: $data['livemode'] ?? false,
             name: $data['name'],
-            credits: $data['credits'],
-            price: $data['price'],
-            currency: Currency::from($data['currency']),
-            description: $data['description'] ?? null,
+            prefix: $data['prefix'],
+            createdAt: $data['created_at'],
+            expiresAt: $data['expires_at'] ?? null,
+            lastUsedAt: $data['last_used_at'] ?? null,
+            apiKey: $data['api_key'] ?? null,
         );
     }
 }

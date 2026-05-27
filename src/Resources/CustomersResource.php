@@ -36,7 +36,7 @@ class CustomersResource
             '/customers',
             HttpClient::buildBody([
                 'billing_email' => $email,
-                'external_id' => $id,
+                'id' => $id,
                 'full_name' => $fullName,
                 'domain' => $domain,
                 'website' => $website,
@@ -62,7 +62,7 @@ class CustomersResource
     ): ApiResponse {
         $mapped = array_map(fn(array $customer) => HttpClient::buildBody([
             'billing_email' => $customer['email'] ?? null,
-            'external_id' => $customer['id'] ?? null,
+            'id' => $customer['id'] ?? null,
             'full_name' => $customer['full_name'] ?? null,
             'domain' => $customer['domain'] ?? null,
             'website' => $customer['website'] ?? null,

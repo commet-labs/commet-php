@@ -52,7 +52,7 @@ class SubscriptionsResource
     /**
      * @return ApiResponse<Subscription|null>
      */
-    public function get(string $customerId): ApiResponse
+    public function getActive(string $customerId): ApiResponse
     {
         $response = $this->http->get('/subscriptions/active', ['customer_id' => $customerId]);
 
@@ -62,6 +62,44 @@ class SubscriptionsResource
                 data: Subscription::fromArray($response->data),
                 code: $response->code,
                 message: $response->message,
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * @return ApiResponse<Subscription[]>
+     */
+    public function list(
+        ?string $customerId = null,
+        ?string $status = null,
+        ?int $limit = null,
+        ?string $cursor = null,
+    ): ApiResponse {
+        $response = $this->http->get(
+            '/subscriptions',
+            HttpClient::buildBody([
+                'customer_id' => $customerId,
+                'status' => $status,
+                'limit' => $limit,
+                'cursor' => $cursor,
+            ]),
+        );
+
+        if ($response->success && is_array($response->data)) {
+            $subscriptions = array_map(
+                fn(array $item) => Subscription::fromArray($item),
+                $response->data,
+            );
+
+            return new ApiResponse(
+                success: true,
+                data: $subscriptions,
+                code: $response->code,
+                message: $response->message,
+                hasMore: $response->hasMore,
+                nextCursor: $response->nextCursor,
             );
         }
 
@@ -106,7 +144,7 @@ class SubscriptionsResource
     }
 
     /**
-     * @return ApiResponse<Subscription>
+     * @return ApiResponse<array<string, mixed>>
      */
     public function changePlan(
         string $subscriptionId,
@@ -114,7 +152,7 @@ class SubscriptionsResource
         ?string $newBillingInterval = null,
         ?string $idempotencyKey = null,
     ): ApiResponse {
-        $response = $this->http->post(
+        return $this->http->post(
             "/subscriptions/{$subscriptionId}/change-plan",
             HttpClient::buildBody([
                 'new_plan_id' => $newPlanId,
@@ -122,8 +160,105 @@ class SubscriptionsResource
             ]),
             idempotencyKey: $idempotencyKey,
         );
+    }
 
-        return self::toTyped($response);
+    /**
+     * @return ApiResponse<array{current_plan_credit: int, new_plan_charge: int, estimated_total: int, effective_date: string, days_remaining: int, total_days: int, is_upgrade: bool}>
+     */
+    public function previewChange(
+        string $subscriptionId,
+        ?string $planId = null,
+        ?string $billingInterval = null,
+        ?string $idempotencyKey = null,
+    ): ApiResponse {
+        return $this->http->post(
+            "/subscriptions/{$subscriptionId}/preview-change",
+            HttpClient::buildBody([
+                'plan_id' => $planId,
+                'billing_interval' => $billingInterval,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+    }
+
+    /**
+     * @return ApiResponse<array{addon_id: string, status: string, prorated_charge: int}>
+     */
+    public function activateAddon(
+        string $subscriptionId,
+        string $addonId,
+        ?string $idempotencyKey = null,
+    ): ApiResponse {
+        return $this->http->post(
+            "/subscriptions/{$subscriptionId}/addons",
+            ['addon_id' => $addonId],
+            idempotencyKey: $idempotencyKey,
+        );
+    }
+
+    /**
+     * @return ApiResponse<array{id: string, status: string, deactivated_at: string}>
+     */
+    public function deactivateAddon(
+        string $subscriptionId,
+        string $addonId,
+        ?string $idempotencyKey = null,
+    ): ApiResponse {
+        return $this->http->delete(
+            "/subscriptions/{$subscriptionId}/addons/{$addonId}",
+            idempotencyKey: $idempotencyKey,
+        );
+    }
+
+    /**
+     * @return ApiResponse<array{amount: int, new_balance: int, reason: string|null}>
+     */
+    public function adjustBalance(
+        string $subscriptionId,
+        int $amount,
+        ?string $reason = null,
+        ?string $type = null,
+        ?string $idempotencyKey = null,
+    ): ApiResponse {
+        return $this->http->post(
+            "/subscriptions/{$subscriptionId}/balance/adjust",
+            HttpClient::buildBody([
+                'amount' => $amount,
+                'reason' => $reason,
+                'type' => $type,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+    }
+
+    /**
+     * @return ApiResponse<array{amount: int}>
+     */
+    public function topupBalance(
+        string $subscriptionId,
+        int $amount,
+        ?string $idempotencyKey = null,
+    ): ApiResponse {
+        return $this->http->post(
+            "/subscriptions/{$subscriptionId}/balance/topup",
+            ['amount' => $amount],
+            idempotencyKey: $idempotencyKey,
+        );
+    }
+
+    /**
+     * @return ApiResponse<array{credits: int}>
+     */
+    public function purchaseCredits(
+        string $subscriptionId,
+        string $creditPackId,
+        ?string $idempotencyKey = null,
+    ): ApiResponse {
+        return $this->http->post(
+            "/subscriptions/{$subscriptionId}/credits",
+            ['credit_pack_id' => $creditPackId],
+            idempotencyKey: $idempotencyKey,
+        );
     }
 
     /**

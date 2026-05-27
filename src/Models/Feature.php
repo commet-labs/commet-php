@@ -10,6 +10,8 @@ class Feature
 {
     public function __construct(
         public readonly string $code,
+        public readonly string $object,
+        public readonly bool $livemode,
         public readonly string $name,
         public readonly FeatureType $type,
         public readonly bool $allowed,
@@ -30,6 +32,8 @@ class Feature
     {
         return new self(
             code: $data['code'],
+            object: $data['object'] ?? 'feature',
+            livemode: $data['livemode'] ?? false,
             name: $data['name'],
             type: FeatureType::from($data['type']),
             allowed: $data['allowed'],

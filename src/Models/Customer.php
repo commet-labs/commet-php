@@ -8,11 +8,12 @@ class Customer
 {
     public function __construct(
         public readonly string $id,
+        public readonly string $object,
+        public readonly bool $livemode,
         public readonly string $organizationId,
         public readonly string $billingEmail,
         public readonly string $createdAt,
         public readonly string $updatedAt,
-        public readonly ?string $externalId = null,
         public readonly ?string $fullName = null,
         public readonly ?string $domain = null,
         public readonly ?string $website = null,
@@ -31,11 +32,12 @@ class Customer
     {
         return new self(
             id: $data['id'],
+            object: $data['object'] ?? 'customer',
+            livemode: $data['livemode'] ?? false,
             organizationId: $data['organization_id'],
             billingEmail: $data['billing_email'],
             createdAt: $data['created_at'],
             updatedAt: $data['updated_at'],
-            externalId: $data['external_id'] ?? null,
             fullName: $data['full_name'] ?? null,
             domain: $data['domain'] ?? null,
             website: $data['website'] ?? null,

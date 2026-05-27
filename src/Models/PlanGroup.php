@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-use Commet\Enums\Currency;
-
-class CreditPack
+class PlanGroup
 {
+    /**
+     * @param array<int, array{id: string, code: string, name: string, sort_order: int}>|null $plans
+     */
     public function __construct(
         public readonly string $id,
         public readonly string $object,
         public readonly bool $livemode,
         public readonly string $name,
-        public readonly int $credits,
-        public readonly int $price,
-        public readonly Currency $currency,
+        public readonly bool $isPublic,
+        public readonly string $createdAt,
+        public readonly string $updatedAt,
         public readonly ?string $description = null,
+        public readonly ?array $plans = null,
     ) {}
 
     /**
@@ -26,13 +28,14 @@ class CreditPack
     {
         return new self(
             id: $data['id'],
-            object: $data['object'] ?? 'credit_pack',
+            object: $data['object'] ?? 'plan_group',
             livemode: $data['livemode'] ?? false,
             name: $data['name'],
-            credits: $data['credits'],
-            price: $data['price'],
-            currency: Currency::from($data['currency']),
+            isPublic: $data['is_public'],
+            createdAt: $data['created_at'],
+            updatedAt: $data['updated_at'],
             description: $data['description'] ?? null,
+            plans: $data['plans'] ?? null,
         );
     }
 }

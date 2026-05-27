@@ -7,6 +7,7 @@ namespace Commet\Models;
 class PortalSession
 {
     public function __construct(
+        public readonly bool $success,
         public readonly string $portalUrl,
         public readonly ?string $message = null,
     ) {}
@@ -17,6 +18,7 @@ class PortalSession
     public static function fromArray(array $data): self
     {
         return new self(
+            success: $data['success'],
             portalUrl: $data['portal_url'],
             message: $data['message'] ?? null,
         );

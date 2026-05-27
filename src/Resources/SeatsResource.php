@@ -15,32 +15,19 @@ class SeatsResource
         private readonly HttpClient $http,
     ) {}
 
-    private static function resolveCode(?string $featureCode, ?string $seatType): string
-    {
-        $code = $featureCode ?? $seatType;
-        if ($code === null) {
-            throw new \InvalidArgumentException('Either $featureCode or $seatType must be provided');
-        }
-        return $code;
-    }
-
     /**
-     * @param string|null $featureCode The feature code identifying the seat type.
-     * @param string|null $seatType Deprecated. Use $featureCode instead.
      * @return ApiResponse<SeatEvent>
      */
     public function add(
-        ?string $featureCode = null,
-        int $count = 0,
+        string $featureCode,
+        int $count = 1,
         ?string $customerId = null,
         ?string $idempotencyKey = null,
-        ?string $seatType = null,
     ): ApiResponse {
-        $code = self::resolveCode($featureCode, $seatType);
         $response = $this->http->post(
             '/seats',
             HttpClient::buildBody([
-                'seat_type' => $code,
+                'feature_code' => $featureCode,
                 'count' => $count,
                 'customer_id' => $customerId,
             ]),
@@ -51,22 +38,18 @@ class SeatsResource
     }
 
     /**
-     * @param string|null $featureCode The feature code identifying the seat type.
-     * @param string|null $seatType Deprecated. Use $featureCode instead.
      * @return ApiResponse<SeatEvent>
      */
     public function remove(
-        ?string $featureCode = null,
-        int $count = 0,
+        string $featureCode,
+        int $count = 1,
         ?string $customerId = null,
         ?string $idempotencyKey = null,
-        ?string $seatType = null,
     ): ApiResponse {
-        $code = self::resolveCode($featureCode, $seatType);
         $response = $this->http->delete(
             '/seats',
             HttpClient::buildBody([
-                'seat_type' => $code,
+                'feature_code' => $featureCode,
                 'count' => $count,
                 'customer_id' => $customerId,
             ]),
@@ -77,22 +60,18 @@ class SeatsResource
     }
 
     /**
-     * @param string|null $featureCode The feature code identifying the seat type.
-     * @param string|null $seatType Deprecated. Use $featureCode instead.
      * @return ApiResponse<SeatEvent>
      */
     public function set(
-        ?string $featureCode = null,
+        string $featureCode,
         int $count = 0,
         ?string $customerId = null,
         ?string $idempotencyKey = null,
-        ?string $seatType = null,
     ): ApiResponse {
-        $code = self::resolveCode($featureCode, $seatType);
         $response = $this->http->put(
             '/seats',
             HttpClient::buildBody([
-                'seat_type' => $code,
+                'feature_code' => $featureCode,
                 'count' => $count,
                 'customer_id' => $customerId,
             ]),
@@ -138,20 +117,16 @@ class SeatsResource
     }
 
     /**
-     * @param string|null $featureCode The feature code identifying the seat type.
-     * @param string|null $seatType Deprecated. Use $featureCode instead.
      * @return ApiResponse<SeatBalance>
      */
     public function getBalance(
-        ?string $featureCode = null,
+        string $featureCode,
         ?string $customerId = null,
-        ?string $seatType = null,
     ): ApiResponse {
-        $code = self::resolveCode($featureCode, $seatType);
         $response = $this->http->get(
             '/seats/balance',
             HttpClient::buildBody([
-                'seat_type' => $code,
+                'feature_code' => $featureCode,
                 'customer_id' => $customerId,
             ]),
         );
@@ -183,9 +158,9 @@ class SeatsResource
 
         if ($response->success && is_array($response->data)) {
             $balances = [];
-            foreach ($response->data as $seatType => $balanceData) {
+            foreach ($response->data as $featureCode => $balanceData) {
                 if (is_array($balanceData)) {
-                    $balances[$seatType] = SeatBalance::fromArray($balanceData);
+                    $balances[$featureCode] = SeatBalance::fromArray($balanceData);
                 }
             }
 

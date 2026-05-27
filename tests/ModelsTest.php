@@ -29,14 +29,12 @@ class ModelsTest extends TestCase
             'billing_email' => 'test@example.com',
             'created_at' => '2024-01-01T00:00:00Z',
             'updated_at' => '2024-01-02T00:00:00Z',
-            'external_id' => 'user_789',
             'full_name' => 'John Doe',
         ]);
 
         $this->assertSame('cust_123', $customer->id);
         $this->assertSame('org_456', $customer->organizationId);
         $this->assertSame('test@example.com', $customer->billingEmail);
-        $this->assertSame('user_789', $customer->externalId);
         $this->assertSame('John Doe', $customer->fullName);
         $this->assertNull($customer->domain);
         $this->assertNull($customer->metadata);
@@ -155,7 +153,7 @@ class ModelsTest extends TestCase
             'id' => 'se_123',
             'organization_id' => 'org_456',
             'customer_id' => 'cust_789',
-            'seat_type' => 'editor',
+            'feature_code' => 'editor',
             'event_type' => 'add',
             'quantity' => 3,
             'new_balance' => 8,
@@ -165,7 +163,7 @@ class ModelsTest extends TestCase
         ]);
 
         $this->assertSame('se_123', $event->id);
-        $this->assertSame('editor', $event->seatType);
+        $this->assertSame('editor', $event->featureCode);
         $this->assertSame('add', $event->eventType);
         $this->assertSame(3, $event->quantity);
         $this->assertSame(8, $event->newBalance);

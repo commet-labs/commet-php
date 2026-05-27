@@ -16,9 +16,11 @@ class HttpClient
 
     private const RETRYABLE_STATUS_CODES = [408, 429, 500, 502, 503, 504];
 
-    public const API_VERSION = '2026-05-18';
+    public const API_VERSION = '2026-05-25';
 
     private const VERSION = '4.3.0';
+
+    private const BODY_METHODS = ['POST', 'PUT', 'PATCH'];
 
     private Client $client;
 
@@ -27,6 +29,8 @@ class HttpClient
     private string $apiVersion;
 
     private bool $telemetryEnabled;
+
+    private bool $debug;
 
     private ?array $lastRequestMetrics = null;
 
@@ -40,9 +44,11 @@ class HttpClient
         float $timeout = 30.0,
         int $retries = 3,
         bool $telemetry = true,
+        bool $debug = false,
     ) {
         $this->apiVersion = $apiVersion;
         $this->telemetryEnabled = $telemetry;
+        $this->debug = $debug;
 
         $this->userAgent = sprintf(
             'commet-php/%s php/%s %s/%s',
@@ -163,8 +169,25 @@ class HttpClient
         if ($apiVersion !== null) {
             $headers['commet-version'] = $apiVersion;
         }
-        if ($method === 'POST') {
-            $headers['Idempotency-Key'] = $idempotencyKey ?? 'sdk_' . bin2hex(random_bytes(16));
+
+        if (
+            in_array($method, self::BODY_METHODS, true)
+            && $this->maxRetries > 0
+            && $idempotencyKey === null
+        ) {
+            $uuid = sprintf(
+                '%s-%s-%s-%s-%s',
+                bin2hex(random_bytes(4)),
+                bin2hex(random_bytes(2)),
+                bin2hex(random_bytes(2)),
+                bin2hex(random_bytes(2)),
+                bin2hex(random_bytes(6)),
+            );
+            $idempotencyKey = 'commet-php-retry-' . $uuid;
+        }
+
+        if ($idempotencyKey !== null) {
+            $headers['Idempotency-Key'] = $idempotencyKey;
         }
 
         $jsonBody = $body !== null ? self::convertKeys($body, [self::class, 'toCamelCase']) : null;
@@ -208,11 +231,22 @@ class HttpClient
             $options['timeout'] = $timeout;
         }
 
+        if ($this->debug) {
+            error_log("[Commet SDK] {$method} {$endpoint}");
+            if ($jsonBody !== null) {
+                error_log('[Commet SDK] Request body: ' . json_encode($jsonBody, JSON_PRETTY_PRINT));
+            }
+        }
+
         try {
             $response = $this->client->request($method, $endpoint, $options);
         } catch (ConnectException $exception) {
             if ($attempt <= $this->maxRetries) {
-                $this->wait($attempt);
+                $delay = $this->retryDelay($attempt);
+                if ($this->debug) {
+                    error_log("[Commet SDK] Network error, retrying in {$delay}ms (attempt {$attempt}/{$this->maxRetries})");
+                }
+                usleep($delay * 1000);
                 return $this->execute($method, $endpoint, $jsonBody, $params, $headers, $timeout, $attempt + 1);
             }
             throw $exception;
@@ -221,7 +255,11 @@ class HttpClient
 
             if ($response === null) {
                 if ($attempt <= $this->maxRetries) {
-                    $this->wait($attempt);
+                    $delay = $this->retryDelay($attempt);
+                    if ($this->debug) {
+                        error_log("[Commet SDK] Network error, retrying in {$delay}ms (attempt {$attempt}/{$this->maxRetries})");
+                    }
+                    usleep($delay * 1000);
                     return $this->execute($method, $endpoint, $jsonBody, $params, $headers, $timeout, $attempt + 1);
                 }
                 throw $exception;
@@ -229,8 +267,16 @@ class HttpClient
 
             $statusCode = $response->getStatusCode();
 
+            if ($this->debug) {
+                error_log("[Commet SDK] Response status: {$statusCode}");
+            }
+
             if (in_array($statusCode, self::RETRYABLE_STATUS_CODES, true) && $attempt <= $this->maxRetries) {
-                $this->wait($attempt);
+                $delay = $this->retryDelay($attempt);
+                if ($this->debug) {
+                    error_log("[Commet SDK] Retrying in {$delay}ms (attempt {$attempt}/{$this->maxRetries})");
+                }
+                usleep($delay * 1000);
                 return $this->execute($method, $endpoint, $jsonBody, $params, $headers, $timeout, $attempt + 1);
             }
 
@@ -247,6 +293,10 @@ class HttpClient
             }
 
             $this->handleError($statusCode, $data);
+        }
+
+        if ($this->debug) {
+            error_log("[Commet SDK] Response status: {$response->getStatusCode()}");
         }
 
         $body = $response->getBody()->getContents();
@@ -291,31 +341,42 @@ class HttpClient
             );
         }
 
-        if (($data['code'] ?? null) === 'validation_error' && is_array($data['details'] ?? null)) {
+        $errorObj = is_array($data['error'] ?? null) ? $data['error'] : $data;
+
+        $type = $errorObj['type'] ?? 'api_error';
+        $code = $errorObj['code'] ?? 'unknown';
+        $message = $errorObj['message'] ?? "Request failed with status {$statusCode}";
+        $param = $errorObj['param'] ?? null;
+        $details = $errorObj['details'] ?? null;
+        $docUrl = $errorObj['doc_url'] ?? null;
+
+        if ($code === 'validation_error' && is_array($details)) {
             $errors = [];
-            foreach ($data['details'] as $detail) {
+            foreach ($details as $detail) {
                 $field = $detail['field'] ?? 'unknown';
+                $errors[$field] ??= [];
                 $errors[$field][] = $detail['message'] ?? '';
             }
             throw new ValidationException(
-                $data['message'] ?? 'Validation failed',
+                $message,
                 validationErrors: $errors,
             );
         }
 
         throw new ApiException(
-            $data['message'] ?? "Request failed with status {$statusCode}",
+            $message,
             statusCode: $statusCode,
-            code: $data['code'] ?? null,
-            details: $data['details'] ?? null,
+            code: $code,
+            details: $details,
+            type: $type,
+            param: $param,
+            docUrl: $docUrl,
         );
     }
 
-    private function wait(int $attempt): void
+    private function retryDelay(int $attempt): int
     {
-        $delay = min(1.0 * (2 ** ($attempt - 1)), 8.0);
-        $jitter = random_int(50, 150) / 100.0;
-        usleep((int) ($delay * $jitter * 1_000_000));
+        return min(1000 * (2 ** ($attempt - 1)), 8000);
     }
 
     public static function toCamelCase(string $name): string
