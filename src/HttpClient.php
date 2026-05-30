@@ -9,6 +9,7 @@ use Commet\Exceptions\ValidationException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\HandlerStack;
 
 class HttpClient
 {
@@ -45,6 +46,7 @@ class HttpClient
         int $retries = 3,
         bool $telemetry = true,
         bool $debug = false,
+        ?HandlerStack $handler = null,
     ) {
         $this->apiVersion = $apiVersion;
         $this->telemetryEnabled = $telemetry;
@@ -81,11 +83,15 @@ class HttpClient
             $this->clientInfoHeader = null;
         }
 
-        $this->client = new Client([
+        $clientConfig = [
             'base_uri' => self::BASE_URL . '/api/v1',
             'timeout' => $timeout,
             'headers' => $headers,
-        ]);
+        ];
+        if ($handler !== null) {
+            $clientConfig['handler'] = $handler;
+        }
+        $this->client = new Client($clientConfig);
 
         $this->maxRetries = $retries;
     }
