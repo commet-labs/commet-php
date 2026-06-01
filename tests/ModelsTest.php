@@ -17,6 +17,9 @@ use Commet\Models\SeatBalance;
 use Commet\Models\SeatEvent;
 use Commet\Models\Subscription;
 use Commet\Models\UsageEvent;
+use Commet\Enums\BillingInterval;
+use Commet\Enums\SeatEventType;
+use Commet\Enums\SubscriptionStatus;
 use PHPUnit\Framework\TestCase;
 
 class ModelsTest extends TestCase
@@ -63,7 +66,7 @@ class ModelsTest extends TestCase
                 [
                     'code' => 'api_calls',
                     'name' => 'API Calls',
-                    'type' => 'metered',
+                    'type' => 'usage',
                     'unit_name' => 'call',
                     'included_amount' => 10000,
                     'unlimited' => false,
@@ -101,9 +104,9 @@ class ModelsTest extends TestCase
         ]);
 
         $this->assertSame('sub_123', $subscription->id);
-        $this->assertSame('active', $subscription->status);
+        $this->assertSame(SubscriptionStatus::Active, $subscription->status);
         $this->assertSame(15, $subscription->billingDayOfMonth);
-        $this->assertSame('monthly', $subscription->billingInterval);
+        $this->assertSame(BillingInterval::Monthly, $subscription->billingInterval);
         $this->assertSame('https://checkout.example.com/abc', $subscription->checkoutUrl);
         $this->assertNull($subscription->trialEndsAt);
     }
@@ -113,7 +116,7 @@ class ModelsTest extends TestCase
         $feature = Feature::fromArray([
             'code' => 'api_calls',
             'name' => 'API Calls',
-            'type' => 'metered',
+            'type' => 'usage',
             'allowed' => true,
             'current' => 500,
             'included' => 10000,
@@ -129,9 +132,10 @@ class ModelsTest extends TestCase
 
     public function testFeatureAccessFromArray(): void
     {
-        $access = FeatureAccess::fromArray(['allowed' => true]);
+        $access = FeatureAccess::fromArray(['allowed' => true, 'will_be_charged' => false]);
 
         $this->assertTrue($access->allowed);
+        $this->assertFalse($access->willBeCharged);
     }
 
     public function testCanUseResultFromArray(): void
@@ -164,7 +168,7 @@ class ModelsTest extends TestCase
 
         $this->assertSame('se_123', $event->id);
         $this->assertSame('editor', $event->featureCode);
-        $this->assertSame('add', $event->eventType);
+        $this->assertSame(SeatEventType::Add, $event->eventType);
         $this->assertSame(3, $event->quantity);
         $this->assertSame(8, $event->newBalance);
         $this->assertSame(5, $event->previousBalance);
@@ -201,10 +205,12 @@ class ModelsTest extends TestCase
     public function testPortalSessionFromArray(): void
     {
         $session = PortalSession::fromArray([
+            'success' => true,
             'portal_url' => 'https://portal.example.com/session_abc',
             'message' => 'Session created',
         ]);
 
+        $this->assertTrue($session->success);
         $this->assertSame('https://portal.example.com/session_abc', $session->portalUrl);
         $this->assertSame('Session created', $session->message);
     }
