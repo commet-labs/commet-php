@@ -23,12 +23,12 @@ class QuotaEvent
     {
         return new self(
             id: $data['id'],
-            customerId: $data['customer_id'],
-            featureCode: $data['feature_code'],
-            previousBalance: $data['previous_balance'],
-            newBalance: $data['new_balance'],
+            customerId: $data['customerId'],
+            featureCode: $data['featureCode'],
+            previousBalance: $data['previousBalance'],
+            newBalance: $data['newBalance'],
             ts: $data['ts'],
-            createdAt: $data['created_at'],
+            createdAt: $data['createdAt'],
         );
     }
 }

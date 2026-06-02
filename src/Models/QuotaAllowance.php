@@ -11,6 +11,7 @@ class QuotaAllowance
         public readonly int $current,
         public readonly int $included,
         public readonly ?int $remaining,
+        public readonly ?int $billedQuantity,
         public readonly bool $unlimited,
         public readonly bool $overageEnabled,
         public readonly ?string $asOf,
@@ -22,13 +23,14 @@ class QuotaAllowance
     public static function fromArray(array $data): self
     {
         return new self(
-            featureCode: $data['feature_code'],
+            featureCode: $data['featureCode'],
             current: $data['current'],
             included: $data['included'],
             remaining: $data['remaining'] ?? null,
+            billedQuantity: $data['billedQuantity'] ?? null,
             unlimited: $data['unlimited'],
-            overageEnabled: $data['overage_enabled'],
-            asOf: $data['as_of'] ?? null,
+            overageEnabled: $data['overageEnabled'],
+            asOf: $data['asOf'] ?? null,
         );
     }
 }

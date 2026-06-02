@@ -27,9 +27,9 @@ class QuotaResource
         $response = $this->http->post(
             '/usage/quota',
             HttpClient::buildBody([
-                'feature_code' => $featureCode,
+                'featureCode' => $featureCode,
                 'count' => $count,
-                'customer_id' => $customerId,
+                'customerId' => $customerId,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -49,9 +49,9 @@ class QuotaResource
         $response = $this->http->put(
             '/usage/quota',
             HttpClient::buildBody([
-                'feature_code' => $featureCode,
+                'featureCode' => $featureCode,
                 'count' => $count,
-                'customer_id' => $customerId,
+                'customerId' => $customerId,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -71,9 +71,9 @@ class QuotaResource
         $response = $this->http->delete(
             '/usage/quota',
             HttpClient::buildBody([
-                'feature_code' => $featureCode,
+                'featureCode' => $featureCode,
                 'count' => $count,
-                'customer_id' => $customerId,
+                'customerId' => $customerId,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -91,8 +91,8 @@ class QuotaResource
         $response = $this->http->get(
             '/usage/quota',
             HttpClient::buildBody([
-                'feature_code' => $featureCode,
-                'customer_id' => $customerId,
+                'featureCode' => $featureCode,
+                'customerId' => $customerId,
             ]),
         );
 
@@ -117,7 +117,7 @@ class QuotaResource
         $response = $this->http->get(
             '/usage/quota/all',
             HttpClient::buildBody([
-                'customer_id' => $customerId,
+                'customerId' => $customerId,
             ]),
         );
 

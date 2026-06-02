@@ -187,12 +187,12 @@ class ModelsTest extends TestCase
     {
         $event = QuotaEvent::fromArray([
             'id' => 'qe_123',
-            'customer_id' => 'cust_789',
-            'feature_code' => 'tasks',
-            'previous_balance' => 4,
-            'new_balance' => 5,
+            'customerId' => 'cust_789',
+            'featureCode' => 'tasks',
+            'previousBalance' => 4,
+            'newBalance' => 5,
             'ts' => '2024-01-15T10:00:00Z',
-            'created_at' => '2024-01-15T10:00:00Z',
+            'createdAt' => '2024-01-15T10:00:00Z',
         ]);
 
         $this->assertSame('qe_123', $event->id);
@@ -207,19 +207,21 @@ class ModelsTest extends TestCase
     public function testQuotaAllowanceFromArray(): void
     {
         $allowance = QuotaAllowance::fromArray([
-            'feature_code' => 'tasks',
+            'featureCode' => 'tasks',
             'current' => 5,
             'included' => 10,
             'remaining' => 5,
+            'billedQuantity' => 10,
             'unlimited' => false,
-            'overage_enabled' => true,
-            'as_of' => '2024-01-15T10:00:00Z',
+            'overageEnabled' => true,
+            'asOf' => '2024-01-15T10:00:00Z',
         ]);
 
         $this->assertSame('tasks', $allowance->featureCode);
         $this->assertSame(5, $allowance->current);
         $this->assertSame(10, $allowance->included);
         $this->assertSame(5, $allowance->remaining);
+        $this->assertSame(10, $allowance->billedQuantity);
         $this->assertFalse($allowance->unlimited);
         $this->assertTrue($allowance->overageEnabled);
         $this->assertSame('2024-01-15T10:00:00Z', $allowance->asOf);
@@ -228,17 +230,18 @@ class ModelsTest extends TestCase
     public function testQuotaAllowanceFromArrayUnlimited(): void
     {
         $allowance = QuotaAllowance::fromArray([
-            'feature_code' => 'tasks',
+            'featureCode' => 'tasks',
             'current' => 5,
             'included' => 0,
             'remaining' => null,
             'unlimited' => true,
-            'overage_enabled' => false,
-            'as_of' => null,
+            'overageEnabled' => false,
+            'asOf' => null,
         ]);
 
         $this->assertTrue($allowance->unlimited);
         $this->assertNull($allowance->remaining);
+        $this->assertNull($allowance->billedQuantity);
         $this->assertNull($allowance->asOf);
         $this->assertFalse($allowance->overageEnabled);
     }
