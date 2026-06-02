@@ -13,6 +13,8 @@ use Commet\Models\Plan;
 use Commet\Models\PlanFeature;
 use Commet\Models\PlanPrice;
 use Commet\Models\PortalSession;
+use Commet\Models\QuotaAllowance;
+use Commet\Models\QuotaEvent;
 use Commet\Models\SeatBalance;
 use Commet\Models\SeatEvent;
 use Commet\Models\Subscription;
@@ -179,6 +181,66 @@ class ModelsTest extends TestCase
 
         $this->assertSame(10, $balance->current);
         $this->assertSame('2024-01-15T10:00:00Z', $balance->asOf);
+    }
+
+    public function testQuotaEventFromArray(): void
+    {
+        $event = QuotaEvent::fromArray([
+            'id' => 'qe_123',
+            'customer_id' => 'cust_789',
+            'feature_code' => 'tasks',
+            'previous_balance' => 4,
+            'new_balance' => 5,
+            'ts' => '2024-01-15T10:00:00Z',
+            'created_at' => '2024-01-15T10:00:00Z',
+        ]);
+
+        $this->assertSame('qe_123', $event->id);
+        $this->assertSame('cust_789', $event->customerId);
+        $this->assertSame('tasks', $event->featureCode);
+        $this->assertSame(4, $event->previousBalance);
+        $this->assertSame(5, $event->newBalance);
+        $this->assertSame('2024-01-15T10:00:00Z', $event->ts);
+        $this->assertSame('2024-01-15T10:00:00Z', $event->createdAt);
+    }
+
+    public function testQuotaAllowanceFromArray(): void
+    {
+        $allowance = QuotaAllowance::fromArray([
+            'feature_code' => 'tasks',
+            'current' => 5,
+            'included' => 10,
+            'remaining' => 5,
+            'unlimited' => false,
+            'overage_enabled' => true,
+            'as_of' => '2024-01-15T10:00:00Z',
+        ]);
+
+        $this->assertSame('tasks', $allowance->featureCode);
+        $this->assertSame(5, $allowance->current);
+        $this->assertSame(10, $allowance->included);
+        $this->assertSame(5, $allowance->remaining);
+        $this->assertFalse($allowance->unlimited);
+        $this->assertTrue($allowance->overageEnabled);
+        $this->assertSame('2024-01-15T10:00:00Z', $allowance->asOf);
+    }
+
+    public function testQuotaAllowanceFromArrayUnlimited(): void
+    {
+        $allowance = QuotaAllowance::fromArray([
+            'feature_code' => 'tasks',
+            'current' => 5,
+            'included' => 0,
+            'remaining' => null,
+            'unlimited' => true,
+            'overage_enabled' => false,
+            'as_of' => null,
+        ]);
+
+        $this->assertTrue($allowance->unlimited);
+        $this->assertNull($allowance->remaining);
+        $this->assertNull($allowance->asOf);
+        $this->assertFalse($allowance->overageEnabled);
     }
 
     public function testCreditPackFromArray(): void
