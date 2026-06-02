@@ -84,6 +84,7 @@ class WebhooksResource
         string $url,
         array $events,
         ?string $description = null,
+        ?string $apiVersion = null,
         ?string $idempotencyKey = null,
     ): ApiResponse {
         $response = $this->http->post(
@@ -92,6 +93,63 @@ class WebhooksResource
                 'url' => $url,
                 'events' => $events,
                 'description' => $description,
+                'api_version' => $apiVersion,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: WebhookEndpoint::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * @return ApiResponse<WebhookEndpoint>
+     */
+    public function get(string $id): ApiResponse
+    {
+        $response = $this->http->get("/webhooks/{$id}");
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: WebhookEndpoint::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param string[]|null $events
+     * @return ApiResponse<WebhookEndpoint>
+     */
+    public function update(
+        string $id,
+        ?string $url = null,
+        ?array $events = null,
+        ?string $description = null,
+        ?bool $isActive = null,
+        ?string $apiVersion = null,
+        ?string $idempotencyKey = null,
+    ): ApiResponse {
+        $response = $this->http->put(
+            "/webhooks/{$id}",
+            HttpClient::buildBody([
+                'url' => $url,
+                'events' => $events,
+                'description' => $description,
+                'is_active' => $isActive,
+                'api_version' => $apiVersion,
             ]),
             idempotencyKey: $idempotencyKey,
         );
