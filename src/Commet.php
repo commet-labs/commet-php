@@ -14,6 +14,7 @@ use Commet\Resources\PlanGroupsResource;
 use Commet\Resources\PlansResource;
 use Commet\Resources\PortalResource;
 use Commet\Resources\PromoCodesResource;
+use Commet\Resources\QuotaResource;
 use Commet\Resources\SeatsResource;
 use Commet\Resources\SubscriptionsResource;
 use Commet\Resources\TransactionsResource;
@@ -32,6 +33,7 @@ class Commet
     public readonly PlansResource $plans;
     public readonly PortalResource $portal;
     public readonly PromoCodesResource $promoCodes;
+    public readonly QuotaResource $quota;
     public readonly SeatsResource $seats;
     public readonly SubscriptionsResource $subscriptions;
     public readonly TransactionsResource $transactions;
@@ -66,6 +68,7 @@ class Commet
         $this->plans = new PlansResource($http);
         $this->portal = new PortalResource($http);
         $this->promoCodes = new PromoCodesResource($http);
+        $this->quota = new QuotaResource($http);
         $this->seats = new SeatsResource($http);
         $this->subscriptions = new SubscriptionsResource($http);
         $this->transactions = new TransactionsResource($http);

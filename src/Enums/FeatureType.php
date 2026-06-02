@@ -9,4 +9,5 @@ enum FeatureType: string
     case Boolean = 'boolean';
     case Usage = 'usage';
     case Seats = 'seats';
+    case Quota = 'quota';
 }

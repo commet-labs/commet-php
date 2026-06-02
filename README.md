@@ -47,6 +47,20 @@ $customer->seats->add('editor', count: 3);
 $customer->portal->getUrl();
 ```
 
+## Quota
+
+Track consumption against a fixed allowance:
+
+```php
+$commet->quota->add(featureCode: 'tasks', count: 3, customerId: 'user_123');
+$commet->quota->set(featureCode: 'tasks', count: 10, customerId: 'user_123');
+$commet->quota->remove(featureCode: 'tasks', count: 1, customerId: 'user_123');
+
+$allowance = $commet->quota->get(featureCode: 'tasks', customerId: 'user_123');
+
+$allowances = $commet->quota->getAll(customerId: 'user_123');
+```
+
 ## Webhook verification
 
 ```php
