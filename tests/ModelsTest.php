@@ -8,7 +8,6 @@ use Commet\Models\CanUseResult;
 use Commet\Models\CreditPack;
 use Commet\Models\Customer;
 use Commet\Models\Feature;
-use Commet\Models\FeatureAccess;
 use Commet\Models\Plan;
 use Commet\Models\PlanFeature;
 use Commet\Models\PlanPrice;
@@ -132,14 +131,6 @@ class ModelsTest extends TestCase
         $this->assertSame(9500, $feature->remaining);
     }
 
-    public function testFeatureAccessFromArray(): void
-    {
-        $access = FeatureAccess::fromArray(['allowed' => true, 'will_be_charged' => false]);
-
-        $this->assertTrue($access->allowed);
-        $this->assertFalse($access->willBeCharged);
-    }
-
     public function testCanUseResultFromArray(): void
     {
         $result = CanUseResult::fromArray([
@@ -191,12 +182,12 @@ class ModelsTest extends TestCase
     {
         $event = QuotaEvent::fromArray([
             'id' => 'qe_123',
-            'customerId' => 'cust_789',
-            'featureCode' => 'tasks',
-            'previousBalance' => 4,
-            'newBalance' => 5,
+            'customer_id' => 'cust_789',
+            'feature_code' => 'tasks',
+            'previous_balance' => 4,
+            'new_balance' => 5,
             'ts' => '2024-01-15T10:00:00Z',
-            'createdAt' => '2024-01-15T10:00:00Z',
+            'created_at' => '2024-01-15T10:00:00Z',
         ]);
 
         $this->assertSame('qe_123', $event->id);
@@ -211,14 +202,14 @@ class ModelsTest extends TestCase
     public function testQuotaAllowanceFromArray(): void
     {
         $allowance = QuotaAllowance::fromArray([
-            'featureCode' => 'tasks',
+            'feature_code' => 'tasks',
             'current' => 5,
             'included' => 10,
             'remaining' => 5,
-            'billedQuantity' => 10,
+            'billed_quantity' => 10,
             'unlimited' => false,
-            'overageEnabled' => true,
-            'asOf' => '2024-01-15T10:00:00Z',
+            'overage_enabled' => true,
+            'as_of' => '2024-01-15T10:00:00Z',
         ]);
 
         $this->assertSame('tasks', $allowance->featureCode);
@@ -234,13 +225,13 @@ class ModelsTest extends TestCase
     public function testQuotaAllowanceFromArrayUnlimited(): void
     {
         $allowance = QuotaAllowance::fromArray([
-            'featureCode' => 'tasks',
+            'feature_code' => 'tasks',
             'current' => 5,
             'included' => 0,
             'remaining' => null,
             'unlimited' => true,
-            'overageEnabled' => false,
-            'asOf' => null,
+            'overage_enabled' => false,
+            'as_of' => null,
         ]);
 
         $this->assertTrue($allowance->unlimited);

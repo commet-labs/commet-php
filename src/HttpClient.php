@@ -19,7 +19,7 @@ class HttpClient
 
     public const API_VERSION = '2026-05-25';
 
-    private const VERSION = '4.3.0';
+    private const VERSION = '5.0.0';
 
     private const BODY_METHODS = ['POST', 'PUT', 'PATCH'];
 
@@ -68,7 +68,7 @@ class HttpClient
         ];
 
         if ($telemetry) {
-            $this->clientInfoHeader = json_encode([
+            $clientInfo = [
                 'sdk' => 'commet-php',
                 'sdk_version' => self::VERSION,
                 'lang' => 'php',
@@ -77,7 +77,15 @@ class HttpClient
                 'arch' => php_uname('m'),
                 'runtime' => 'php',
                 'runtime_version' => PHP_VERSION,
-            ], JSON_THROW_ON_ERROR);
+                'integrations' => [],
+            ];
+
+            $executionContext = self::detectExecutionContext();
+            if ($executionContext !== null) {
+                $clientInfo['execution_context'] = $executionContext;
+            }
+
+            $this->clientInfoHeader = json_encode($clientInfo, JSON_THROW_ON_ERROR);
             $headers['commet-client-info'] = $this->clientInfoHeader;
         } else {
             $this->clientInfoHeader = null;
@@ -399,6 +407,24 @@ class HttpClient
         $result = preg_replace('/([A-Z])([A-Z][a-z])/', '$1_$2', $result);
 
         return strtolower($result);
+    }
+
+    private static function detectExecutionContext(): ?string
+    {
+        if (defined('PHPUNIT_COMPOSER_INSTALL') || getenv('PHPUNIT_RUNNING') !== false) {
+            return 'test';
+        }
+
+        if (
+            getenv('CI') !== false
+            || getenv('GITHUB_ACTIONS') !== false
+            || getenv('GITLAB_CI') !== false
+            || getenv('CIRCLECI') !== false
+        ) {
+            return 'ci';
+        }
+
+        return null;
     }
 
     /**

@@ -18,6 +18,7 @@ class WebhookEndpoint
         public readonly bool $isActive,
         public readonly string $createdAt,
         public readonly ?string $description = null,
+        public readonly ?string $apiVersion = null,
         public readonly ?string $secretKey = null,
     ) {}
 
@@ -35,6 +36,7 @@ class WebhookEndpoint
             isActive: $data['is_active'],
             createdAt: $data['created_at'],
             description: $data['description'] ?? null,
+            apiVersion: $data['api_version'] ?? null,
             secretKey: $data['secret_key'] ?? null,
         );
     }

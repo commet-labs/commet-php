@@ -23,14 +23,14 @@ class QuotaAllowance
     public static function fromArray(array $data): self
     {
         return new self(
-            featureCode: $data['featureCode'],
+            featureCode: $data['feature_code'],
             current: $data['current'],
             included: $data['included'],
             remaining: $data['remaining'] ?? null,
-            billedQuantity: $data['billedQuantity'] ?? null,
+            billedQuantity: $data['billed_quantity'] ?? null,
             unlimited: $data['unlimited'],
-            overageEnabled: $data['overageEnabled'],
-            asOf: $data['asOf'] ?? null,
+            overageEnabled: $data['overage_enabled'],
+            asOf: $data['as_of'] ?? null,
         );
     }
 }

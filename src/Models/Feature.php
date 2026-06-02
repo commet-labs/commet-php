@@ -21,6 +21,7 @@ class Feature
         public readonly ?int $remaining = null,
         public readonly ?int $overage = null,
         public readonly ?int $overageUnitPrice = null,
+        public readonly ?int $billedQuantity = null,
         public readonly ?bool $unlimited = null,
         public readonly ?bool $overageEnabled = null,
     ) {}
@@ -43,6 +44,7 @@ class Feature
             remaining: $data['remaining'] ?? null,
             overage: $data['overage'] ?? null,
             overageUnitPrice: $data['overage_unit_price'] ?? null,
+            billedQuantity: $data['billed_quantity'] ?? null,
             unlimited: $data['unlimited'] ?? null,
             overageEnabled: $data['overage_enabled'] ?? null,
         );
