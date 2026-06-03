@@ -16,6 +16,7 @@ class SubscriptionsResource
 
     /**
      * @param array<string, int>|null $initialSeats
+     * @param array{discount_type: string, discount_value: int, duration_cycles: int}|null $customIntroOffer
      * @return ApiResponse<Subscription>
      */
     public function create(
@@ -28,6 +29,7 @@ class SubscriptionsResource
         ?string $name = null,
         ?string $startDate = null,
         ?string $successUrl = null,
+        ?array $customIntroOffer = null,
         ?string $idempotencyKey = null,
     ): ApiResponse {
         $response = $this->http->post(
@@ -42,6 +44,7 @@ class SubscriptionsResource
                 'name' => $name,
                 'start_date' => $startDate,
                 'success_url' => $successUrl,
+                'custom_intro_offer' => $customIntroOffer,
             ]),
             idempotencyKey: $idempotencyKey,
         );
