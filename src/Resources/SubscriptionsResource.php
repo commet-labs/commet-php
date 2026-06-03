@@ -150,6 +150,7 @@ class SubscriptionsResource
         string $subscriptionId,
         ?string $newPlanId = null,
         ?string $newBillingInterval = null,
+        ?string $successUrl = null,
         ?string $idempotencyKey = null,
     ): ApiResponse {
         return $this->http->post(
@@ -157,6 +158,7 @@ class SubscriptionsResource
             HttpClient::buildBody([
                 'new_plan_id' => $newPlanId,
                 'new_billing_interval' => $newBillingInterval,
+                'success_url' => $successUrl,
             ]),
             idempotencyKey: $idempotencyKey,
         );
