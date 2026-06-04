@@ -6,6 +6,8 @@ namespace Commet\Resources;
 
 use Commet\ApiResponse;
 use Commet\HttpClient;
+use Commet\Models\ActivateAddonResult;
+use Commet\Models\DeactivateAddonResult;
 use Commet\Models\Subscription;
 
 class SubscriptionsResource
@@ -187,32 +189,56 @@ class SubscriptionsResource
     }
 
     /**
-     * @return ApiResponse<array{addon_id: string, status: string, prorated_charge: int}>
+     * Prorated charge for the current billing period.
+     *
+     * @return ApiResponse<ActivateAddonResult>
      */
     public function activateAddon(
         string $subscriptionId,
         string $addonId,
         ?string $idempotencyKey = null,
     ): ApiResponse {
-        return $this->http->post(
+        $response = $this->http->post(
             "/subscriptions/{$subscriptionId}/addons",
             ['addon_id' => $addonId],
             idempotencyKey: $idempotencyKey,
         );
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: ActivateAddonResult::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
     }
 
     /**
-     * @return ApiResponse<array{id: string, status: string, deactivated_at: string}>
+     * @return ApiResponse<DeactivateAddonResult>
      */
     public function deactivateAddon(
         string $subscriptionId,
         string $addonId,
         ?string $idempotencyKey = null,
     ): ApiResponse {
-        return $this->http->delete(
+        $response = $this->http->delete(
             "/subscriptions/{$subscriptionId}/addons/{$addonId}",
             idempotencyKey: $idempotencyKey,
         );
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: DeactivateAddonResult::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
     }
 
     /**

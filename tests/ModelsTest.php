@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace Commet\Tests;
 
+use Commet\Models\ActivateAddonResult;
 use Commet\Models\CanUseResult;
 use Commet\Models\CreditPack;
 use Commet\Models\Customer;
+use Commet\Models\DeactivateAddonResult;
 use Commet\Models\Feature;
+use Commet\Models\InvoiceDownloadResult;
+use Commet\Models\InvoiceSendResult;
+use Commet\Models\InvoiceStatusResult;
 use Commet\Models\Plan;
 use Commet\Models\PlanFeature;
 use Commet\Models\PlanPrice;
@@ -17,10 +22,17 @@ use Commet\Models\QuotaEvent;
 use Commet\Models\SeatBalance;
 use Commet\Models\SeatEvent;
 use Commet\Models\Subscription;
+use Commet\Models\TransactionRefundResult;
+use Commet\Models\TransactionRetryResult;
+use Commet\Models\UsageCheckResult;
 use Commet\Models\UsageEvent;
 use Commet\Enums\BillingInterval;
+use Commet\Enums\ConsumptionModel;
+use Commet\Enums\InvoiceStatus;
 use Commet\Enums\SeatEventType;
 use Commet\Enums\SubscriptionStatus;
+use Commet\Enums\TransactionStatus;
+use Commet\Enums\UsageCheckDenialReason;
 use PHPUnit\Framework\TestCase;
 
 class ModelsTest extends TestCase
@@ -298,5 +310,131 @@ class ModelsTest extends TestCase
         $this->assertCount(1, $event->properties);
         $this->assertSame('model', $event->properties[0]->property);
         $this->assertSame('gpt-4', $event->properties[0]->value);
+    }
+
+    public function testInvoiceDownloadResultFromArray(): void
+    {
+        $result = InvoiceDownloadResult::fromArray([
+            'url' => 'https://files.example.com/inv_123.pdf',
+            'expires_at' => '2024-01-22T10:00:00Z',
+        ]);
+
+        $this->assertSame('https://files.example.com/inv_123.pdf', $result->url);
+        $this->assertSame('2024-01-22T10:00:00Z', $result->expiresAt);
+    }
+
+    public function testInvoiceSendResultFromArray(): void
+    {
+        $result = InvoiceSendResult::fromArray([
+            'sent' => true,
+            'sent_at' => '2024-01-15T10:00:00Z',
+        ]);
+
+        $this->assertTrue($result->sent);
+        $this->assertSame('2024-01-15T10:00:00Z', $result->sentAt);
+    }
+
+    public function testInvoiceStatusResultFromArray(): void
+    {
+        $result = InvoiceStatusResult::fromArray([
+            'id' => 'inv_123',
+            'status' => 'paid',
+            'updated_at' => '2024-01-15T10:00:00Z',
+        ]);
+
+        $this->assertSame('inv_123', $result->id);
+        $this->assertSame(InvoiceStatus::Paid, $result->status);
+        $this->assertSame('2024-01-15T10:00:00Z', $result->updatedAt);
+    }
+
+    public function testTransactionRefundResultFromArray(): void
+    {
+        $result = TransactionRefundResult::fromArray([
+            'id' => 'txn_123',
+            'status' => 'refunded',
+        ]);
+
+        $this->assertSame('txn_123', $result->id);
+        $this->assertSame(TransactionStatus::Refunded, $result->status);
+    }
+
+    public function testTransactionRetryResultFromArray(): void
+    {
+        $result = TransactionRetryResult::fromArray([
+            'id' => 'txn_123',
+            'status' => 'processing',
+            'retry_invoice_number' => 'INV-0002',
+        ]);
+
+        $this->assertSame('txn_123', $result->id);
+        $this->assertSame('processing', $result->status);
+        $this->assertSame('INV-0002', $result->retryInvoiceNumber);
+    }
+
+    public function testUsageCheckResultFromArray(): void
+    {
+        $result = UsageCheckResult::fromArray([
+            'allowed' => true,
+            'consumption_model' => 'metered',
+            'feature' => 'api_calls',
+            'quantity' => 1,
+            'current' => 500,
+            'included' => 10000,
+            'remaining' => 9500,
+            'overage_enabled' => false,
+        ]);
+
+        $this->assertTrue($result->allowed);
+        $this->assertSame(ConsumptionModel::Metered, $result->consumptionModel);
+        $this->assertSame('api_calls', $result->feature);
+        $this->assertSame(1, $result->quantity);
+        $this->assertSame(500, $result->current);
+        $this->assertSame(9500, $result->remaining);
+        $this->assertFalse($result->overageEnabled);
+        $this->assertNull($result->reason);
+        $this->assertNull($result->message);
+    }
+
+    public function testUsageCheckResultDeniedFromArray(): void
+    {
+        $result = UsageCheckResult::fromArray([
+            'allowed' => false,
+            'consumption_model' => 'credits',
+            'feature' => 'tokens',
+            'quantity' => 100,
+            'reason' => 'insufficient_credits',
+            'message' => 'Not enough credits',
+        ]);
+
+        $this->assertFalse($result->allowed);
+        $this->assertSame(ConsumptionModel::Credits, $result->consumptionModel);
+        $this->assertSame(UsageCheckDenialReason::InsufficientCredits, $result->reason);
+        $this->assertSame('Not enough credits', $result->message);
+    }
+
+    public function testActivateAddonResultFromArray(): void
+    {
+        $result = ActivateAddonResult::fromArray([
+            'addon_id' => 'addon_123',
+            'status' => 'active',
+            'prorated_charge' => 500,
+        ]);
+
+        $this->assertSame('addon_123', $result->addonId);
+        $this->assertSame('active', $result->status);
+        $this->assertSame(500, $result->proratedCharge);
+    }
+
+    public function testDeactivateAddonResultFromArray(): void
+    {
+        $result = DeactivateAddonResult::fromArray([
+            'id' => 'addon_123',
+            'status' => 'inactive',
+            'deactivated_at' => '2024-01-15T10:00:00Z',
+        ]);
+
+        $this->assertSame('addon_123', $result->id);
+        $this->assertSame('inactive', $result->status);
+        $this->assertSame('2024-01-15T10:00:00Z', $result->deactivatedAt);
     }
 }

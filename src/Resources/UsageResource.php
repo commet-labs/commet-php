@@ -6,6 +6,7 @@ namespace Commet\Resources;
 
 use Commet\ApiResponse;
 use Commet\HttpClient;
+use Commet\Models\UsageCheckResult;
 use Commet\Models\UsageEvent;
 
 class UsageResource
@@ -109,17 +110,30 @@ class UsageResource
     }
 
     /**
-     * @return ApiResponse<array<string, mixed>>
+     * Dry-run: checks if a usage event would be allowed without tracking it.
+     *
+     * @return ApiResponse<UsageCheckResult>
      */
     public function check(
         string $customerId,
         string $featureCode,
         int $quantity,
     ): ApiResponse {
-        return $this->http->post('/usage/check', [
+        $response = $this->http->post('/usage/check', [
             'customer_id' => $customerId,
             'feature_code' => $featureCode,
             'quantity' => $quantity,
         ]);
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: UsageCheckResult::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
     }
 }

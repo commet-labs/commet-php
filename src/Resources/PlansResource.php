@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Commet\Resources;
 
 use Commet\ApiResponse;
+use Commet\Enums\ConsumptionModel;
 use Commet\HttpClient;
 use Commet\Models\Plan;
 use Commet\Models\PlanFeatureManage;
@@ -80,7 +81,7 @@ class PlansResource
         string $name,
         string $code,
         ?string $description = null,
-        ?string $consumptionModel = null,
+        ?ConsumptionModel $consumptionModel = null,
         ?bool $isPublic = null,
         ?bool $isFree = null,
         ?bool $blockOnExhaustion = null,
@@ -94,7 +95,7 @@ class PlansResource
                 'name' => $name,
                 'code' => $code,
                 'description' => $description,
-                'consumption_model' => $consumptionModel,
+                'consumption_model' => $consumptionModel?->value,
                 'is_public' => $isPublic,
                 'is_free' => $isFree,
                 'block_on_exhaustion' => $blockOnExhaustion,

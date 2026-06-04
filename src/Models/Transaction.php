@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
+use Commet\Enums\TransactionStatus;
+
 class Transaction
 {
     public function __construct(
@@ -15,7 +17,7 @@ class Transaction
         public readonly int $subtotal,
         public readonly int $taxAmount,
         public readonly string $currency,
-        public readonly string $status,
+        public readonly TransactionStatus $status,
         public readonly string $customerEmail,
         public readonly string $createdAt,
         public readonly string $updatedAt,
@@ -38,7 +40,7 @@ class Transaction
             subtotal: $data['subtotal'],
             taxAmount: $data['tax_amount'],
             currency: $data['currency'],
-            status: $data['status'],
+            status: TransactionStatus::from($data['status']),
             customerEmail: $data['customer_email'],
             createdAt: $data['created_at'],
             updatedAt: $data['updated_at'],

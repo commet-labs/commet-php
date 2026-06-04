@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
+use Commet\Enums\AddonConsumptionModel;
+use Commet\Enums\FeatureType;
+
 class ActiveAddon
 {
     public function __construct(
@@ -14,9 +17,9 @@ class ActiveAddon
         public readonly int $basePrice,
         public readonly string $featureCode,
         public readonly string $featureName,
-        public readonly string $featureType,
+        public readonly FeatureType $featureType,
         public readonly string $activatedAt,
-        public readonly ?string $consumptionModel = null,
+        public readonly ?AddonConsumptionModel $consumptionModel = null,
     ) {}
 
     /**
@@ -32,9 +35,9 @@ class ActiveAddon
             basePrice: $data['base_price'],
             featureCode: $data['feature_code'],
             featureName: $data['feature_name'],
-            featureType: $data['feature_type'],
+            featureType: FeatureType::from($data['feature_type']),
             activatedAt: $data['activated_at'],
-            consumptionModel: $data['consumption_model'] ?? null,
+            consumptionModel: isset($data['consumption_model']) ? AddonConsumptionModel::from($data['consumption_model']) : null,
         );
     }
 }

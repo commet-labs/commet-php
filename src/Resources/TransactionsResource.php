@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Commet\Resources;
 
 use Commet\ApiResponse;
+use Commet\Enums\TransactionStatus;
 use Commet\HttpClient;
 use Commet\Models\Transaction;
+use Commet\Models\TransactionRefundResult;
+use Commet\Models\TransactionRetryResult;
 
 class TransactionsResource
 {
@@ -18,7 +21,7 @@ class TransactionsResource
      * @return ApiResponse<Transaction[]>
      */
     public function list(
-        ?string $status = null,
+        ?TransactionStatus $status = null,
         ?string $customerEmail = null,
         ?int $limit = null,
         ?string $cursor = null,
@@ -26,7 +29,7 @@ class TransactionsResource
         $response = $this->http->get(
             '/transactions',
             HttpClient::buildBody([
-                'status' => $status,
+                'status' => $status?->value,
                 'customer_email' => $customerEmail,
                 'limit' => $limit,
                 'cursor' => $cursor,
@@ -72,22 +75,51 @@ class TransactionsResource
     }
 
     /**
-     * @return ApiResponse<array{id: string, status: string}>
+     * Full refund only.
+     *
+     * @return ApiResponse<TransactionRefundResult>
      */
     public function refund(
         string $id,
         ?string $idempotencyKey = null,
     ): ApiResponse {
-        return $this->http->post("/transactions/{$id}/refund", [], idempotencyKey: $idempotencyKey);
+        $response = $this->http->post("/transactions/{$id}/refund", [], idempotencyKey: $idempotencyKey);
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: TransactionRefundResult::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
     }
 
     /**
-     * @return ApiResponse<array{id: string, status: string, retry_invoice_number: string}>
+     * Creates a new invoice and initiates a new payment attempt.
+     *
+     * The returned `status` is the synthetic literal `'processing'`, which is not
+     * a member of {@see TransactionStatus}, so it stays typed as a plain string.
+     *
+     * @return ApiResponse<TransactionRetryResult>
      */
     public function retry(
         string $id,
         ?string $idempotencyKey = null,
     ): ApiResponse {
-        return $this->http->post("/transactions/{$id}/retry", [], idempotencyKey: $idempotencyKey);
+        $response = $this->http->post("/transactions/{$id}/retry", [], idempotencyKey: $idempotencyKey);
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: TransactionRetryResult::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
     }
 }

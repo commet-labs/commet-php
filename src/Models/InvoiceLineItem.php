@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
+use Commet\Enums\ChargeType;
+use Commet\Enums\DiscountType;
+use Commet\Enums\InvoiceLineType;
+
 class InvoiceLineItem
 {
     public function __construct(
-        public readonly string $lineType,
+        public readonly InvoiceLineType $lineType,
         public readonly int $quantity,
         public readonly int $unitAmount,
         public readonly int $amount,
@@ -16,10 +20,10 @@ class InvoiceLineItem
         public readonly ?int $includedAmount = null,
         public readonly ?int $usedAmount = null,
         public readonly ?int $overageAmount = null,
-        public readonly ?string $discountType = null,
+        public readonly ?DiscountType $discountType = null,
         public readonly ?int $discountValue = null,
         public readonly ?string $discountName = null,
-        public readonly ?string $chargeType = null,
+        public readonly ?ChargeType $chargeType = null,
     ) {}
 
     /**
@@ -28,7 +32,7 @@ class InvoiceLineItem
     public static function fromArray(array $data): self
     {
         return new self(
-            lineType: $data['line_type'],
+            lineType: InvoiceLineType::from($data['line_type']),
             quantity: $data['quantity'],
             unitAmount: $data['unit_amount'],
             amount: $data['amount'],
@@ -37,10 +41,10 @@ class InvoiceLineItem
             includedAmount: $data['included_amount'] ?? null,
             usedAmount: $data['used_amount'] ?? null,
             overageAmount: $data['overage_amount'] ?? null,
-            discountType: $data['discount_type'] ?? null,
+            discountType: isset($data['discount_type']) ? DiscountType::from($data['discount_type']) : null,
             discountValue: $data['discount_value'] ?? null,
             discountName: $data['discount_name'] ?? null,
-            chargeType: $data['charge_type'] ?? null,
+            chargeType: isset($data['charge_type']) ? ChargeType::from($data['charge_type']) : null,
         );
     }
 }

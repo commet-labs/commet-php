@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
+use Commet\Enums\InvoiceStatus;
+use Commet\Enums\InvoiceType;
+
 class Invoice
 {
     /**
@@ -16,8 +19,8 @@ class Invoice
         public readonly bool $livemode,
         public readonly string $customerId,
         public readonly string $invoiceNumber,
-        public readonly string $status,
-        public readonly string $invoiceType,
+        public readonly InvoiceStatus $status,
+        public readonly InvoiceType $invoiceType,
         public readonly string $currency,
         public readonly int $subtotal,
         public readonly int $discountAmount,
@@ -55,8 +58,8 @@ class Invoice
             livemode: $data['livemode'] ?? false,
             customerId: $data['customer_id'],
             invoiceNumber: $data['invoice_number'],
-            status: $data['status'],
-            invoiceType: $data['invoice_type'],
+            status: InvoiceStatus::from($data['status']),
+            invoiceType: InvoiceType::from($data['invoice_type']),
             currency: $data['currency'],
             subtotal: $data['subtotal'],
             discountAmount: $data['discount_amount'] ?? 0,

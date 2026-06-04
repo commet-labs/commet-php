@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
+use Commet\Enums\ConsumptionModel;
+
 class PlanManage
 {
     /**
@@ -23,7 +25,7 @@ class PlanManage
         public readonly string $createdAt,
         public readonly string $updatedAt,
         public readonly ?string $description = null,
-        public readonly ?string $consumptionModel = null,
+        public readonly ?ConsumptionModel $consumptionModel = null,
         public readonly ?string $planGroupId = null,
         public readonly ?array $metadata = null,
     ) {}
@@ -47,7 +49,7 @@ class PlanManage
             createdAt: $data['created_at'],
             updatedAt: $data['updated_at'],
             description: $data['description'] ?? null,
-            consumptionModel: $data['consumption_model'] ?? null,
+            consumptionModel: isset($data['consumption_model']) ? ConsumptionModel::from($data['consumption_model']) : null,
             planGroupId: $data['plan_group_id'] ?? null,
             metadata: $data['metadata'] ?? null,
         );
