@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class TransactionRetryResult
+class TransactionRetry
 {
-    /**
-     * The retry response status is the synthetic literal `'processing'`, which is
-     * not a member of {@see \Commet\Enums\TransactionStatus}, so it stays typed
-     * as a plain string.
-     */
     public function __construct(
         public readonly string $id,
         public readonly string $status,
         public readonly string $retryInvoiceNumber,
+        public readonly string $object,
+        public readonly bool $livemode,
     ) {}
 
     /**
@@ -23,9 +20,11 @@ class TransactionRetryResult
     public static function fromArray(array $data): self
     {
         return new self(
-            id: $data['id'],
-            status: $data['status'],
-            retryInvoiceNumber: $data['retry_invoice_number'],
+            id: $data["id"],
+            status: $data["status"],
+            retryInvoiceNumber: $data["retry_invoice_number"],
+            object: $data["object"],
+            livemode: $data["livemode"],
         );
     }
 }

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class PortalSession
+class PortalAccess
 {
     public function __construct(
-        public readonly bool $success,
         public readonly string $portalUrl,
-        public readonly ?string $message = null,
+        public readonly string $object,
+        public readonly bool $livemode,
     ) {}
 
     /**
@@ -18,9 +18,9 @@ class PortalSession
     public static function fromArray(array $data): self
     {
         return new self(
-            success: $data['success'],
-            portalUrl: $data['portal_url'],
-            message: $data['message'] ?? null,
+            portalUrl: $data["portal_url"],
+            object: $data["object"],
+            livemode: $data["livemode"],
         );
     }
 }

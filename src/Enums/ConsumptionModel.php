@@ -6,7 +6,7 @@ namespace Commet\Enums;
 
 enum ConsumptionModel: string
 {
-    case Metered = 'metered';
-    case Credits = 'credits';
-    case Balance = 'balance';
+    case Metered = "metered";
+    case Credits = "credits";
+    case Balance = "balance";
 }

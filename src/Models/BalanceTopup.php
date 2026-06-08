@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class InvoiceSendResult
+class BalanceTopup
 {
     public function __construct(
-        public readonly bool $sent,
-        public readonly string $sentAt,
+        public readonly int $amount,
+        public readonly string $object,
+        public readonly bool $livemode,
     ) {}
 
     /**
@@ -17,8 +18,9 @@ class InvoiceSendResult
     public static function fromArray(array $data): self
     {
         return new self(
-            sent: $data['sent'],
-            sentAt: $data['sent_at'],
+            amount: $data["amount"],
+            object: $data["object"],
+            livemode: $data["livemode"],
         );
     }
 }

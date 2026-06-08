@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class DeactivateAddonResult
+class PlanVisibility
 {
     public function __construct(
         public readonly string $id,
-        public readonly string $status,
-        public readonly string $deactivatedAt,
+        public readonly bool $isPublic,
+        public readonly string $object,
+        public readonly bool $livemode,
     ) {}
 
     /**
@@ -18,9 +19,10 @@ class DeactivateAddonResult
     public static function fromArray(array $data): self
     {
         return new self(
-            id: $data['id'],
-            status: $data['status'],
-            deactivatedAt: $data['deactivated_at'],
+            id: $data["id"],
+            isPublic: $data["is_public"],
+            object: $data["object"],
+            livemode: $data["livemode"],
         );
     }
 }

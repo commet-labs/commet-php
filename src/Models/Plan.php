@@ -4,27 +4,37 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
+use Commet\Enums\BillingInterval;
+use Commet\Enums\ConsumptionModel;
+use Commet\Enums\DiscountType;
+use Commet\Enums\FeatureType;
+
 class Plan
 {
-    /**
-     * @param PlanPrice[] $prices
-     * @param PlanFeature[] $features
-     */
     public function __construct(
         public readonly string $id,
-        public readonly string $object,
-        public readonly bool $livemode,
-        public readonly string $code,
         public readonly string $name,
+        public readonly string $code,
         public readonly bool $isPublic,
         public readonly bool $isDefault,
+        public readonly bool $isFree,
         public readonly int $sortOrder,
-        public readonly array $prices,
-        public readonly array $features,
         public readonly string $createdAt,
+        public readonly string $updatedAt,
+        public readonly string $object,
+        public readonly bool $livemode,
         public readonly ?string $description = null,
-        public readonly ?bool $isFree = null,
-        public readonly ?string $updatedAt = null,
+        public readonly ?ConsumptionModel $consumptionModel = null,
+        public readonly ?bool $blockOnExhaustion = null,
+        public readonly ?string $planGroupId = null,
+        /** @var array<string, mixed>|null */
+        public readonly ?array $metadata = null,
+        /** @var list<array<string, mixed>>|null */
+        public readonly ?array $features = null,
+        /** @var list<array<string, mixed>>|null */
+        public readonly ?array $prices = null,
+        /** @var list<array<string, mixed>>|null */
+        public readonly ?array $exchangeRates = null,
     ) {}
 
     /**
@@ -32,31 +42,26 @@ class Plan
      */
     public static function fromArray(array $data): self
     {
-        $prices = array_map(
-            fn(array $price) => PlanPrice::fromArray($price),
-            $data['prices'] ?? [],
-        );
-
-        $features = array_map(
-            fn(array $feature) => PlanFeature::fromArray($feature),
-            $data['features'] ?? [],
-        );
-
         return new self(
-            id: $data['id'],
-            object: $data['object'] ?? 'plan',
-            livemode: $data['livemode'] ?? false,
-            code: $data['code'],
-            name: $data['name'],
-            isPublic: $data['is_public'],
-            isDefault: $data['is_default'],
-            sortOrder: $data['sort_order'],
-            prices: $prices,
-            features: $features,
-            createdAt: $data['created_at'],
-            description: $data['description'] ?? null,
-            isFree: $data['is_free'] ?? null,
-            updatedAt: $data['updated_at'] ?? null,
+            id: $data["id"],
+            name: $data["name"],
+            code: $data["code"],
+            isPublic: $data["is_public"],
+            isDefault: $data["is_default"],
+            isFree: $data["is_free"],
+            sortOrder: $data["sort_order"],
+            createdAt: $data["created_at"],
+            updatedAt: $data["updated_at"],
+            object: $data["object"],
+            livemode: $data["livemode"],
+            description: $data["description"] ?? null,
+            consumptionModel: isset($data["consumption_model"]) ? ConsumptionModel::from($data["consumption_model"]) : null,
+            blockOnExhaustion: $data["block_on_exhaustion"] ?? null,
+            planGroupId: $data["plan_group_id"] ?? null,
+            metadata: $data["metadata"] ?? null,
+            features: $data["features"] ?? null,
+            prices: $data["prices"] ?? null,
+            exchangeRates: $data["exchange_rates"] ?? null,
         );
     }
 }

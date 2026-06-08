@@ -4,20 +4,21 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-use Commet\Enums\FeatureType;
-
 class PlanFeature
 {
     public function __construct(
-        public readonly string $code,
-        public readonly string $name,
-        public readonly FeatureType $type,
-        public readonly ?string $unitName = null,
-        public readonly ?bool $enabled = null,
-        public readonly ?int $includedAmount = null,
-        public readonly ?bool $unlimited = null,
-        public readonly ?bool $overageEnabled = null,
-        public readonly ?int $overageUnitPrice = null,
+        public readonly string $planId,
+        public readonly string $featureId,
+        public readonly bool $enabled,
+        public readonly int $includedAmount,
+        public readonly bool $unlimited,
+        /** @var array<string, mixed> */
+        public readonly array $overage,
+        public readonly string $pricingMode,
+        public readonly string $object,
+        public readonly bool $livemode,
+        public readonly ?int $creditsPerUnit = null,
+        public readonly ?int $margin = null,
     ) {}
 
     /**
@@ -26,15 +27,17 @@ class PlanFeature
     public static function fromArray(array $data): self
     {
         return new self(
-            code: $data['code'],
-            name: $data['name'],
-            type: FeatureType::from($data['type']),
-            unitName: $data['unit_name'] ?? null,
-            enabled: $data['enabled'] ?? null,
-            includedAmount: $data['included_amount'] ?? null,
-            unlimited: $data['unlimited'] ?? null,
-            overageEnabled: $data['overage_enabled'] ?? null,
-            overageUnitPrice: $data['overage_unit_price'] ?? null,
+            planId: $data["plan_id"],
+            featureId: $data["feature_id"],
+            enabled: $data["enabled"],
+            includedAmount: $data["included_amount"],
+            unlimited: $data["unlimited"],
+            overage: $data["overage"],
+            pricingMode: $data["pricing_mode"],
+            object: $data["object"],
+            livemode: $data["livemode"],
+            creditsPerUnit: $data["credits_per_unit"] ?? null,
+            margin: $data["margin"] ?? null,
         );
     }
 }

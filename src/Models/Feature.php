@@ -9,21 +9,16 @@ use Commet\Enums\FeatureType;
 class Feature
 {
     public function __construct(
+        public readonly string $id,
+        public readonly string $name,
         public readonly string $code,
+        public readonly FeatureType $type,
+        public readonly string $createdAt,
+        public readonly string $updatedAt,
         public readonly string $object,
         public readonly bool $livemode,
-        public readonly string $name,
-        public readonly FeatureType $type,
-        public readonly bool $allowed,
-        public readonly ?bool $enabled = null,
-        public readonly ?int $current = null,
-        public readonly ?int $included = null,
-        public readonly ?int $remaining = null,
-        public readonly ?int $overage = null,
-        public readonly ?int $overageUnitPrice = null,
-        public readonly ?int $billedQuantity = null,
-        public readonly ?bool $unlimited = null,
-        public readonly ?bool $overageEnabled = null,
+        public readonly ?string $description = null,
+        public readonly ?string $unitName = null,
     ) {}
 
     /**
@@ -32,21 +27,16 @@ class Feature
     public static function fromArray(array $data): self
     {
         return new self(
-            code: $data['code'],
-            object: $data['object'] ?? 'feature',
-            livemode: $data['livemode'] ?? false,
-            name: $data['name'],
-            type: FeatureType::from($data['type']),
-            allowed: $data['allowed'],
-            enabled: $data['enabled'] ?? null,
-            current: $data['current'] ?? null,
-            included: $data['included'] ?? null,
-            remaining: $data['remaining'] ?? null,
-            overage: $data['overage'] ?? null,
-            overageUnitPrice: $data['overage_unit_price'] ?? null,
-            billedQuantity: $data['billed_quantity'] ?? null,
-            unlimited: $data['unlimited'] ?? null,
-            overageEnabled: $data['overage_enabled'] ?? null,
+            id: $data["id"],
+            name: $data["name"],
+            code: $data["code"],
+            type: FeatureType::from($data["type"]),
+            createdAt: $data["created_at"],
+            updatedAt: $data["updated_at"],
+            object: $data["object"],
+            livemode: $data["livemode"],
+            description: $data["description"] ?? null,
+            unitName: $data["unit_name"] ?? null,
         );
     }
 }

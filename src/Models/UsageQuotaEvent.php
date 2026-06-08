@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class QuotaEvent
+class UsageQuotaEvent
 {
     public function __construct(
         public readonly string $id,
@@ -14,6 +14,8 @@ class QuotaEvent
         public readonly int $newBalance,
         public readonly string $ts,
         public readonly string $createdAt,
+        public readonly string $object,
+        public readonly bool $livemode,
     ) {}
 
     /**
@@ -22,13 +24,15 @@ class QuotaEvent
     public static function fromArray(array $data): self
     {
         return new self(
-            id: $data['id'],
-            customerId: $data['customer_id'],
-            featureCode: $data['feature_code'],
-            previousBalance: $data['previous_balance'],
-            newBalance: $data['new_balance'],
-            ts: $data['ts'],
-            createdAt: $data['created_at'],
+            id: $data["id"],
+            customerId: $data["customer_id"],
+            featureCode: $data["feature_code"],
+            previousBalance: $data["previous_balance"],
+            newBalance: $data["new_balance"],
+            ts: $data["ts"],
+            createdAt: $data["created_at"],
+            object: $data["object"],
+            livemode: $data["livemode"],
         );
     }
 }

@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-use Commet\Enums\TransactionStatus;
-
-class TransactionRefundResult
+class ReorderedPlans
 {
     public function __construct(
-        public readonly string $id,
-        public readonly TransactionStatus $status,
+        public readonly bool $reordered,
+        public readonly string $object,
+        public readonly bool $livemode,
     ) {}
 
     /**
@@ -19,8 +18,9 @@ class TransactionRefundResult
     public static function fromArray(array $data): self
     {
         return new self(
-            id: $data['id'],
-            status: TransactionStatus::from($data['status']),
+            reordered: $data["reordered"],
+            object: $data["object"],
+            livemode: $data["livemode"],
         );
     }
 }

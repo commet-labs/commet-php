@@ -4,35 +4,24 @@ declare(strict_types=1);
 
 namespace Commet\Tests;
 
-use Commet\Models\ActivateAddonResult;
-use Commet\Models\CanUseResult;
-use Commet\Models\CreditPack;
-use Commet\Models\Customer;
-use Commet\Models\DeactivateAddonResult;
-use Commet\Models\Feature;
-use Commet\Models\InvoiceDownloadResult;
-use Commet\Models\InvoiceSendResult;
-use Commet\Models\InvoiceStatusResult;
-use Commet\Models\Plan;
-use Commet\Models\PlanFeature;
-use Commet\Models\PlanPrice;
-use Commet\Models\PortalSession;
-use Commet\Models\QuotaAllowance;
-use Commet\Models\QuotaEvent;
-use Commet\Models\SeatBalance;
-use Commet\Models\SeatEvent;
-use Commet\Models\Subscription;
-use Commet\Models\TransactionRefundResult;
-use Commet\Models\TransactionRetryResult;
-use Commet\Models\UsageCheckResult;
-use Commet\Models\UsageEvent;
 use Commet\Enums\BillingInterval;
 use Commet\Enums\ConsumptionModel;
-use Commet\Enums\InvoiceStatus;
-use Commet\Enums\SeatEventType;
+use Commet\Enums\FeatureType;
 use Commet\Enums\SubscriptionStatus;
 use Commet\Enums\TransactionStatus;
 use Commet\Enums\UsageCheckDenialReason;
+use Commet\Models\CreditPack;
+use Commet\Models\Customer;
+use Commet\Models\Feature;
+use Commet\Models\Plan;
+use Commet\Models\SeatBalance;
+use Commet\Models\SeatEvent;
+use Commet\Models\Subscription;
+use Commet\Models\Transaction;
+use Commet\Models\UsageCheckResult;
+use Commet\Models\UsageEvent;
+use Commet\Models\UsageQuota;
+use Commet\Models\UsageQuotaEvent;
 use PHPUnit\Framework\TestCase;
 
 class ModelsTest extends TestCase
@@ -40,143 +29,114 @@ class ModelsTest extends TestCase
     public function testCustomerFromArray(): void
     {
         $customer = Customer::fromArray([
-            'id' => 'cust_123',
-            'organization_id' => 'org_456',
-            'billing_email' => 'test@example.com',
+            'id' => 'cus_123',
+            'email' => 'test@example.com',
             'created_at' => '2024-01-01T00:00:00Z',
             'updated_at' => '2024-01-02T00:00:00Z',
+            'object' => 'customer',
+            'livemode' => false,
+            'external_id' => 'ext_1',
             'full_name' => 'John Doe',
         ]);
 
-        $this->assertSame('cust_123', $customer->id);
-        $this->assertSame('org_456', $customer->organizationId);
-        $this->assertSame('test@example.com', $customer->billingEmail);
+        $this->assertSame('cus_123', $customer->id);
+        $this->assertSame('test@example.com', $customer->email);
+        $this->assertSame('ext_1', $customer->externalId);
         $this->assertSame('John Doe', $customer->fullName);
-        $this->assertNull($customer->domain);
+        $this->assertNull($customer->timezone);
         $this->assertNull($customer->metadata);
     }
 
-    public function testPlanFromArrayWithNestedObjects(): void
+    public function testFeatureFromArray(): void
     {
-        $plan = Plan::fromArray([
-            'id' => 'plan_pro',
-            'code' => 'pro',
-            'name' => 'Pro',
-            'description' => 'Professional plan',
-            'is_public' => true,
-            'is_default' => false,
-            'sort_order' => 2,
+        $feature = Feature::fromArray([
+            'id' => 'feat_1',
+            'name' => 'API Calls',
+            'code' => 'api_calls',
+            'type' => 'usage',
             'created_at' => '2024-01-01T00:00:00Z',
-            'prices' => [
-                [
-                    'billing_interval' => 'monthly',
-                    'price' => 9900,
-                    'is_default' => true,
-                    'trial_days' => 14,
-                ],
-            ],
-            'features' => [
-                [
-                    'code' => 'api_calls',
-                    'name' => 'API Calls',
-                    'type' => 'usage',
-                    'unit_name' => 'call',
-                    'included_amount' => 10000,
-                    'unlimited' => false,
-                ],
-            ],
+            'updated_at' => '2024-01-01T00:00:00Z',
+            'object' => 'feature',
+            'livemode' => false,
+            'unit_name' => 'call',
         ]);
 
-        $this->assertSame('plan_pro', $plan->id);
-        $this->assertSame('Pro', $plan->name);
-        $this->assertCount(1, $plan->prices);
-        $this->assertInstanceOf(PlanPrice::class, $plan->prices[0]);
-        $this->assertSame(9900, $plan->prices[0]->price);
-        $this->assertSame(14, $plan->prices[0]->trialDays);
-        $this->assertCount(1, $plan->features);
-        $this->assertInstanceOf(PlanFeature::class, $plan->features[0]);
-        $this->assertSame('api_calls', $plan->features[0]->code);
-        $this->assertSame(10000, $plan->features[0]->includedAmount);
+        $this->assertSame('api_calls', $feature->code);
+        $this->assertSame(FeatureType::Usage, $feature->type);
+        $this->assertSame('call', $feature->unitName);
     }
 
     public function testSubscriptionFromArray(): void
     {
         $subscription = Subscription::fromArray([
             'id' => 'sub_123',
-            'customer_id' => 'cust_456',
+            'customer_id' => 'cus_456',
+            'plan' => ['id' => 'plan_pro', 'name' => 'Pro'],
             'name' => 'Pro Subscription',
             'status' => 'active',
+            'cancel_at_period_end' => false,
             'start_date' => '2024-01-01T00:00:00Z',
-            'billing_day_of_month' => 15,
             'created_at' => '2024-01-01T00:00:00Z',
             'updated_at' => '2024-01-02T00:00:00Z',
+            'object' => 'subscription',
+            'livemode' => false,
             'billing_interval' => 'monthly',
-            'plan_id' => 'plan_pro',
-            'plan_name' => 'Pro',
+            'consumption_model' => 'metered',
             'checkout_url' => 'https://checkout.example.com/abc',
         ]);
 
         $this->assertSame('sub_123', $subscription->id);
         $this->assertSame(SubscriptionStatus::Active, $subscription->status);
-        $this->assertSame(15, $subscription->billingDayOfMonth);
         $this->assertSame(BillingInterval::Monthly, $subscription->billingInterval);
+        $this->assertSame(ConsumptionModel::Metered, $subscription->consumptionModel);
+        $this->assertSame(['id' => 'plan_pro', 'name' => 'Pro'], $subscription->plan);
         $this->assertSame('https://checkout.example.com/abc', $subscription->checkoutUrl);
         $this->assertNull($subscription->trialEndsAt);
     }
 
-    public function testFeatureFromArray(): void
+    public function testPlanFromArrayKeepsInlineCollectionsAsArrays(): void
     {
-        $feature = Feature::fromArray([
-            'code' => 'api_calls',
-            'name' => 'API Calls',
-            'type' => 'usage',
-            'allowed' => true,
-            'current' => 500,
-            'included' => 10000,
-            'remaining' => 9500,
-            'unlimited' => false,
+        $plan = Plan::fromArray([
+            'id' => 'plan_pro',
+            'name' => 'Pro',
+            'code' => 'pro',
+            'is_public' => true,
+            'is_default' => false,
+            'is_free' => false,
+            'sort_order' => 2,
+            'created_at' => '2024-01-01T00:00:00Z',
+            'updated_at' => '2024-01-01T00:00:00Z',
+            'object' => 'plan',
+            'livemode' => false,
+            'prices' => [['billing_interval' => 'monthly', 'price' => 9900]],
+            'features' => [['code' => 'api_calls', 'name' => 'API Calls']],
         ]);
 
-        $this->assertSame('api_calls', $feature->code);
-        $this->assertTrue($feature->allowed);
-        $this->assertSame(500, $feature->current);
-        $this->assertSame(9500, $feature->remaining);
-    }
-
-    public function testCanUseResultFromArray(): void
-    {
-        $result = CanUseResult::fromArray([
-            'allowed' => true,
-            'will_be_charged' => false,
-            'reason' => 'Within included amount',
-        ]);
-
-        $this->assertTrue($result->allowed);
-        $this->assertFalse($result->willBeCharged);
-        $this->assertSame('Within included amount', $result->reason);
+        $this->assertSame('plan_pro', $plan->id);
+        $this->assertIsArray($plan->prices);
+        $this->assertSame(9900, $plan->prices[0]['price']);
+        $this->assertIsArray($plan->features);
+        $this->assertSame('api_calls', $plan->features[0]['code']);
     }
 
     public function testSeatEventFromArray(): void
     {
         $event = SeatEvent::fromArray([
             'id' => 'se_123',
-            'organization_id' => 'org_456',
-            'customer_id' => 'cust_789',
+            'customer_id' => 'cus_789',
             'feature_code' => 'editor',
-            'event_type' => 'add',
-            'quantity' => 3,
+            'previous_balance' => 5,
             'new_balance' => 8,
             'ts' => '2024-01-15T10:00:00Z',
             'created_at' => '2024-01-15T10:00:00Z',
-            'previous_balance' => 5,
+            'object' => 'seat_event',
+            'livemode' => false,
         ]);
 
         $this->assertSame('se_123', $event->id);
         $this->assertSame('editor', $event->featureCode);
-        $this->assertSame(SeatEventType::Add, $event->eventType);
-        $this->assertSame(3, $event->quantity);
-        $this->assertSame(8, $event->newBalance);
         $this->assertSame(5, $event->previousBalance);
+        $this->assertSame(8, $event->newBalance);
     }
 
     public function testSeatBalanceFromArray(): void
@@ -184,73 +144,73 @@ class ModelsTest extends TestCase
         $balance = SeatBalance::fromArray([
             'current' => 10,
             'as_of' => '2024-01-15T10:00:00Z',
+            'object' => 'seat_balance',
+            'livemode' => false,
         ]);
 
         $this->assertSame(10, $balance->current);
         $this->assertSame('2024-01-15T10:00:00Z', $balance->asOf);
     }
 
-    public function testQuotaEventFromArray(): void
+    public function testUsageQuotaEventFromArray(): void
     {
-        $event = QuotaEvent::fromArray([
+        $event = UsageQuotaEvent::fromArray([
             'id' => 'qe_123',
-            'customer_id' => 'cust_789',
+            'customer_id' => 'cus_789',
             'feature_code' => 'tasks',
             'previous_balance' => 4,
             'new_balance' => 5,
             'ts' => '2024-01-15T10:00:00Z',
             'created_at' => '2024-01-15T10:00:00Z',
+            'object' => 'usage_quota_event',
+            'livemode' => false,
         ]);
 
         $this->assertSame('qe_123', $event->id);
-        $this->assertSame('cust_789', $event->customerId);
         $this->assertSame('tasks', $event->featureCode);
         $this->assertSame(4, $event->previousBalance);
         $this->assertSame(5, $event->newBalance);
-        $this->assertSame('2024-01-15T10:00:00Z', $event->ts);
-        $this->assertSame('2024-01-15T10:00:00Z', $event->createdAt);
     }
 
-    public function testQuotaAllowanceFromArray(): void
+    public function testUsageQuotaFromArray(): void
     {
-        $allowance = QuotaAllowance::fromArray([
+        $quota = UsageQuota::fromArray([
             'feature_code' => 'tasks',
             'current' => 5,
             'included' => 10,
-            'remaining' => 5,
             'billed_quantity' => 10,
             'unlimited' => false,
             'overage_enabled' => true,
+            'object' => 'usage_quota',
+            'livemode' => false,
+            'remaining' => 5,
             'as_of' => '2024-01-15T10:00:00Z',
         ]);
 
-        $this->assertSame('tasks', $allowance->featureCode);
-        $this->assertSame(5, $allowance->current);
-        $this->assertSame(10, $allowance->included);
-        $this->assertSame(5, $allowance->remaining);
-        $this->assertSame(10, $allowance->billedQuantity);
-        $this->assertFalse($allowance->unlimited);
-        $this->assertTrue($allowance->overageEnabled);
-        $this->assertSame('2024-01-15T10:00:00Z', $allowance->asOf);
+        $this->assertSame('tasks', $quota->featureCode);
+        $this->assertSame(5.0, $quota->current);
+        $this->assertSame(5.0, $quota->remaining);
+        $this->assertTrue($quota->overageEnabled);
     }
 
-    public function testQuotaAllowanceFromArrayUnlimited(): void
+    public function testUsageQuotaFromArrayUnlimited(): void
     {
-        $allowance = QuotaAllowance::fromArray([
+        $quota = UsageQuota::fromArray([
             'feature_code' => 'tasks',
             'current' => 5,
             'included' => 0,
-            'remaining' => null,
+            'billed_quantity' => 0,
             'unlimited' => true,
             'overage_enabled' => false,
+            'object' => 'usage_quota',
+            'livemode' => false,
+            'remaining' => null,
             'as_of' => null,
         ]);
 
-        $this->assertTrue($allowance->unlimited);
-        $this->assertNull($allowance->remaining);
-        $this->assertNull($allowance->billedQuantity);
-        $this->assertNull($allowance->asOf);
-        $this->assertFalse($allowance->overageEnabled);
+        $this->assertTrue($quota->unlimited);
+        $this->assertNull($quota->remaining);
+        $this->assertNull($quota->asOf);
     }
 
     public function testCreditPackFromArray(): void
@@ -260,6 +220,8 @@ class ModelsTest extends TestCase
             'name' => '100 Credits',
             'credits' => 100,
             'price' => 999,
+            'object' => 'credit_pack',
+            'livemode' => false,
             'currency' => 'USD',
             'description' => 'Starter credit pack',
         ]);
@@ -270,17 +232,26 @@ class ModelsTest extends TestCase
         $this->assertSame('Starter credit pack', $pack->description);
     }
 
-    public function testPortalSessionFromArray(): void
+    public function testTransactionFromArray(): void
     {
-        $session = PortalSession::fromArray([
-            'success' => true,
-            'portal_url' => 'https://portal.example.com/session_abc',
-            'message' => 'Session created',
+        $transaction = Transaction::fromArray([
+            'id' => 'txn_123',
+            'gross_amount' => 10000,
+            'subtotal' => 9000,
+            'tax_amount' => 1000,
+            'currency' => 'USD',
+            'status' => 'succeeded',
+            'created_at' => '2024-01-15T10:00:00Z',
+            'updated_at' => '2024-01-15T10:00:00Z',
+            'object' => 'transaction',
+            'livemode' => false,
+            'invoice_id' => 'inv_1',
         ]);
 
-        $this->assertTrue($session->success);
-        $this->assertSame('https://portal.example.com/session_abc', $session->portalUrl);
-        $this->assertSame('Session created', $session->message);
+        $this->assertSame('txn_123', $transaction->id);
+        $this->assertSame(TransactionStatus::Succeeded, $transaction->status);
+        $this->assertSame(10000, $transaction->grossAmount);
+        $this->assertSame('inv_1', $transaction->invoiceId);
     }
 
     public function testUsageEventFromArray(): void
@@ -312,65 +283,6 @@ class ModelsTest extends TestCase
         $this->assertSame('gpt-4', $event->properties[0]->value);
     }
 
-    public function testInvoiceDownloadResultFromArray(): void
-    {
-        $result = InvoiceDownloadResult::fromArray([
-            'url' => 'https://files.example.com/inv_123.pdf',
-            'expires_at' => '2024-01-22T10:00:00Z',
-        ]);
-
-        $this->assertSame('https://files.example.com/inv_123.pdf', $result->url);
-        $this->assertSame('2024-01-22T10:00:00Z', $result->expiresAt);
-    }
-
-    public function testInvoiceSendResultFromArray(): void
-    {
-        $result = InvoiceSendResult::fromArray([
-            'sent' => true,
-            'sent_at' => '2024-01-15T10:00:00Z',
-        ]);
-
-        $this->assertTrue($result->sent);
-        $this->assertSame('2024-01-15T10:00:00Z', $result->sentAt);
-    }
-
-    public function testInvoiceStatusResultFromArray(): void
-    {
-        $result = InvoiceStatusResult::fromArray([
-            'id' => 'inv_123',
-            'status' => 'paid',
-            'updated_at' => '2024-01-15T10:00:00Z',
-        ]);
-
-        $this->assertSame('inv_123', $result->id);
-        $this->assertSame(InvoiceStatus::Paid, $result->status);
-        $this->assertSame('2024-01-15T10:00:00Z', $result->updatedAt);
-    }
-
-    public function testTransactionRefundResultFromArray(): void
-    {
-        $result = TransactionRefundResult::fromArray([
-            'id' => 'txn_123',
-            'status' => 'refunded',
-        ]);
-
-        $this->assertSame('txn_123', $result->id);
-        $this->assertSame(TransactionStatus::Refunded, $result->status);
-    }
-
-    public function testTransactionRetryResultFromArray(): void
-    {
-        $result = TransactionRetryResult::fromArray([
-            'id' => 'txn_123',
-            'status' => 'processing',
-            'retry_invoice_number' => 'INV-0002',
-        ]);
-
-        $this->assertSame('txn_123', $result->id);
-        $this->assertSame('processing', $result->status);
-        $this->assertSame('INV-0002', $result->retryInvoiceNumber);
-    }
-
     public function testUsageCheckResultFromArray(): void
     {
         $result = UsageCheckResult::fromArray([
@@ -387,12 +299,9 @@ class ModelsTest extends TestCase
         $this->assertTrue($result->allowed);
         $this->assertSame(ConsumptionModel::Metered, $result->consumptionModel);
         $this->assertSame('api_calls', $result->feature);
-        $this->assertSame(1, $result->quantity);
-        $this->assertSame(500, $result->current);
         $this->assertSame(9500, $result->remaining);
         $this->assertFalse($result->overageEnabled);
         $this->assertNull($result->reason);
-        $this->assertNull($result->message);
     }
 
     public function testUsageCheckResultDeniedFromArray(): void
@@ -410,31 +319,5 @@ class ModelsTest extends TestCase
         $this->assertSame(ConsumptionModel::Credits, $result->consumptionModel);
         $this->assertSame(UsageCheckDenialReason::InsufficientCredits, $result->reason);
         $this->assertSame('Not enough credits', $result->message);
-    }
-
-    public function testActivateAddonResultFromArray(): void
-    {
-        $result = ActivateAddonResult::fromArray([
-            'addon_id' => 'addon_123',
-            'status' => 'active',
-            'prorated_charge' => 500,
-        ]);
-
-        $this->assertSame('addon_123', $result->addonId);
-        $this->assertSame('active', $result->status);
-        $this->assertSame(500, $result->proratedCharge);
-    }
-
-    public function testDeactivateAddonResultFromArray(): void
-    {
-        $result = DeactivateAddonResult::fromArray([
-            'id' => 'addon_123',
-            'status' => 'inactive',
-            'deactivated_at' => '2024-01-15T10:00:00Z',
-        ]);
-
-        $this->assertSame('addon_123', $result->id);
-        $this->assertSame('inactive', $result->status);
-        $this->assertSame('2024-01-15T10:00:00Z', $result->deactivatedAt);
     }
 }

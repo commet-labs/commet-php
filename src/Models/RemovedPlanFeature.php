@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-use Commet\Enums\InvoiceStatus;
-
-class InvoiceStatusResult
+class RemovedPlanFeature
 {
     public function __construct(
         public readonly string $id,
-        public readonly InvoiceStatus $status,
-        public readonly string $updatedAt,
+        public readonly mixed $removed,
+        public readonly string $object,
+        public readonly bool $livemode,
     ) {}
 
     /**
@@ -20,9 +19,10 @@ class InvoiceStatusResult
     public static function fromArray(array $data): self
     {
         return new self(
-            id: $data['id'],
-            status: InvoiceStatus::from($data['status']),
-            updatedAt: $data['updated_at'],
+            id: $data["id"],
+            removed: $data["removed"],
+            object: $data["object"],
+            livemode: $data["livemode"],
         );
     }
 }
