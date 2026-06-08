@@ -14,6 +14,19 @@ class WebhooksResource
         private readonly ?HttpClient $http = null,
     ) {}
 
+    private function http(): HttpClient
+    {
+        if ($this->http === null) {
+            throw new \LogicException(
+                'WebhooksResource was constructed without an HttpClient. '
+                . 'Signature helpers (verify, verifyAndParse) work standalone, '
+                . 'but API methods require the Commet client.',
+            );
+        }
+
+        return $this->http;
+    }
+
     public function verify(string $payload, ?string $signature, string $secret): bool
     {
         if ($signature === null || $signature === '' || $secret === '' || $payload === '') {
@@ -49,7 +62,7 @@ class WebhooksResource
         ?int $limit = null,
         ?string $cursor = null,
     ): ApiResponse {
-        $response = $this->http->get(
+        $response = $this->http()->get(
             '/webhooks',
             HttpClient::buildBody([
                 'limit' => $limit,
@@ -87,7 +100,7 @@ class WebhooksResource
         ?string $apiVersion = null,
         ?string $idempotencyKey = null,
     ): ApiResponse {
-        $response = $this->http->post(
+        $response = $this->http()->post(
             '/webhooks',
             HttpClient::buildBody([
                 'url' => $url,
@@ -115,7 +128,7 @@ class WebhooksResource
      */
     public function get(string $id): ApiResponse
     {
-        $response = $this->http->get("/webhooks/{$id}");
+        $response = $this->http()->get("/webhooks/{$id}");
 
         if ($response->success && is_array($response->data)) {
             return new ApiResponse(
@@ -142,7 +155,7 @@ class WebhooksResource
         ?string $apiVersion = null,
         ?string $idempotencyKey = null,
     ): ApiResponse {
-        $response = $this->http->put(
+        $response = $this->http()->put(
             "/webhooks/{$id}",
             HttpClient::buildBody([
                 'url' => $url,
@@ -173,7 +186,7 @@ class WebhooksResource
         string $id,
         ?string $idempotencyKey = null,
     ): ApiResponse {
-        return $this->http->delete("/webhooks/{$id}", idempotencyKey: $idempotencyKey);
+        return $this->http()->delete("/webhooks/{$id}", idempotencyKey: $idempotencyKey);
     }
 
     /**
@@ -183,6 +196,6 @@ class WebhooksResource
         string $id,
         ?string $idempotencyKey = null,
     ): ApiResponse {
-        return $this->http->post("/webhooks/{$id}/test", idempotencyKey: $idempotencyKey);
+        return $this->http()->post("/webhooks/{$id}/test", idempotencyKey: $idempotencyKey);
     }
 }
