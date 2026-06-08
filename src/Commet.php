@@ -10,6 +10,7 @@ use Commet\Resources\CreditPacksResource;
 use Commet\Resources\CustomersResource;
 use Commet\Resources\FeaturesResource;
 use Commet\Resources\InvoicesResource;
+use Commet\Resources\PayoutsResource;
 use Commet\Resources\PlanGroupsResource;
 use Commet\Resources\PlansResource;
 use Commet\Resources\PortalResource;
@@ -17,6 +18,7 @@ use Commet\Resources\PromoCodesResource;
 use Commet\Resources\QuotaResource;
 use Commet\Resources\SeatsResource;
 use Commet\Resources\SubscriptionsResource;
+use Commet\Resources\TestClockResource;
 use Commet\Resources\TransactionsResource;
 use Commet\Resources\UsageResource;
 use Commet\Resources\WebhooksResource;
@@ -29,6 +31,7 @@ class Commet
     public readonly CustomersResource $customers;
     public readonly FeaturesResource $features;
     public readonly InvoicesResource $invoices;
+    public readonly PayoutsResource $payouts;
     public readonly PlanGroupsResource $planGroups;
     public readonly PlansResource $plans;
     public readonly PortalResource $portal;
@@ -36,6 +39,7 @@ class Commet
     public readonly QuotaResource $quota;
     public readonly SeatsResource $seats;
     public readonly SubscriptionsResource $subscriptions;
+    public readonly TestClockResource $testClock;
     public readonly TransactionsResource $transactions;
     public readonly UsageResource $usage;
     public readonly WebhooksResource $webhooks;
@@ -64,6 +68,7 @@ class Commet
         $this->customers = new CustomersResource($http);
         $this->features = new FeaturesResource($http);
         $this->invoices = new InvoicesResource($http);
+        $this->payouts = new PayoutsResource($http);
         $this->planGroups = new PlanGroupsResource($http);
         $this->plans = new PlansResource($http);
         $this->portal = new PortalResource($http);
@@ -71,6 +76,7 @@ class Commet
         $this->quota = new QuotaResource($http);
         $this->seats = new SeatsResource($http);
         $this->subscriptions = new SubscriptionsResource($http);
+        $this->testClock = new TestClockResource($http);
         $this->transactions = new TransactionsResource($http);
         $this->usage = new UsageResource($http);
         $this->webhooks = new WebhooksResource($http);
