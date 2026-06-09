@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Commet\Resources;
 
 use Commet\ApiResponse;
-use Commet\Enums\InvoiceStatus;
 use Commet\HttpClient;
+use Commet\Models\CreatedInvoice;
 use Commet\Models\Invoice;
-use Commet\Models\InvoiceDownloadResult;
-use Commet\Models\InvoiceSendResult;
-use Commet\Models\InvoiceStatusResult;
+use Commet\Models\InvoiceDownload;
+use Commet\Models\InvoiceStatus;
+use Commet\Models\SentInvoice;
 
 class InvoicesResource
 {
@@ -19,35 +19,36 @@ class InvoicesResource
     ) {}
 
     /**
+     * List invoices with cursor-based pagination. Filter by customer, status, or subscription.
      * @return ApiResponse<Invoice[]>
      */
     public function list(
         ?string $customerId = null,
-        ?InvoiceStatus $status = null,
+        ?string $status = null,
         ?string $subscriptionId = null,
-        ?int $limit = null,
         ?string $cursor = null,
+        ?int $limit = null,
     ): ApiResponse {
         $response = $this->http->get(
-            '/invoices',
+            "/invoices",
             HttpClient::buildBody([
-                'customer_id' => $customerId,
-                'status' => $status?->value,
-                'subscription_id' => $subscriptionId,
-                'limit' => $limit,
-                'cursor' => $cursor,
+                "customer_id" => $customerId,
+                "status" => $status,
+                "subscription_id" => $subscriptionId,
+                "cursor" => $cursor,
+                "limit" => $limit,
             ]),
         );
 
         if ($response->success && is_array($response->data)) {
-            $invoices = array_map(
+            $items = array_map(
                 fn(array $item) => Invoice::fromArray($item),
                 $response->data,
             );
 
             return new ApiResponse(
                 success: true,
-                data: $invoices,
+                data: $items,
                 code: $response->code,
                 message: $response->message,
                 hasMore: $response->hasMore,
@@ -59,11 +60,15 @@ class InvoicesResource
     }
 
     /**
+     * Retrieve a single invoice by its public ID, including line items.
      * @return ApiResponse<Invoice>
      */
-    public function get(string $id): ApiResponse
-    {
-        $response = $this->http->get("/invoices/{$id}");
+    public function get(
+        string $id,
+    ): ApiResponse {
+        $response = $this->http->get(
+            "/invoices/{$id}",
+        );
 
         if ($response->success && is_array($response->data)) {
             return new ApiResponse(
@@ -78,23 +83,24 @@ class InvoicesResource
     }
 
     /**
+     * Create a one-off adjustment invoice. Use a negative amount for a credit.
      * @param array<string, mixed>|null $metadata
-     * @return ApiResponse<Invoice>
+     * @return ApiResponse<CreatedInvoice>
      */
     public function createAdjustment(
         string $customerId,
         int $amount,
-        ?string $description = null,
+        string $description,
         ?array $metadata = null,
         ?string $idempotencyKey = null,
     ): ApiResponse {
         $response = $this->http->post(
-            '/invoices',
+            "/invoices",
             HttpClient::buildBody([
-                'customer_id' => $customerId,
-                'amount' => $amount,
-                'description' => $description,
-                'metadata' => $metadata,
+                "customer_id" => $customerId,
+                "amount" => $amount,
+                "description" => $description,
+                "metadata" => $metadata,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -102,7 +108,7 @@ class InvoicesResource
         if ($response->success && is_array($response->data)) {
             return new ApiResponse(
                 success: true,
-                data: Invoice::fromArray($response->data),
+                data: CreatedInvoice::fromArray($response->data),
                 code: $response->code,
                 message: $response->message,
             );
@@ -112,18 +118,20 @@ class InvoicesResource
     }
 
     /**
-     * Signed URL, expires after 7 days.
-     *
-     * @return ApiResponse<InvoiceDownloadResult>
+     * Generate a signed URL to download the invoice as a PDF. The URL expires after 7 days.
+     * @return ApiResponse<InvoiceDownload>
      */
-    public function getDownloadUrl(string $id): ApiResponse
-    {
-        $response = $this->http->get("/invoices/{$id}/download");
+    public function getDownloadUrl(
+        string $id,
+    ): ApiResponse {
+        $response = $this->http->get(
+            "/invoices/{$id}/download",
+        );
 
         if ($response->success && is_array($response->data)) {
             return new ApiResponse(
                 success: true,
-                data: InvoiceDownloadResult::fromArray($response->data),
+                data: InvoiceDownload::fromArray($response->data),
                 code: $response->code,
                 message: $response->message,
             );
@@ -133,46 +141,51 @@ class InvoicesResource
     }
 
     /**
-     * @return ApiResponse<InvoiceSendResult>
+     * Send the invoice to the customer via email.
+     * @return ApiResponse<SentInvoice>
      */
     public function send(
         string $id,
         ?string $idempotencyKey = null,
     ): ApiResponse {
-        $response = $this->http->post("/invoices/{$id}/send", [], idempotencyKey: $idempotencyKey);
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: InvoiceSendResult::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Only outstanding invoices can be changed to paid or void.
-     *
-     * @return ApiResponse<InvoiceStatusResult>
-     */
-    public function updateStatus(
-        string $id,
-        InvoiceStatus $status,
-        ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->put(
-            "/invoices/{$id}/status",
-            ['status' => $status->value],
+        $response = $this->http->post(
+            "/invoices/{$id}/send",
             idempotencyKey: $idempotencyKey,
         );
 
         if ($response->success && is_array($response->data)) {
             return new ApiResponse(
                 success: true,
-                data: InvoiceStatusResult::fromArray($response->data),
+                data: SentInvoice::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * Mark an outstanding invoice as "paid" or "void". Cannot change the status of already paid or voided invoices.
+     * @return ApiResponse<InvoiceStatus>
+     */
+    public function updateStatus(
+        string $id,
+        string $status,
+        ?string $idempotencyKey = null,
+    ): ApiResponse {
+        $response = $this->http->put(
+            "/invoices/{$id}/status",
+            HttpClient::buildBody([
+                "status" => $status,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: InvoiceStatus::fromArray($response->data),
                 code: $response->code,
                 message: $response->message,
             );

@@ -7,7 +7,7 @@ namespace Commet\Resources;
 use Commet\ApiResponse;
 use Commet\HttpClient;
 use Commet\Models\CreditPack;
-use Commet\Models\CreditPackDetail;
+use Commet\Models\DeletedObject;
 
 class CreditPacksResource
 {
@@ -16,23 +16,29 @@ class CreditPacksResource
     ) {}
 
     /**
+     * List all active credit packs.
      * @return ApiResponse<CreditPack[]>
      */
-    public function list(): ApiResponse
-    {
-        $response = $this->http->get('/credit-packs');
+    public function list(
+
+    ): ApiResponse {
+        $response = $this->http->get(
+            "/credit-packs",
+        );
 
         if ($response->success && is_array($response->data)) {
-            $packs = array_map(
+            $items = array_map(
                 fn(array $item) => CreditPack::fromArray($item),
                 $response->data,
             );
 
             return new ApiResponse(
                 success: true,
-                data: $packs,
+                data: $items,
                 code: $response->code,
                 message: $response->message,
+                hasMore: $response->hasMore,
+                nextCursor: $response->nextCursor,
             );
         }
 
@@ -40,7 +46,8 @@ class CreditPacksResource
     }
 
     /**
-     * @return ApiResponse<CreditPackDetail>
+     * Create a new credit pack.
+     * @return ApiResponse<CreditPack>
      */
     public function create(
         string $name,
@@ -51,13 +58,13 @@ class CreditPacksResource
         ?string $idempotencyKey = null,
     ): ApiResponse {
         $response = $this->http->post(
-            '/credit-packs/manage',
+            "/credit-packs/manage",
             HttpClient::buildBody([
-                'name' => $name,
-                'credits' => $credits,
-                'price' => $price,
-                'description' => $description,
-                'is_active' => $isActive,
+                "name" => $name,
+                "description" => $description,
+                "credits" => $credits,
+                "price" => $price,
+                "is_active" => $isActive,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -65,7 +72,7 @@ class CreditPacksResource
         if ($response->success && is_array($response->data)) {
             return new ApiResponse(
                 success: true,
-                data: CreditPackDetail::fromArray($response->data),
+                data: CreditPack::fromArray($response->data),
                 code: $response->code,
                 message: $response->message,
             );
@@ -75,7 +82,8 @@ class CreditPacksResource
     }
 
     /**
-     * @return ApiResponse<CreditPackDetail>
+     * Update a credit pack's name, description, credits, price, or active status.
+     * @return ApiResponse<CreditPack>
      */
     public function update(
         string $id,
@@ -89,11 +97,11 @@ class CreditPacksResource
         $response = $this->http->put(
             "/credit-packs/{$id}",
             HttpClient::buildBody([
-                'name' => $name,
-                'description' => $description,
-                'credits' => $credits,
-                'price' => $price,
-                'is_active' => $isActive,
+                "name" => $name,
+                "description" => $description,
+                "credits" => $credits,
+                "price" => $price,
+                "is_active" => $isActive,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -101,7 +109,7 @@ class CreditPacksResource
         if ($response->success && is_array($response->data)) {
             return new ApiResponse(
                 success: true,
-                data: CreditPackDetail::fromArray($response->data),
+                data: CreditPack::fromArray($response->data),
                 code: $response->code,
                 message: $response->message,
             );
@@ -111,12 +119,25 @@ class CreditPacksResource
     }
 
     /**
-     * @return ApiResponse<array{id: string, deleted: true}>
+     * Soft-delete a credit pack.
+     * @return ApiResponse<DeletedObject>
      */
     public function delete(
         string $id,
-        ?string $idempotencyKey = null,
     ): ApiResponse {
-        return $this->http->delete("/credit-packs/{$id}", idempotencyKey: $idempotencyKey);
+        $response = $this->http->delete(
+            "/credit-packs/{$id}",
+        );
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: DeletedObject::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
     }
 }

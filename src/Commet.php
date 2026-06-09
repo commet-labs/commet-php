@@ -4,39 +4,13 @@ declare(strict_types=1);
 
 namespace Commet;
 
-use Commet\Resources\AddonsResource;
-use Commet\Resources\ApiKeysResource;
-use Commet\Resources\CreditPacksResource;
-use Commet\Resources\CustomersResource;
-use Commet\Resources\FeaturesResource;
-use Commet\Resources\InvoicesResource;
-use Commet\Resources\PlanGroupsResource;
-use Commet\Resources\PlansResource;
-use Commet\Resources\PortalResource;
-use Commet\Resources\PromoCodesResource;
-use Commet\Resources\QuotaResource;
-use Commet\Resources\SeatsResource;
-use Commet\Resources\SubscriptionsResource;
-use Commet\Resources\TransactionsResource;
 use Commet\Resources\UsageResource;
 use Commet\Resources\WebhooksResource;
 
 class Commet
 {
-    public readonly AddonsResource $addons;
-    public readonly ApiKeysResource $apiKeys;
-    public readonly CreditPacksResource $creditPacks;
-    public readonly CustomersResource $customers;
-    public readonly FeaturesResource $features;
-    public readonly InvoicesResource $invoices;
-    public readonly PlanGroupsResource $planGroups;
-    public readonly PlansResource $plans;
-    public readonly PortalResource $portal;
-    public readonly PromoCodesResource $promoCodes;
-    public readonly QuotaResource $quota;
-    public readonly SeatsResource $seats;
-    public readonly SubscriptionsResource $subscriptions;
-    public readonly TransactionsResource $transactions;
+    use GeneratedResources;
+
     public readonly UsageResource $usage;
     public readonly WebhooksResource $webhooks;
 
@@ -58,20 +32,8 @@ class Commet
 
         $http = new HttpClient($apiKey, $apiVersion, $timeout, $retries, $telemetry, $debug);
 
-        $this->addons = new AddonsResource($http);
-        $this->apiKeys = new ApiKeysResource($http);
-        $this->creditPacks = new CreditPacksResource($http);
-        $this->customers = new CustomersResource($http);
-        $this->features = new FeaturesResource($http);
-        $this->invoices = new InvoicesResource($http);
-        $this->planGroups = new PlanGroupsResource($http);
-        $this->plans = new PlansResource($http);
-        $this->portal = new PortalResource($http);
-        $this->promoCodes = new PromoCodesResource($http);
-        $this->quota = new QuotaResource($http);
-        $this->seats = new SeatsResource($http);
-        $this->subscriptions = new SubscriptionsResource($http);
-        $this->transactions = new TransactionsResource($http);
+        $this->initResources($http);
+
         $this->usage = new UsageResource($http);
         $this->webhooks = new WebhooksResource($http);
     }

@@ -1,0 +1,127 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Commet\Resources;
+
+use Commet\ApiResponse;
+use Commet\HttpClient;
+use Commet\Models\Payout;
+use Commet\Models\PayoutBankAccount;
+use Commet\Models\PayoutVerification;
+
+class PayoutsResource
+{
+    public function __construct(
+        private readonly HttpClient $http,
+    ) {}
+
+    /**
+     * Add an additional destination bank account to the organization's existing payout account. Country and currency are resolved from the organization. The full account number is never returned — only `last4`.
+     * @return ApiResponse<PayoutBankAccount>
+     */
+    public function addBankAccount(
+        string $accountNumber,
+        string $accountHolderName,
+        ?string $routingNumber = null,
+        ?string $accountType = null,
+        ?bool $setDefault = null,
+        ?string $idempotencyKey = null,
+    ): ApiResponse {
+        $response = $this->http->post(
+            "/payouts/bank-accounts",
+            HttpClient::buildBody([
+                "account_number" => $accountNumber,
+                "account_holder_name" => $accountHolderName,
+                "routing_number" => $routingNumber,
+                "account_type" => $accountType,
+                "set_default" => $setDefault,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: PayoutBankAccount::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * Withdraw available balance to the organization's verified payout account. `amount` is in cents (USD, minimum 1000 = $10). The payout is created in `pending` and settles to `paid` asynchronously as provider webhooks arrive.
+     * @return ApiResponse<Payout>
+     */
+    public function request(
+        int $amount,
+        ?string $description = null,
+        ?string $idempotencyKey = null,
+    ): ApiResponse {
+        $response = $this->http->post(
+            "/payouts",
+            HttpClient::buildBody([
+                "amount" => $amount,
+                "description" => $description,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: Payout::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * Provision the organization's payout account in a single call with the full KYC + bank payload. Uploads the identity document, persists the destination bank, and creates the connected account through the org's payout provider. The account starts `pending_verification` and flips to `verified` via the provider's webhook. Idempotent: returns the existing account if the org already has one.
+     * @param array<string, mixed> $bank
+     * @param array<string, mixed>|null $individual
+     * @param array<string, mixed>|null $company
+     * @return ApiResponse<PayoutVerification>
+     */
+    public function completeVerification(
+        string $email,
+        string $businessType,
+        string $businessUrl,
+        string $documentUrl,
+        array $bank,
+        ?array $individual = null,
+        ?array $company = null,
+        ?string $idempotencyKey = null,
+    ): ApiResponse {
+        $response = $this->http->post(
+            "/payouts/verification",
+            HttpClient::buildBody([
+                "email" => $email,
+                "business_type" => $businessType,
+                "business_url" => $businessUrl,
+                "document_url" => $documentUrl,
+                "bank" => $bank,
+                "individual" => $individual,
+                "company" => $company,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: PayoutVerification::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
+    }
+}

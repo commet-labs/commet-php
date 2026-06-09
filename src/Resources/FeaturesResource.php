@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Commet\Resources;
 
 use Commet\ApiResponse;
+use Commet\Enums\FeatureType;
 use Commet\HttpClient;
-use Commet\Models\CanUseResult;
+use Commet\Models\DeletedObject;
 use Commet\Models\Feature;
-use Commet\Models\FeatureManage;
+use Commet\Models\FeatureAccess;
+use Commet\Models\FeatureLookup;
 
 class FeaturesResource
 {
@@ -17,11 +19,118 @@ class FeaturesResource
     ) {}
 
     /**
+     * List all features for a customer's active subscription.
+     * @return ApiResponse<FeatureAccess[]>
+     */
+    public function list(
+        string $customerId,
+    ): ApiResponse {
+        $response = $this->http->get(
+            "/features",
+            HttpClient::buildBody([
+                "customer_id" => $customerId,
+            ]),
+        );
+
+        if ($response->success && is_array($response->data)) {
+            $items = array_map(
+                fn(array $item) => FeatureAccess::fromArray($item),
+                $response->data,
+            );
+
+            return new ApiResponse(
+                success: true,
+                data: $items,
+                code: $response->code,
+                message: $response->message,
+                hasMore: $response->hasMore,
+                nextCursor: $response->nextCursor,
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * Get feature access details. Use action=canUse to check if customer can consume one more unit.
+     * @return ApiResponse<FeatureLookup>
+     */
+    public function get(
+        string $code,
+        string $customerId,
+        ?string $action = null,
+    ): ApiResponse {
+        $response = $this->http->get(
+            "/features/{$code}",
+            HttpClient::buildBody([
+                "customer_id" => $customerId,
+                "action" => $action,
+            ]),
+        );
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: FeatureLookup::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * Get feature access details. Use action=canUse to check if customer can consume one more unit.
+     * @return ApiResponse<FeatureLookup>
+     */
+    public function canUse(
+        string $code,
+        string $customerId,
+    ): ApiResponse {
+        $response = $this->http->get(
+            "/features/{$code}",
+            HttpClient::buildBody([
+                "action" => "canUse",
+                "customer_id" => $customerId,
+            ]),
+        );
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: FeatureLookup::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * Create a new feature. Code must be lowercase alphanumeric with underscores.
      * @return ApiResponse<Feature>
      */
-    public function get(string $code, string $customerId): ApiResponse
-    {
-        $response = $this->http->get("/features/{$code}", ['customer_id' => $customerId]);
+    public function create(
+        string $name,
+        string $code,
+        FeatureType $type,
+        ?string $description = null,
+        ?string $unitName = null,
+        ?string $idempotencyKey = null,
+    ): ApiResponse {
+        $response = $this->http->post(
+            "/features/manage",
+            HttpClient::buildBody([
+                "name" => $name,
+                "code" => $code,
+                "type" => $type->value,
+                "description" => $description,
+                "unit_name" => $unitName,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
 
         if ($response->success && is_array($response->data)) {
             return new ApiResponse(
@@ -36,88 +145,8 @@ class FeaturesResource
     }
 
     /**
-     * @return ApiResponse<CanUseResult>
-     */
-    public function canUse(string $code, string $customerId): ApiResponse
-    {
-        $response = $this->http->get(
-            "/features/{$code}",
-            ['customer_id' => $customerId, 'action' => 'canUse'],
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: CanUseResult::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * @return ApiResponse<Feature[]>
-     */
-    public function list(string $customerId): ApiResponse
-    {
-        $response = $this->http->get('/features', ['customer_id' => $customerId]);
-
-        if ($response->success && is_array($response->data)) {
-            $features = array_map(
-                fn(array $item) => Feature::fromArray($item),
-                $response->data,
-            );
-
-            return new ApiResponse(
-                success: true,
-                data: $features,
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * @return ApiResponse<FeatureManage>
-     */
-    public function create(
-        string $code,
-        string $name,
-        string $type,
-        ?string $description = null,
-        ?string $unitName = null,
-        ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->post(
-            '/features/manage',
-            HttpClient::buildBody([
-                'code' => $code,
-                'name' => $name,
-                'type' => $type,
-                'description' => $description,
-                'unit_name' => $unitName,
-            ]),
-            idempotencyKey: $idempotencyKey,
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: FeatureManage::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * @return ApiResponse<FeatureManage>
+     * Update a feature's name, description, or unit name. At least one field must be provided.
+     * @return ApiResponse<Feature>
      */
     public function update(
         string $code,
@@ -129,9 +158,9 @@ class FeaturesResource
         $response = $this->http->put(
             "/features/{$code}/manage",
             HttpClient::buildBody([
-                'name' => $name,
-                'description' => $description,
-                'unit_name' => $unitName,
+                "name" => $name,
+                "description" => $description,
+                "unit_name" => $unitName,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -139,7 +168,7 @@ class FeaturesResource
         if ($response->success && is_array($response->data)) {
             return new ApiResponse(
                 success: true,
-                data: FeatureManage::fromArray($response->data),
+                data: Feature::fromArray($response->data),
                 code: $response->code,
                 message: $response->message,
             );
@@ -149,12 +178,25 @@ class FeaturesResource
     }
 
     /**
-     * @return ApiResponse<array{id: string, deleted: true}>
+     * Delete a feature. Fails if the feature is attached to active plans or has an active add-on.
+     * @return ApiResponse<DeletedObject>
      */
     public function delete(
         string $code,
-        ?string $idempotencyKey = null,
     ): ApiResponse {
-        return $this->http->delete("/features/{$code}/manage", idempotencyKey: $idempotencyKey);
+        $response = $this->http->delete(
+            "/features/{$code}/manage",
+        );
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: DeletedObject::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
     }
 }

@@ -17,7 +17,7 @@ class HttpClient
 
     private const RETRYABLE_STATUS_CODES = [408, 429, 500, 502, 503, 504];
 
-    public const API_VERSION = '2026-05-25';
+    public const API_VERSION = '2026-06-07';
 
     private const VERSION = '5.5.0';
 
@@ -27,12 +27,11 @@ class HttpClient
 
     private int $maxRetries;
 
-    private string $apiVersion;
-
     private bool $telemetryEnabled;
 
     private bool $debug;
 
+    /** @var array{request_id: string, duration_ms: int}|null */
     private ?array $lastRequestMetrics = null;
 
     private string $userAgent;
@@ -48,7 +47,6 @@ class HttpClient
         bool $debug = false,
         ?HandlerStack $handler = null,
     ) {
-        $this->apiVersion = $apiVersion;
         $this->telemetryEnabled = $telemetry;
         $this->debug = $debug;
 
@@ -106,6 +104,7 @@ class HttpClient
 
     /**
      * @param array<string, mixed>|null $params
+     * @return ApiResponse<mixed>
      */
     public function get(
         string $endpoint,
@@ -129,6 +128,7 @@ class HttpClient
 
     /**
      * @param array<string, mixed>|null $body
+     * @return ApiResponse<mixed>
      */
     public function post(
         string $endpoint,
@@ -142,6 +142,7 @@ class HttpClient
 
     /**
      * @param array<string, mixed>|null $body
+     * @return ApiResponse<mixed>
      */
     public function put(
         string $endpoint,
@@ -155,6 +156,7 @@ class HttpClient
 
     /**
      * @param array<string, mixed>|null $body
+     * @return ApiResponse<mixed>
      */
     public function delete(
         string $endpoint,
@@ -169,6 +171,7 @@ class HttpClient
     /**
      * @param array<string, mixed>|null $body
      * @param array<string, mixed>|null $params
+     * @return ApiResponse<mixed>
      */
     private function request(
         string $method,
@@ -213,6 +216,7 @@ class HttpClient
      * @param array<string, mixed>|null $jsonBody
      * @param array<string, mixed>|null $params
      * @param array<string, string> $headers
+     * @return ApiResponse<mixed>
      */
     private function execute(
         string $method,
@@ -335,14 +339,15 @@ class HttpClient
         }
 
         $converted = self::convertKeys($data, [self::class, 'toSnakeCase']);
+        $envelope = is_array($converted) ? $converted : [];
 
         return new ApiResponse(
-            success: $converted['success'] ?? true,
-            data: $converted['data'] ?? null,
-            code: $converted['code'] ?? null,
-            message: $converted['message'] ?? null,
-            hasMore: $converted['has_more'] ?? null,
-            nextCursor: $converted['next_cursor'] ?? null,
+            success: $envelope['success'] ?? true,
+            data: $envelope['data'] ?? null,
+            code: $envelope['code'] ?? null,
+            message: $envelope['message'] ?? null,
+            hasMore: $envelope['has_more'] ?? null,
+            nextCursor: $envelope['next_cursor'] ?? null,
         );
     }
 
@@ -365,11 +370,16 @@ class HttpClient
         $docUrl = $errorObj['doc_url'] ?? null;
 
         if ($code === 'validation_error' && is_array($details)) {
+            /** @var array<string, list<string>> $errors */
             $errors = [];
             foreach ($details as $detail) {
-                $field = $detail['field'] ?? 'unknown';
+                if (!is_array($detail)) {
+                    continue;
+                }
+                $field = is_string($detail['field'] ?? null) ? $detail['field'] : 'unknown';
+                $fieldMessage = is_string($detail['message'] ?? null) ? $detail['message'] : '';
                 $errors[$field] ??= [];
-                $errors[$field][] = $detail['message'] ?? '';
+                $errors[$field][] = $fieldMessage;
             }
             throw new ValidationException(
                 $message,
@@ -390,7 +400,7 @@ class HttpClient
 
     private function retryDelay(int $attempt): int
     {
-        return min(1000 * (2 ** ($attempt - 1)), 8000);
+        return (int) min(1000 * (2 ** ($attempt - 1)), 8000);
     }
 
     public static function toCamelCase(string $name): string
@@ -403,8 +413,8 @@ class HttpClient
 
     public static function toSnakeCase(string $name): string
     {
-        $result = preg_replace('/([a-z0-9])([A-Z])/', '$1_$2', $name);
-        $result = preg_replace('/([A-Z])([A-Z][a-z])/', '$1_$2', $result);
+        $result = preg_replace('/([a-z0-9])([A-Z])/', '$1_$2', $name) ?? $name;
+        $result = preg_replace('/([A-Z])([A-Z][a-z])/', '$1_$2', $result) ?? $result;
 
         return strtolower($result);
     }

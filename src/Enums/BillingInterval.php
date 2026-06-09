@@ -6,9 +6,9 @@ namespace Commet\Enums;
 
 enum BillingInterval: string
 {
-    case Weekly = 'weekly';
-    case Monthly = 'monthly';
-    case Quarterly = 'quarterly';
-    case Yearly = 'yearly';
-    case OneTime = 'one_time';
+    case Weekly = "weekly";
+    case Monthly = "monthly";
+    case Quarterly = "quarterly";
+    case Yearly = "yearly";
+    case OneTime = "one_time";
 }

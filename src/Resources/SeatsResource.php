@@ -6,7 +6,9 @@ namespace Commet\Resources;
 
 use Commet\ApiResponse;
 use Commet\HttpClient;
+use Commet\Models\BulkSeatUpdate;
 use Commet\Models\SeatBalance;
+use Commet\Models\SeatBalanceListItem;
 use Commet\Models\SeatEvent;
 
 class SeatsResource
@@ -16,98 +18,29 @@ class SeatsResource
     ) {}
 
     /**
+     * Add seats to a customer's subscription. Prorates charges for the current billing period.
      * @return ApiResponse<SeatEvent>
      */
     public function add(
+        string $customerId,
         string $featureCode,
-        int $count = 1,
-        ?string $customerId = null,
+        int $count,
         ?string $idempotencyKey = null,
     ): ApiResponse {
         $response = $this->http->post(
-            '/seats',
+            "/seats",
             HttpClient::buildBody([
-                'feature_code' => $featureCode,
-                'count' => $count,
-                'customer_id' => $customerId,
-            ]),
-            idempotencyKey: $idempotencyKey,
-        );
-
-        return self::toTypedEvent($response);
-    }
-
-    /**
-     * @return ApiResponse<SeatEvent>
-     */
-    public function remove(
-        string $featureCode,
-        int $count = 1,
-        ?string $customerId = null,
-        ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->delete(
-            '/seats',
-            HttpClient::buildBody([
-                'feature_code' => $featureCode,
-                'count' => $count,
-                'customer_id' => $customerId,
-            ]),
-            idempotencyKey: $idempotencyKey,
-        );
-
-        return self::toTypedEvent($response);
-    }
-
-    /**
-     * @return ApiResponse<SeatEvent>
-     */
-    public function set(
-        string $featureCode,
-        int $count = 0,
-        ?string $customerId = null,
-        ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->put(
-            '/seats',
-            HttpClient::buildBody([
-                'feature_code' => $featureCode,
-                'count' => $count,
-                'customer_id' => $customerId,
-            ]),
-            idempotencyKey: $idempotencyKey,
-        );
-
-        return self::toTypedEvent($response);
-    }
-
-    /**
-     * @param array<string, int> $seats
-     * @return ApiResponse<SeatEvent[]>
-     */
-    public function setAll(
-        array $seats,
-        ?string $customerId = null,
-        ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->put(
-            '/seats/bulk',
-            HttpClient::buildBody([
-                'seats' => $seats,
-                'customer_id' => $customerId,
+                "customer_id" => $customerId,
+                "feature_code" => $featureCode,
+                "count" => $count,
             ]),
             idempotencyKey: $idempotencyKey,
         );
 
         if ($response->success && is_array($response->data)) {
-            $events = array_map(
-                fn(array $item) => SeatEvent::fromArray($item),
-                $response->data,
-            );
-
             return new ApiResponse(
                 success: true,
-                data: $events,
+                data: SeatEvent::fromArray($response->data),
                 code: $response->code,
                 message: $response->message,
             );
@@ -117,17 +50,118 @@ class SeatsResource
     }
 
     /**
+     * Set seats to an exact count.
+     * @return ApiResponse<SeatEvent>
+     */
+    public function set(
+        string $customerId,
+        string $featureCode,
+        int $count,
+        ?string $idempotencyKey = null,
+    ): ApiResponse {
+        $response = $this->http->put(
+            "/seats",
+            HttpClient::buildBody([
+                "customer_id" => $customerId,
+                "feature_code" => $featureCode,
+                "count" => $count,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: SeatEvent::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * Remove seats from a customer's subscription. Takes effect at the end of the billing period.
+     * @return ApiResponse<SeatEvent>
+     */
+    public function remove(
+        string $customerId,
+        string $featureCode,
+        int $count,
+    ): ApiResponse {
+        $response = $this->http->delete(
+            "/seats",
+            HttpClient::buildBody([
+                "customer_id" => $customerId,
+                "feature_code" => $featureCode,
+                "count" => $count,
+            ]),
+        );
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: SeatEvent::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * Set all seat types at once.
+     * @param array<string, int> $seats
+     * @return ApiResponse<BulkSeatUpdate[]>
+     */
+    public function setAll(
+        string $customerId,
+        array $seats,
+        ?string $idempotencyKey = null,
+    ): ApiResponse {
+        $response = $this->http->put(
+            "/seats/bulk",
+            HttpClient::buildBody([
+                "customer_id" => $customerId,
+                "seats" => $seats,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if ($response->success && is_array($response->data)) {
+            $items = array_map(
+                fn(array $item) => BulkSeatUpdate::fromArray($item),
+                $response->data,
+            );
+
+            return new ApiResponse(
+                success: true,
+                data: $items,
+                code: $response->code,
+                message: $response->message,
+                hasMore: $response->hasMore,
+                nextCursor: $response->nextCursor,
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * Get current balance for a specific seat type.
      * @return ApiResponse<SeatBalance>
      */
     public function getBalance(
+        string $customerId,
         string $featureCode,
-        ?string $customerId = null,
     ): ApiResponse {
         $response = $this->http->get(
-            '/seats/balance',
+            "/seats/balance",
             HttpClient::buildBody([
-                'feature_code' => $featureCode,
-                'customer_id' => $customerId,
+                "customer_id" => $customerId,
+                "feature_code" => $featureCode,
             ]),
         );
 
@@ -144,46 +178,23 @@ class SeatsResource
     }
 
     /**
-     * @return ApiResponse<array<string, SeatBalance>>
+     * Get the current balance for all seat types in a customer's subscription.
+     * @return ApiResponse<SeatBalanceListItem>
      */
     public function getAllBalances(
-        ?string $customerId = null,
+        string $customerId,
     ): ApiResponse {
         $response = $this->http->get(
-            '/seats/balances',
+            "/seats/balances",
             HttpClient::buildBody([
-                'customer_id' => $customerId,
+                "customer_id" => $customerId,
             ]),
         );
 
         if ($response->success && is_array($response->data)) {
-            $balances = [];
-            foreach ($response->data as $featureCode => $balanceData) {
-                if (is_array($balanceData)) {
-                    $balances[$featureCode] = SeatBalance::fromArray($balanceData);
-                }
-            }
-
             return new ApiResponse(
                 success: true,
-                data: $balances,
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * @return ApiResponse<SeatEvent>
-     */
-    private static function toTypedEvent(ApiResponse $response): ApiResponse
-    {
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: SeatEvent::fromArray($response->data),
+                data: SeatBalanceListItem::fromArray($response->data),
                 code: $response->code,
                 message: $response->message,
             );

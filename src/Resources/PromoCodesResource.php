@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Commet\Resources;
 
 use Commet\ApiResponse;
+use Commet\Enums\DiscountType;
 use Commet\HttpClient;
 use Commet\Models\PromoCode;
 
@@ -15,6 +16,7 @@ class PromoCodesResource
     ) {}
 
     /**
+     * List promo codes with cursor-based pagination.
      * @return ApiResponse<PromoCode[]>
      */
     public function list(
@@ -22,22 +24,22 @@ class PromoCodesResource
         ?string $cursor = null,
     ): ApiResponse {
         $response = $this->http->get(
-            '/promo-codes',
+            "/promo-codes",
             HttpClient::buildBody([
-                'limit' => $limit,
-                'cursor' => $cursor,
+                "limit" => $limit,
+                "cursor" => $cursor,
             ]),
         );
 
         if ($response->success && is_array($response->data)) {
-            $codes = array_map(
+            $items = array_map(
                 fn(array $item) => PromoCode::fromArray($item),
                 $response->data,
             );
 
             return new ApiResponse(
                 success: true,
-                data: $codes,
+                data: $items,
                 code: $response->code,
                 message: $response->message,
                 hasMore: $response->hasMore,
@@ -49,11 +51,15 @@ class PromoCodesResource
     }
 
     /**
+     * Retrieve a promo code by its public ID.
      * @return ApiResponse<PromoCode>
      */
-    public function get(string $id): ApiResponse
-    {
-        $response = $this->http->get("/promo-codes/{$id}");
+    public function get(
+        string $id,
+    ): ApiResponse {
+        $response = $this->http->get(
+            "/promo-codes/{$id}",
+        );
 
         if ($response->success && is_array($response->data)) {
             return new ApiResponse(
@@ -68,12 +74,13 @@ class PromoCodesResource
     }
 
     /**
-     * @param string[] $planIds
+     * Create a new promo code. Optionally restrict to specific plans.
+     * @param string[]|null $planIds
      * @return ApiResponse<PromoCode>
      */
     public function create(
         string $code,
-        string $discountType,
+        DiscountType $discountType,
         int $discountValue,
         ?int $durationCycles = null,
         ?int $maxRedemptions = null,
@@ -82,15 +89,15 @@ class PromoCodesResource
         ?string $idempotencyKey = null,
     ): ApiResponse {
         $response = $this->http->post(
-            '/promo-codes',
+            "/promo-codes",
             HttpClient::buildBody([
-                'code' => $code,
-                'discount_type' => $discountType,
-                'discount_value' => $discountValue,
-                'duration_cycles' => $durationCycles,
-                'max_redemptions' => $maxRedemptions,
-                'expires_at' => $expiresAt,
-                'plan_ids' => $planIds,
+                "code" => $code,
+                "discount_type" => $discountType->value,
+                "discount_value" => $discountValue,
+                "duration_cycles" => $durationCycles,
+                "max_redemptions" => $maxRedemptions,
+                "expires_at" => $expiresAt,
+                "plan_ids" => $planIds,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -108,7 +115,8 @@ class PromoCodesResource
     }
 
     /**
-     * @param string[] $planIds
+     * Update a promo code's redemption limits, expiration, active status, or plan restrictions.
+     * @param string[]|null $planIds
      * @return ApiResponse<PromoCode>
      */
     public function update(
@@ -122,10 +130,10 @@ class PromoCodesResource
         $response = $this->http->put(
             "/promo-codes/{$id}",
             HttpClient::buildBody([
-                'max_redemptions' => $maxRedemptions,
-                'expires_at' => $expiresAt,
-                'active' => $active,
-                'plan_ids' => $planIds,
+                "max_redemptions" => $maxRedemptions,
+                "expires_at" => $expiresAt,
+                "active" => $active,
+                "plan_ids" => $planIds,
             ]),
             idempotencyKey: $idempotencyKey,
         );

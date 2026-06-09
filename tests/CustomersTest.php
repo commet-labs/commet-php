@@ -41,10 +41,11 @@ class CustomersTest extends TestCase
             'success' => true,
             'data' => [
                 'id' => 'cus_x',
-                'organization_id' => 'org_1',
-                'billing_email' => 'a@b.com',
+                'email' => 'a@b.com',
                 'created_at' => '2024-01-01T00:00:00Z',
                 'updated_at' => '2024-01-01T00:00:00Z',
+                'object' => 'customer',
+                'livemode' => false,
             ],
         ], JSON_THROW_ON_ERROR));
     }
@@ -57,7 +58,7 @@ class CustomersTest extends TestCase
 
         $body = $this->sentBody();
         $this->assertSame('ext_123', $body['id']);
-        $this->assertSame('a@b.com', $body['billingEmail']);
+        $this->assertSame('a@b.com', $body['email']);
     }
 
     public function testCreateOmitsIdWhenNull(): void
@@ -69,21 +70,27 @@ class CustomersTest extends TestCase
         $this->assertArrayNotHasKey('id', $this->sentBody());
     }
 
-    public function testCreateBatchSendsId(): void
+    public function testCreateBatchSendsCustomersAsCamelCase(): void
     {
         $batch = new Response(200, ['Content-Type' => 'application/json'], json_encode([
             'success' => true,
-            'data' => ['successful' => [], 'failed' => []],
+            'data' => [
+                'successful' => [],
+                'failed' => [],
+                'object' => 'customer_batch',
+                'livemode' => false,
+            ],
         ], JSON_THROW_ON_ERROR));
         $customers = $this->customersWithResponses([$batch]);
 
         $customers->createBatch([
-            ['email' => 'a@b.com', 'id' => 'ext_a'],
+            ['email' => 'a@b.com', 'external_id' => 'ext_a'],
             ['email' => 'b@b.com'],
         ]);
 
         $body = $this->sentBody();
-        $this->assertSame('ext_a', $body['customers'][0]['id']);
-        $this->assertArrayNotHasKey('id', $body['customers'][1]);
+        $this->assertSame('ext_a', $body['customers'][0]['externalId']);
+        $this->assertArrayNotHasKey('external_id', $body['customers'][0]);
+        $this->assertArrayNotHasKey('externalId', $body['customers'][1]);
     }
 }

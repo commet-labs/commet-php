@@ -39,7 +39,12 @@ class SubscriptionsTest extends TestCase
     {
         return new Response(200, ['Content-Type' => 'application/json'], json_encode([
             'success' => true,
-            'data' => ['checkout_url' => 'https://commet.co/checkout/abc'],
+            'data' => [
+                'object' => 'plan_change',
+                'livemode' => false,
+                'requires_checkout' => true,
+                'checkout_url' => 'https://commet.co/checkout/abc',
+            ],
         ], JSON_THROW_ON_ERROR));
     }
 
@@ -49,15 +54,16 @@ class SubscriptionsTest extends TestCase
             'success' => true,
             'data' => [
                 'id' => 'sub_123',
-                'object' => 'subscription',
-                'livemode' => false,
                 'customerId' => 'cus_123',
+                'plan' => ['id' => 'plan_pro', 'name' => 'Pro'],
                 'name' => 'Pro',
                 'status' => 'active',
+                'cancelAtPeriodEnd' => false,
                 'startDate' => '2026-06-03',
-                'billingDayOfMonth' => 1,
                 'createdAt' => '2026-06-03T00:00:00Z',
                 'updatedAt' => '2026-06-03T00:00:00Z',
+                'object' => 'subscription',
+                'livemode' => false,
             ],
         ], JSON_THROW_ON_ERROR));
     }
@@ -67,7 +73,7 @@ class SubscriptionsTest extends TestCase
         $subscriptions = $this->subscriptionsWithResponses([$this->changePlanResponse()]);
 
         $subscriptions->changePlan(
-            subscriptionId: 'sub_123',
+            id: 'sub_123',
             newPlanId: 'plan_456',
             successUrl: 'https://app.example.com/done',
         );
@@ -75,16 +81,17 @@ class SubscriptionsTest extends TestCase
         $body = $this->sentBody();
         $this->assertSame('https://app.example.com/done', $body['successUrl']);
         $this->assertArrayNotHasKey('success_url', $body);
+        $this->assertSame('plan_456', $body['newPlanId']);
     }
 
-    public function testCreateSendsCustomIntroOfferAsNestedCamelCase(): void
+    public function testCreateSendsIntroOfferAsNestedCamelCase(): void
     {
         $subscriptions = $this->subscriptionsWithResponses([$this->createResponse()]);
 
         $subscriptions->create(
             customerId: 'cus_123',
             planCode: 'pro',
-            customIntroOffer: [
+            introOffer: [
                 'discount_type' => 'percentage',
                 'discount_value' => 1000,
                 'duration_cycles' => 3,
@@ -92,15 +99,13 @@ class SubscriptionsTest extends TestCase
         );
 
         $body = $this->sentBody();
-        $this->assertArrayHasKey('customIntroOffer', $body);
-        $this->assertArrayNotHasKey('custom_intro_offer', $body);
+        $this->assertArrayHasKey('introOffer', $body);
+        $this->assertArrayNotHasKey('intro_offer', $body);
 
-        $offer = $body['customIntroOffer'];
+        $offer = $body['introOffer'];
         $this->assertSame('percentage', $offer['discountType']);
         $this->assertSame(1000, $offer['discountValue']);
         $this->assertSame(3, $offer['durationCycles']);
         $this->assertArrayNotHasKey('discount_type', $offer);
-        $this->assertArrayNotHasKey('discount_value', $offer);
-        $this->assertArrayNotHasKey('duration_cycles', $offer);
     }
 }

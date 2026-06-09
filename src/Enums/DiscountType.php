@@ -6,6 +6,6 @@ namespace Commet\Enums;
 
 enum DiscountType: string
 {
-    case Percentage = 'percentage';
-    case Amount = 'amount';
+    case Percentage = "percentage";
+    case Amount = "amount";
 }

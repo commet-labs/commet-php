@@ -9,6 +9,8 @@ class SeatBalance
     public function __construct(
         public readonly int $current,
         public readonly string $asOf,
+        public readonly string $object,
+        public readonly bool $livemode,
     ) {}
 
     /**
@@ -17,8 +19,10 @@ class SeatBalance
     public static function fromArray(array $data): self
     {
         return new self(
-            current: $data['current'],
-            asOf: $data['as_of'],
+            current: $data["current"],
+            asOf: $data["as_of"],
+            object: $data["object"],
+            livemode: $data["livemode"],
         );
     }
 }

@@ -6,7 +6,7 @@ namespace Commet\Resources;
 
 use Commet\ApiResponse;
 use Commet\HttpClient;
-use Commet\Models\PortalSession;
+use Commet\Models\PortalAccess;
 
 class PortalResource
 {
@@ -15,18 +15,19 @@ class PortalResource
     ) {}
 
     /**
-     * @return ApiResponse<PortalSession>
+     * Generate a customer portal URL. Exactly one identifier (email or customerId) is required.
+     * @return ApiResponse<PortalAccess>
      */
     public function getUrl(
-        ?string $customerId = null,
         ?string $email = null,
+        ?string $customerId = null,
         ?string $idempotencyKey = null,
     ): ApiResponse {
         $response = $this->http->post(
-            '/portal/request-access',
+            "/portal/request-access",
             HttpClient::buildBody([
-                'customer_id' => $customerId,
-                'email' => $email,
+                "email" => $email,
+                "customer_id" => $customerId,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -34,7 +35,7 @@ class PortalResource
         if ($response->success && is_array($response->data)) {
             return new ApiResponse(
                 success: true,
-                data: PortalSession::fromArray($response->data),
+                data: PortalAccess::fromArray($response->data),
                 code: $response->code,
                 message: $response->message,
             );
