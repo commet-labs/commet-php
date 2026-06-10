@@ -40,6 +40,8 @@ class Subscription
         /** @var array<string, mixed>|null */
         public readonly ?array $cancellation = null,
         /** @var array<string, mixed>|null */
+        public readonly ?array $scheduledPlanChange = null,
+        /** @var array<string, mixed>|null */
         public readonly ?array $discount = null,
         public readonly ?string $endDate = null,
         public readonly ?int $billingDayOfMonth = null,
@@ -73,6 +75,7 @@ class Subscription
             credits: $data["credits"] ?? null,
             balance: $data["balance"] ?? null,
             cancellation: $data["cancellation"] ?? null,
+            scheduledPlanChange: $data["scheduled_plan_change"] ?? null,
             discount: $data["discount"] ?? null,
             endDate: $data["end_date"] ?? null,
             billingDayOfMonth: $data["billing_day_of_month"] ?? null,

@@ -9,8 +9,6 @@ use Commet\Enums\FeatureType;
 use Commet\HttpClient;
 use Commet\Models\DeletedObject;
 use Commet\Models\Feature;
-use Commet\Models\FeatureAccess;
-use Commet\Models\FeatureLookup;
 
 class FeaturesResource
 {
@@ -19,22 +17,19 @@ class FeaturesResource
     ) {}
 
     /**
-     * List all features for a customer's active subscription.
-     * @return ApiResponse<FeatureAccess[]>
+     * List every feature defined in the organization. This is the organization's feature catalog (definitions), not a customer's feature access.
+     * @return ApiResponse<Feature[]>
      */
     public function list(
-        string $customerId,
+
     ): ApiResponse {
         $response = $this->http->get(
             "/features",
-            HttpClient::buildBody([
-                "customer_id" => $customerId,
-            ]),
         );
 
         if ($response->success && is_array($response->data)) {
             $items = array_map(
-                fn(array $item) => FeatureAccess::fromArray($item),
+                fn(array $item) => Feature::fromArray($item),
                 $response->data,
             );
 
@@ -52,54 +47,20 @@ class FeaturesResource
     }
 
     /**
-     * Get feature access details. Use action=canUse to check if customer can consume one more unit.
-     * @return ApiResponse<FeatureLookup>
+     * Get a single feature definition by code from the organization's feature catalog.
+     * @return ApiResponse<Feature>
      */
     public function get(
         string $code,
-        string $customerId,
-        ?string $action = null,
     ): ApiResponse {
         $response = $this->http->get(
             "/features/{$code}",
-            HttpClient::buildBody([
-                "customer_id" => $customerId,
-                "action" => $action,
-            ]),
         );
 
         if ($response->success && is_array($response->data)) {
             return new ApiResponse(
                 success: true,
-                data: FeatureLookup::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Get feature access details. Use action=canUse to check if customer can consume one more unit.
-     * @return ApiResponse<FeatureLookup>
-     */
-    public function canUse(
-        string $code,
-        string $customerId,
-    ): ApiResponse {
-        $response = $this->http->get(
-            "/features/{$code}",
-            HttpClient::buildBody([
-                "action" => "canUse",
-                "customer_id" => $customerId,
-            ]),
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: FeatureLookup::fromArray($response->data),
+                data: Feature::fromArray($response->data),
                 code: $response->code,
                 message: $response->message,
             );

@@ -8,6 +8,7 @@ use Commet\Resources\AddonsResource;
 use Commet\Resources\ApiKeysResource;
 use Commet\Resources\CreditPacksResource;
 use Commet\Resources\CustomersResource;
+use Commet\Resources\FeatureAccessResource;
 use Commet\Resources\FeaturesResource;
 use Commet\Resources\InvoicesResource;
 use Commet\Resources\PayoutsResource;
@@ -27,6 +28,7 @@ trait GeneratedResources
     public ApiKeysResource $apiKeys;
     public CreditPacksResource $creditPacks;
     public CustomersResource $customers;
+    public FeatureAccessResource $featureAccess;
     public FeaturesResource $features;
     public InvoicesResource $invoices;
     public PayoutsResource $payouts;
@@ -46,6 +48,7 @@ trait GeneratedResources
         $this->apiKeys = new ApiKeysResource($http);
         $this->creditPacks = new CreditPacksResource($http);
         $this->customers = new CustomersResource($http);
+        $this->featureAccess = new FeatureAccessResource($http);
         $this->features = new FeaturesResource($http);
         $this->invoices = new InvoicesResource($http);
         $this->payouts = new PayoutsResource($http);

@@ -7,8 +7,6 @@ namespace Commet\Tests;
 use Commet\Enums\FeatureType;
 use Commet\HttpClient;
 use Commet\Models\Feature;
-use Commet\Models\FeatureAccess;
-use Commet\Models\FeatureLookup;
 use Commet\Resources\FeaturesResource;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -83,67 +81,57 @@ class FeaturesTest extends TestCase
         $this->assertSame('call', $result->data->unitName);
     }
 
-    public function testListHydratesFeatureAccessWithFloatUsageFields(): void
+    public function testListHydratesFeatureCatalogWithoutParams(): void
     {
         $features = $this->featuresWithResponses([
             $this->response([
                 [
-                    'code' => 'api_calls',
+                    'id' => 'feat_1',
                     'name' => 'API Calls',
+                    'code' => 'api_calls',
                     'type' => 'usage',
-                    'allowed' => true,
-                    'object' => 'feature_access',
+                    'created_at' => '2026-06-08T00:00:00Z',
+                    'updated_at' => '2026-06-08T00:00:00Z',
+                    'object' => 'feature',
                     'livemode' => false,
-                    'current' => 250.5,
-                    'included' => 1000,
-                    'remaining' => 749.5,
-                    'overage_enabled' => true,
-                    'overage_unit_price' => 0.01,
+                    'unit_name' => 'call',
                 ],
             ]),
         ]);
 
-        $result = $features->list(customerId: 'cus_1');
+        $result = $features->list();
+
+        $query = $this->history[0]['request']->getUri()->getQuery();
+        $this->assertSame('', $query);
 
         $this->assertIsArray($result->data);
-        $access = $result->data[0];
-        $this->assertInstanceOf(FeatureAccess::class, $access);
-        $this->assertSame(FeatureType::Usage, $access->type);
-        $this->assertTrue($access->allowed);
-        $this->assertSame(250.5, $access->current);
-        $this->assertSame(749.5, $access->remaining);
-        $this->assertTrue($access->overageEnabled);
-        $this->assertSame(0.01, $access->overageUnitPrice);
-        // Omitted optional fields stay null.
-        $this->assertNull($access->unlimited);
+        $feature = $result->data[0];
+        $this->assertInstanceOf(Feature::class, $feature);
+        $this->assertSame('api_calls', $feature->code);
+        $this->assertSame(FeatureType::Usage, $feature->type);
+        $this->assertSame('call', $feature->unitName);
     }
 
-    public function testCanUseSendsActionParamAndHydratesLookup(): void
+    public function testGetHydratesFeatureDefinition(): void
     {
         $features = $this->featuresWithResponses([
             $this->response([
-                'allowed' => false,
-                'object' => 'feature_lookup',
-                'livemode' => false,
-                'code' => 'api_calls',
+                'id' => 'feat_1',
                 'name' => 'API Calls',
+                'code' => 'api_calls',
                 'type' => 'usage',
-                'remaining' => 0,
-                'will_be_charged' => true,
-                'reason' => 'limit_reached',
+                'created_at' => '2026-06-08T00:00:00Z',
+                'updated_at' => '2026-06-08T00:00:00Z',
+                'object' => 'feature',
+                'livemode' => false,
             ]),
         ]);
 
-        $result = $features->canUse(code: 'api_calls', customerId: 'cus_1');
+        $result = $features->get(code: 'api_calls');
 
-        $query = $this->history[0]['request']->getUri()->getQuery();
-        $this->assertStringContainsString('action=canUse', $query);
-        $this->assertStringContainsString('customerId=cus_1', $query);
-
-        $this->assertInstanceOf(FeatureLookup::class, $result->data);
-        $this->assertFalse($result->data->allowed);
+        $this->assertSame('/features/api_calls', $this->history[0]['request']->getUri()->getPath());
+        $this->assertInstanceOf(Feature::class, $result->data);
+        $this->assertSame('api_calls', $result->data->code);
         $this->assertSame(FeatureType::Usage, $result->data->type);
-        $this->assertTrue($result->data->willBeCharged);
-        $this->assertSame('limit_reached', $result->data->reason);
     }
 }

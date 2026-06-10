@@ -17,9 +17,9 @@ class HttpClient
 
     private const RETRYABLE_STATUS_CODES = [408, 429, 500, 502, 503, 504];
 
-    public const API_VERSION = '2026-06-07';
+    public const API_VERSION = '2026-06-10';
 
-    private const VERSION = '6.0.0';
+    private const VERSION = '7.0.0';
 
     private const BODY_METHODS = ['POST', 'PUT', 'PATCH'];
 

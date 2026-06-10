@@ -21,10 +21,10 @@ class AddonsResource
      * @return ApiResponse<ActiveAddon[]>
      */
     public function listActive(
-        ?string $customerId = null,
+        string $customerId,
     ): ApiResponse {
         $response = $this->http->get(
-            "/addons/active",
+            "/active-addons",
             HttpClient::buildBody([
                 "customer_id" => $customerId,
             ]),
