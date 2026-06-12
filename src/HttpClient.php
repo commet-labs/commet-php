@@ -10,6 +10,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
+use Psr\Http\Message\ResponseInterface;
 
 class HttpClient
 {
@@ -17,9 +18,11 @@ class HttpClient
 
     private const RETRYABLE_STATUS_CODES = [408, 429, 500, 502, 503, 504];
 
+    private const RETRY_AFTER_CAP_MS = 30000;
+
     public const API_VERSION = '2026-06-10';
 
-    private const VERSION = '7.0.0';
+    private const VERSION = '7.1.0';
 
     private const BODY_METHODS = ['POST', 'PUT', 'PATCH'];
 
@@ -295,12 +298,14 @@ class HttpClient
             }
 
             if (in_array($statusCode, self::RETRYABLE_STATUS_CODES, true) && $attempt <= $this->maxRetries) {
-                $delay = $this->retryDelay($attempt);
-                if ($this->debug) {
-                    error_log("[Commet SDK] Retrying in {$delay}ms (attempt {$attempt}/{$this->maxRetries})");
+                $delay = $this->statusRetryDelay($response, $attempt);
+                if ($delay !== null) {
+                    if ($this->debug) {
+                        error_log("[Commet SDK] Retrying in {$delay}ms (attempt {$attempt}/{$this->maxRetries})");
+                    }
+                    usleep($delay * 1000);
+                    return $this->execute($method, $endpoint, $jsonBody, $params, $headers, $timeout, $attempt + 1);
                 }
-                usleep($delay * 1000);
-                return $this->execute($method, $endpoint, $jsonBody, $params, $headers, $timeout, $attempt + 1);
             }
 
             $body = $response->getBody()->getContents();
@@ -406,6 +411,24 @@ class HttpClient
     private function retryDelay(int $attempt): int
     {
         return (int) min(1000 * (2 ** ($attempt - 1)), 8000);
+    }
+
+    // 429 retries wait exactly what the rate limiter reports in Retry-After
+    // (seconds until the window resets); a 429 without the header did not come
+    // from the rate limiter, so it is not retried (returns null). Exponential
+    // backoff only applies to statuses that carry no server-provided wait.
+    private function statusRetryDelay(ResponseInterface $response, int $attempt): ?int
+    {
+        if ($response->getStatusCode() !== 429) {
+            return $this->retryDelay($attempt);
+        }
+
+        $retryAfter = $response->getHeaderLine('Retry-After');
+        if (!is_numeric($retryAfter) || (float) $retryAfter <= 0) {
+            return null;
+        }
+
+        return (int) min((float) $retryAfter * 1000, self::RETRY_AFTER_CAP_MS);
     }
 
     public static function toCamelCase(string $name): string
