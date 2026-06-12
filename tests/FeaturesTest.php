@@ -129,7 +129,7 @@ class FeaturesTest extends TestCase
 
         $result = $features->get(code: 'api_calls');
 
-        $this->assertSame('/features/api_calls', $this->history[0]['request']->getUri()->getPath());
+        $this->assertSame('/api/v1/features/api_calls', $this->history[0]['request']->getUri()->getPath());
         $this->assertInstanceOf(Feature::class, $result->data);
         $this->assertSame('api_calls', $result->data->code);
         $this->assertSame(FeatureType::Usage, $result->data->type);

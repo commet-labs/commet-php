@@ -89,8 +89,10 @@ class HttpClient
             $this->clientInfoHeader = null;
         }
 
+        // The trailing slash matters: Guzzle resolves relative endpoints against
+        // base_uri per RFC 3986, and a base path without "/" would be dropped.
         $clientConfig = [
-            'base_uri' => self::BASE_URL . '/api/v1',
+            'base_uri' => self::BASE_URL . '/api/v1/',
             'timeout' => $timeout,
             'headers' => $headers,
         ];
@@ -257,7 +259,10 @@ class HttpClient
         }
 
         try {
-            $response = $this->client->request($method, $endpoint, $options);
+            // A leading slash would make Guzzle replace the whole base_uri path
+            // (RFC 3986 absolute-path resolution), sending requests to the site
+            // root instead of /api/v1 — strip it so endpoints resolve relative.
+            $response = $this->client->request($method, ltrim($endpoint, '/'), $options);
         } catch (ConnectException $exception) {
             if ($attempt <= $this->maxRetries) {
                 $delay = $this->retryDelay($attempt);
