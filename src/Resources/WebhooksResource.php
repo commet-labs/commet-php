@@ -7,6 +7,7 @@ namespace Commet\Resources;
 use Commet\ApiResponse;
 use Commet\HttpClient;
 use Commet\Models\WebhookEndpoint;
+use Commet\Webhooks\WebhookEvent;
 
 class WebhooksResource
 {
@@ -38,10 +39,7 @@ class WebhooksResource
         return hash_equals($expected, $signature);
     }
 
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function verifyAndParse(string $rawBody, ?string $signature, string $secret): ?array
+    public function verifyAndParse(string $rawBody, ?string $signature, string $secret): ?WebhookEvent
     {
         if (!$this->verify($rawBody, $signature, $secret)) {
             return null;
@@ -49,7 +47,7 @@ class WebhooksResource
 
         try {
             $parsed = json_decode($rawBody, true, 512, JSON_THROW_ON_ERROR);
-            return is_array($parsed) ? $parsed : null;
+            return is_array($parsed) ? WebhookEvent::fromArray($parsed) : null;
         } catch (\JsonException) {
             return null;
         }
