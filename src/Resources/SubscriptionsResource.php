@@ -14,8 +14,11 @@ use Commet\Models\BalanceTopup;
 use Commet\Models\CanceledSubscription;
 use Commet\Models\CreditGrant;
 use Commet\Models\DeletedSubscriptionAddon;
+use Commet\Models\PaymentMethodUpdateCheckout;
 use Commet\Models\PlanChange;
 use Commet\Models\PreviewChange;
+use Commet\Models\ReactivatedSubscription;
+use Commet\Models\RecoveryLink;
 use Commet\Models\Subscription;
 use Commet\Models\SubscriptionAddon;
 use Commet\Models\UncanceledSubscription;
@@ -206,6 +209,85 @@ class SubscriptionsResource
             return new ApiResponse(
                 success: true,
                 data: UncanceledSubscription::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * Retries the outstanding renewal charge for a past_due subscription. On a successful charge the subscription recovers to active and a payment.recovered webhook is delivered; a declined charge returns an error and the subscription stays past_due.
+     * @return ApiResponse<ReactivatedSubscription>
+     */
+    public function reactivate(
+        string $id,
+        ?string $idempotencyKey = null,
+    ): ApiResponse {
+        $response = $this->http->post(
+            "/subscriptions/{$id}/reactivate",
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: ReactivatedSubscription::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * Generates a hosted, signed recovery link that lets the customer pay the outstanding renewal charge for a past_due subscription. Unlike reactivate, which charges server-to-server, this returns a link the merchant can deliver through their own email, SMS, or dashboard. The link carries a self-contained signed token and stays valid until the charge is paid or the subscription is no longer past due.
+     * @return ApiResponse<RecoveryLink>
+     */
+    public function createRecoveryLink(
+        string $id,
+        ?string $idempotencyKey = null,
+    ): ApiResponse {
+        $response = $this->http->post(
+            "/subscriptions/{$id}/recovery-link",
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: RecoveryLink::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * Creates a hosted checkout session for the customer to update the subscription's default payment method.
+     * @return ApiResponse<PaymentMethodUpdateCheckout>
+     */
+    public function updatePaymentMethod(
+        string $id,
+        ?string $successUrl = null,
+        ?string $idempotencyKey = null,
+    ): ApiResponse {
+        $response = $this->http->post(
+            "/subscriptions/{$id}/payment-method/update",
+            HttpClient::buildBody([
+                "success_url" => $successUrl,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: PaymentMethodUpdateCheckout::fromArray($response->data),
                 code: $response->code,
                 message: $response->message,
             );

@@ -11,6 +11,7 @@ use Commet\Resources\CustomersResource;
 use Commet\Resources\FeatureAccessResource;
 use Commet\Resources\FeaturesResource;
 use Commet\Resources\InvoicesResource;
+use Commet\Resources\PaymentsResource;
 use Commet\Resources\PayoutsResource;
 use Commet\Resources\PlanGroupsResource;
 use Commet\Resources\PlansResource;
@@ -31,6 +32,7 @@ trait GeneratedResources
     public FeatureAccessResource $featureAccess;
     public FeaturesResource $features;
     public InvoicesResource $invoices;
+    public PaymentsResource $payments;
     public PayoutsResource $payouts;
     public PlanGroupsResource $planGroups;
     public PlansResource $plans;
@@ -51,6 +53,7 @@ trait GeneratedResources
         $this->featureAccess = new FeatureAccessResource($http);
         $this->features = new FeaturesResource($http);
         $this->invoices = new InvoicesResource($http);
+        $this->payments = new PaymentsResource($http);
         $this->payouts = new PayoutsResource($http);
         $this->planGroups = new PlanGroupsResource($http);
         $this->plans = new PlansResource($http);

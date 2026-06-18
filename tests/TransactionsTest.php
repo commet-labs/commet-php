@@ -112,13 +112,12 @@ class TransactionsTest extends TestCase
         $this->assertSame('succeeded', $result->data->status);
     }
 
-    public function testRetryHydratesRetryInvoiceNumber(): void
+    public function testRetryParsesProcessingStatus(): void
     {
         $transactions = $this->transactionsWithResponses([
             $this->response([
                 'id' => 'txn_2',
-                'status' => 'pending',
-                'retry_invoice_number' => 'INV-RETRY-9',
+                'status' => 'processing',
                 'object' => 'transaction_retry',
                 'livemode' => false,
             ]),
@@ -127,6 +126,6 @@ class TransactionsTest extends TestCase
         $result = $transactions->retry('txn_1');
 
         $this->assertInstanceOf(TransactionRetry::class, $result->data);
-        $this->assertSame('INV-RETRY-9', $result->data->retryInvoiceNumber);
+        $this->assertSame('processing', $result->data->status);
     }
 }

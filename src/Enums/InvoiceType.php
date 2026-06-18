@@ -13,4 +13,5 @@ enum InvoiceType: string
     case CreditPurchase = "credit_purchase";
     case BalanceTopup = "balance_topup";
     case AddonActivation = "addon_activation";
+    case OneTimePayment = "one_time_payment";
 }

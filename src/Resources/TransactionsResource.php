@@ -105,7 +105,7 @@ class TransactionsResource
     }
 
     /**
-     * Retry a failed payment transaction. Creates a new invoice and initiates a new payment attempt.
+     * Retry a failed subscription renewal. Re-charges the outstanding renewal invoice through the recovery engine.
      * @return ApiResponse<TransactionRetry>
      */
     public function retry(

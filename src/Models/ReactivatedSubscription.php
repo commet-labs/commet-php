@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class TransactionRetry
+class ReactivatedSubscription
 {
     public function __construct(
         public readonly string $id,
-        public readonly string $status,
+        public readonly bool $retryInitiated,
         public readonly string $object,
         public readonly bool $livemode,
     ) {}
@@ -20,7 +20,7 @@ class TransactionRetry
     {
         return new self(
             id: $data["id"],
-            status: $data["status"],
+            retryInitiated: $data["retry_initiated"],
             object: $data["object"],
             livemode: $data["livemode"],
         );

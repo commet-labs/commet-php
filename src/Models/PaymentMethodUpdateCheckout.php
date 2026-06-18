@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class TransactionRetry
+class PaymentMethodUpdateCheckout
 {
     public function __construct(
-        public readonly string $id,
-        public readonly string $status,
+        public readonly string $checkoutUrl,
         public readonly string $object,
         public readonly bool $livemode,
     ) {}
@@ -19,8 +18,7 @@ class TransactionRetry
     public static function fromArray(array $data): self
     {
         return new self(
-            id: $data["id"],
-            status: $data["status"],
+            checkoutUrl: $data["checkout_url"],
             object: $data["object"],
             livemode: $data["livemode"],
         );

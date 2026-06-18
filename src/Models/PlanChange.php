@@ -27,6 +27,8 @@ class PlanChange
         /** @var array<string, mixed>|null */
         public readonly ?array $billing = null,
         public readonly ?string $invoiceId = null,
+        /** @var array<string, mixed>|null */
+        public readonly ?array $seatLimitWarning = null,
     ) {}
 
     /**
@@ -52,6 +54,7 @@ class PlanChange
             billingInterval: $data["billing_interval"] ?? null,
             billing: $data["billing"] ?? null,
             invoiceId: $data["invoice_id"] ?? null,
+            seatLimitWarning: $data["seat_limit_warning"] ?? null,
         );
     }
 }
