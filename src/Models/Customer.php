@@ -15,6 +15,8 @@ class Customer
         public readonly bool $livemode,
         public readonly ?string $externalId = null,
         public readonly ?string $fullName = null,
+        public readonly ?string $taxDocument = null,
+        public readonly ?string $documentType = null,
         public readonly ?string $timezone = null,
         /** @var array<string, mixed>|null */
         public readonly ?array $metadata = null,
@@ -34,6 +36,8 @@ class Customer
             livemode: $data["livemode"],
             externalId: $data["external_id"] ?? null,
             fullName: $data["full_name"] ?? null,
+            taxDocument: $data["tax_document"] ?? null,
+            documentType: $data["document_type"] ?? null,
             timezone: $data["timezone"] ?? null,
             metadata: $data["metadata"] ?? null,
         );

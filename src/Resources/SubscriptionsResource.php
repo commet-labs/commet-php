@@ -218,7 +218,7 @@ class SubscriptionsResource
     }
 
     /**
-     * Retries the outstanding renewal charge for a past_due subscription. On a successful charge the subscription recovers to active and a payment.recovered webhook is delivered; a declined charge returns an error and the subscription stays past_due.
+     * Reactivates a subscription. A past_due subscription retries its outstanding renewal charge (recovering to active on success). A canceled subscription generates a fresh invoice, charges the saved card, and resets the billing period. On a successful charge the subscription becomes active; a declined charge returns an error with a recoveryUrl in the error details that can be sent to the customer to update their card.
      * @return ApiResponse<ReactivatedSubscription>
      */
     public function reactivate(
