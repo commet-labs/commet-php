@@ -22,12 +22,14 @@ class PortalResource
         ?string $email = null,
         ?string $customerId = null,
         ?string $idempotencyKey = null,
+        ?string $returnUrl = null,
     ): ApiResponse {
         $response = $this->http->post(
             "/portal/request-access",
             HttpClient::buildBody([
                 "email" => $email,
                 "customer_id" => $customerId,
+                "return_url" => $returnUrl,
             ]),
             idempotencyKey: $idempotencyKey,
         );
