@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Commet\Webhooks;
 
+use Commet\Enums\PaymentProvider;
+
 /** Fired when a canceled subscription is reactivated and its reactivation charge succeeds. The subscription returns to active with a fresh invoice and a billing period anchored to the reactivation date. Distinct from subscription.activated (first activation) and payment.recovered (past_due recovery, which keeps the original anchor). */
 final class SubscriptionReactivatedData
 {
@@ -18,6 +20,7 @@ final class SubscriptionReactivatedData
         public readonly string $invoiceNumber,
         public readonly float $invoiceTotal,
         public readonly string $invoiceCurrency,
+        public readonly PaymentProvider $provider,
     ) {}
 
     /**
@@ -36,6 +39,7 @@ final class SubscriptionReactivatedData
             invoiceNumber: $data["invoiceNumber"],
             invoiceTotal: $data["invoiceTotal"],
             invoiceCurrency: $data["invoiceCurrency"],
+            provider: PaymentProvider::fromArray($data["provider"]),
         );
     }
 }
