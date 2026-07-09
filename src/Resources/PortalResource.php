@@ -21,6 +21,7 @@ class PortalResource
     public function getUrl(
         ?string $email = null,
         ?string $customerId = null,
+        ?string $returnUrl = null,
         ?string $idempotencyKey = null,
     ): ApiResponse {
         $response = $this->http->post(
@@ -28,6 +29,7 @@ class PortalResource
             HttpClient::buildBody([
                 "email" => $email,
                 "customer_id" => $customerId,
+                "return_url" => $returnUrl,
             ]),
             idempotencyKey: $idempotencyKey,
         );

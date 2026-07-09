@@ -71,6 +71,7 @@ class TransactionsTest extends TestCase
                 'tax_amount' => 1000,
                 'currency' => 'USD',
                 'status' => 'pending',
+                'provider' => 'stripe',
                 'created_at' => '2026-06-08T00:00:00Z',
                 'updated_at' => '2026-06-08T00:00:00Z',
                 'object' => 'transaction',

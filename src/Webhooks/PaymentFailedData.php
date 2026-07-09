@@ -14,6 +14,7 @@ final class PaymentFailedData
         public readonly ?string $subscriptionId,
         public readonly string $failureCode,
         public readonly string $failureMessage,
+        public readonly ?string $recoveryUrl,
     ) {}
 
     /**
@@ -28,6 +29,7 @@ final class PaymentFailedData
             subscriptionId: $data["subscriptionId"] ?? null,
             failureCode: $data["failureCode"],
             failureMessage: $data["failureMessage"],
+            recoveryUrl: $data["recoveryUrl"] ?? null,
         );
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Webhooks;
 
-/** Fired when the first charge succeeds and status becomes active (or trialing if a trial is configured). This is where you grant access. */
+/** Fired once, when the subscription's first charge succeeds and it becomes active — this is where you grant access. Never re-fired on renewals; use payment.received for per-charge notifications. */
 final class SubscriptionActivatedData
 {
     public function __construct(

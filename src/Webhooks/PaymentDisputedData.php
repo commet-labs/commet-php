@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Commet\Webhooks;
 
+use Commet\Enums\PaymentProvider;
+
 /** Fired when a cardholder opens a dispute (chargeback) against a payment. The disputed amount is frozen from your payout balance while the dispute is open; Commet, as the Merchant of Record, handles the resolution process. payment.dispute_resolved fires with the outcome. */
 final class PaymentDisputedData
 {
     public function __construct(
         public readonly string $paymentTransactionId,
+        public readonly PaymentProvider $provider,
         public readonly ?string $paymentLinkId,
         public readonly ?string $invoiceId,
         public readonly ?string $invoiceNumber,
@@ -26,6 +29,7 @@ final class PaymentDisputedData
     {
         return new self(
             paymentTransactionId: $data["paymentTransactionId"],
+            provider: PaymentProvider::fromArray($data["provider"]),
             paymentLinkId: $data["paymentLinkId"] ?? null,
             invoiceId: $data["invoiceId"] ?? null,
             invoiceNumber: $data["invoiceNumber"] ?? null,

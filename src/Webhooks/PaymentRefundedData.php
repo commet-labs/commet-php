@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Commet\Webhooks;
 
+use Commet\Enums\PaymentProvider;
+
 /** Fired when a payment is refunded, fully or partially. A full refund of a subscription invoice also cancels the subscription immediately (subscription.canceled fires with reason refund); partial refunds leave the subscription untouched. */
 final class PaymentRefundedData
 {
     public function __construct(
         public readonly string $paymentTransactionId,
+        public readonly PaymentProvider $provider,
         public readonly ?string $paymentLinkId,
         public readonly ?string $invoiceId,
         public readonly ?string $invoiceNumber,
@@ -25,6 +28,7 @@ final class PaymentRefundedData
     {
         return new self(
             paymentTransactionId: $data["paymentTransactionId"],
+            provider: PaymentProvider::fromArray($data["provider"]),
             paymentLinkId: $data["paymentLinkId"] ?? null,
             invoiceId: $data["invoiceId"] ?? null,
             invoiceNumber: $data["invoiceNumber"] ?? null,

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Commet\Webhooks;
 
-/** Fired when a recurring payment is successfully processed. This event is for recurring charges only — the first checkout payment triggers subscription.activated instead. */
+use Commet\Enums\PaymentProvider;
+
+/** Fired every time a payment settles successfully — the first payment and every renewal alike. subscription.activated fires alongside it only on the first one. */
 final class PaymentReceivedData
 {
     public function __construct(
@@ -14,6 +16,7 @@ final class PaymentReceivedData
         public readonly string $customerId,
         public readonly ?string $subscriptionId,
         public readonly ?string $paymentTransactionId,
+        public readonly ?PaymentProvider $provider,
         public readonly ?float $grossAmount,
         public readonly ?string $currency,
         public readonly ?float $orgNetAmount,
@@ -33,6 +36,7 @@ final class PaymentReceivedData
             customerId: $data["customerId"],
             subscriptionId: $data["subscriptionId"] ?? null,
             paymentTransactionId: $data["paymentTransactionId"] ?? null,
+            provider: isset($data["provider"]) ? PaymentProvider::fromArray($data["provider"]) : null,
             grossAmount: $data["grossAmount"] ?? null,
             currency: $data["currency"] ?? null,
             orgNetAmount: $data["orgNetAmount"] ?? null,

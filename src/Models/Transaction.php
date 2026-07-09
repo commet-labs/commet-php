@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
+use Commet\Enums\PaymentProvider;
 use Commet\Enums\TransactionStatus;
 
 class Transaction
@@ -13,6 +14,7 @@ class Transaction
         public readonly int $grossAmount,
         public readonly int $subtotal,
         public readonly string $currency,
+        public readonly PaymentProvider $provider,
         public readonly TransactionStatus $status,
         public readonly string $createdAt,
         public readonly string $updatedAt,
@@ -36,6 +38,7 @@ class Transaction
             grossAmount: $data["gross_amount"],
             subtotal: $data["subtotal"],
             currency: $data["currency"],
+            provider: PaymentProvider::from($data["provider"]),
             status: TransactionStatus::from($data["status"]),
             createdAt: $data["created_at"],
             updatedAt: $data["updated_at"],
