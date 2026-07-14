@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Webhooks;
 
-/** Fired when a recurring payment fails on a previously paid subscription and its status becomes past_due. Access is cut immediately for past_due subscriptions — use this to notify the customer and recover the payment. */
+/** Fired when a recurring payment fails on a previously paid subscription and its status becomes past_due. past_due is a grace window, not a cutoff: usage and seats keep working while new purchases are blocked, and dunning retries the charge — use this to notify the customer and recover the payment. */
 final class SubscriptionPastDueData
 {
     public function __construct(

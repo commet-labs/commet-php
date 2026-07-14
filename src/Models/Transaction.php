@@ -11,8 +11,6 @@ class Transaction
 {
     public function __construct(
         public readonly string $id,
-        public readonly int $grossAmount,
-        public readonly int $subtotal,
         public readonly string $currency,
         public readonly PaymentProvider $provider,
         public readonly TransactionStatus $status,
@@ -21,7 +19,10 @@ class Transaction
         public readonly string $object,
         public readonly bool $livemode,
         public readonly ?string $invoiceId = null,
+        public readonly ?int $grossAmount = null,
+        public readonly ?int $subtotal = null,
         public readonly ?int $taxAmount = null,
+        public readonly ?int $presentmentAmount = null,
         public readonly ?string $customerEmail = null,
         public readonly ?string $customerName = null,
         public readonly ?string $paidAt = null,
@@ -35,8 +36,6 @@ class Transaction
     {
         return new self(
             id: $data["id"],
-            grossAmount: $data["gross_amount"],
-            subtotal: $data["subtotal"],
             currency: $data["currency"],
             provider: PaymentProvider::from($data["provider"]),
             status: TransactionStatus::from($data["status"]),
@@ -45,7 +44,10 @@ class Transaction
             object: $data["object"],
             livemode: $data["livemode"],
             invoiceId: $data["invoice_id"] ?? null,
+            grossAmount: $data["gross_amount"] ?? null,
+            subtotal: $data["subtotal"] ?? null,
             taxAmount: $data["tax_amount"] ?? null,
+            presentmentAmount: $data["presentment_amount"] ?? null,
             customerEmail: $data["customer_email"] ?? null,
             customerName: $data["customer_name"] ?? null,
             paidAt: $data["paid_at"] ?? null,

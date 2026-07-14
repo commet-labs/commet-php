@@ -20,9 +20,9 @@ class HttpClient
 
     private const RETRY_AFTER_CAP_MS = 30000;
 
-    public const API_VERSION = '2026-06-23';
+    public const API_VERSION = '2026-07-11';
 
-    private const VERSION = '7.6.0';
+    private const VERSION = '7.7.0';
 
     private const BODY_METHODS = ['POST', 'PUT', 'PATCH'];
 
