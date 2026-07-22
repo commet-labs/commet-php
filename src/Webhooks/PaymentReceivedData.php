@@ -36,7 +36,7 @@ final class PaymentReceivedData
             customerId: $data["customerId"],
             subscriptionId: $data["subscriptionId"] ?? null,
             paymentTransactionId: $data["paymentTransactionId"] ?? null,
-            provider: isset($data["provider"]) ? PaymentProvider::fromArray($data["provider"]) : null,
+            provider: isset($data["provider"]) ? PaymentProvider::from($data["provider"]) : null,
             grossAmount: $data["grossAmount"] ?? null,
             currency: $data["currency"] ?? null,
             orgNetAmount: $data["orgNetAmount"] ?? null,

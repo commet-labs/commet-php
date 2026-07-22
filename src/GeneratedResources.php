@@ -17,6 +17,7 @@ use Commet\Resources\PlanGroupsResource;
 use Commet\Resources\PlansResource;
 use Commet\Resources\PortalResource;
 use Commet\Resources\PromoCodesResource;
+use Commet\Resources\ProvisioningResource;
 use Commet\Resources\QuotaResource;
 use Commet\Resources\SeatsResource;
 use Commet\Resources\SubscriptionsResource;
@@ -38,6 +39,7 @@ trait GeneratedResources
     public PlansResource $plans;
     public PortalResource $portal;
     public PromoCodesResource $promoCodes;
+    public ProvisioningResource $provisioning;
     public QuotaResource $quota;
     public SeatsResource $seats;
     public SubscriptionsResource $subscriptions;
@@ -59,6 +61,7 @@ trait GeneratedResources
         $this->plans = new PlansResource($http);
         $this->portal = new PortalResource($http);
         $this->promoCodes = new PromoCodesResource($http);
+        $this->provisioning = new ProvisioningResource($http);
         $this->quota = new QuotaResource($http);
         $this->seats = new SeatsResource($http);
         $this->subscriptions = new SubscriptionsResource($http);

@@ -39,7 +39,7 @@ final class SubscriptionActivatedData
             invoiceNumber: $data["invoiceNumber"],
             invoiceTotal: $data["invoiceTotal"],
             invoiceCurrency: $data["invoiceCurrency"],
-            provider: isset($data["provider"]) ? PaymentProvider::fromArray($data["provider"]) : null,
+            provider: isset($data["provider"]) ? PaymentProvider::from($data["provider"]) : null,
         );
     }
 }

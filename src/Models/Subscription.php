@@ -8,6 +8,7 @@ use Commet\Enums\BillingInterval;
 use Commet\Enums\ConsumptionModel;
 use Commet\Enums\DiscountType;
 use Commet\Enums\FeatureType;
+use Commet\Enums\PaymentProvider;
 use Commet\Enums\SubscriptionStatus;
 
 class Subscription
@@ -47,6 +48,7 @@ class Subscription
         public readonly ?int $billingDayOfMonth = null,
         public readonly ?string $nextBillingDate = null,
         public readonly ?string $checkoutUrl = null,
+        public readonly ?PaymentProvider $checkoutProvider = null,
     ) {}
 
     /**
@@ -81,6 +83,7 @@ class Subscription
             billingDayOfMonth: $data["billing_day_of_month"] ?? null,
             nextBillingDate: $data["next_billing_date"] ?? null,
             checkoutUrl: $data["checkout_url"] ?? null,
+            checkoutProvider: isset($data["checkout_provider"]) ? PaymentProvider::from($data["checkout_provider"]) : null,
         );
     }
 }

@@ -6,6 +6,7 @@ namespace Commet\Resources;
 
 use Commet\ApiResponse;
 use Commet\HttpClient;
+use Commet\Models\UsageAdjustment;
 use Commet\Models\UsageCheckResult;
 use Commet\Models\UsageEvent;
 
@@ -129,6 +130,42 @@ class UsageResource
             return new ApiResponse(
                 success: true,
                 data: UsageCheckResult::fromArray($response->data),
+                code: $response->code,
+                message: $response->message,
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * Set a metered feature's usage to an exact value for the current period.
+     *
+     * @return ApiResponse<UsageAdjustment>
+     */
+    public function set(
+        string $customerId,
+        string $feature,
+        int $value,
+        ?string $reason = null,
+        ?string $idempotencyKey = null,
+    ): ApiResponse {
+        $response = $this->http->put(
+            '/usage',
+            HttpClient::buildBody([
+                'customer_id' => $customerId,
+                'feature' => $feature,
+                'value' => $value,
+                'idempotency_key' => $idempotencyKey,
+                'reason' => $reason,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if ($response->success && is_array($response->data)) {
+            return new ApiResponse(
+                success: true,
+                data: UsageAdjustment::fromArray($response->data),
                 code: $response->code,
                 message: $response->message,
             );

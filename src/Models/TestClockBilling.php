@@ -10,6 +10,8 @@ class TestClockBilling
         public readonly int $customersFound,
         public readonly int $enqueued,
         public readonly int $failed,
+        public readonly int $dunningRetried,
+        public readonly int $dunningFailed,
         public readonly string $object,
         public readonly bool $livemode,
     ) {}
@@ -23,6 +25,8 @@ class TestClockBilling
             customersFound: $data["customers_found"],
             enqueued: $data["enqueued"],
             failed: $data["failed"],
+            dunningRetried: $data["dunning_retried"],
+            dunningFailed: $data["dunning_failed"],
             object: $data["object"],
             livemode: $data["livemode"],
         );

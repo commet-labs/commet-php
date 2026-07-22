@@ -39,7 +39,7 @@ final class SubscriptionReactivatedData
             invoiceNumber: $data["invoiceNumber"],
             invoiceTotal: $data["invoiceTotal"],
             invoiceCurrency: $data["invoiceCurrency"],
-            provider: PaymentProvider::fromArray($data["provider"]),
+            provider: PaymentProvider::from($data["provider"]),
         );
     }
 }

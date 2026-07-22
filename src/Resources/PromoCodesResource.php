@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Commet\Resources;
 
 use Commet\ApiResponse;
+use Commet\Enums\BillingInterval;
 use Commet\Enums\DiscountType;
 use Commet\HttpClient;
 use Commet\Models\PromoCode;
@@ -74,7 +75,7 @@ class PromoCodesResource
     }
 
     /**
-     * Create a new promo code. Optionally restrict to specific plans.
+     * Create a new promo code. Optionally restrict it to specific plans and a billing interval.
 
 **100% discounts are not supported.** Percentage codes must be strictly less than 100% (`discountValue` < 10000 basis points). For full waivers, use an introductory offer on the plan instead. At checkout, any code — percentage or fixed amount — that would reduce the total below the currency's minimum charge ($0.50 USD equivalent) is silently dropped.
      * @param string[]|null $planIds
@@ -85,6 +86,7 @@ class PromoCodesResource
         DiscountType $discountType,
         int $discountValue,
         ?int $durationCycles = null,
+        ?BillingInterval $billingInterval = null,
         ?int $maxRedemptions = null,
         ?string $expiresAt = null,
         ?array $planIds = null,
@@ -97,6 +99,7 @@ class PromoCodesResource
                 "discount_type" => $discountType->value,
                 "discount_value" => $discountValue,
                 "duration_cycles" => $durationCycles,
+                "billing_interval" => $billingInterval?->value,
                 "max_redemptions" => $maxRedemptions,
                 "expires_at" => $expiresAt,
                 "plan_ids" => $planIds,
@@ -117,12 +120,13 @@ class PromoCodesResource
     }
 
     /**
-     * Update a promo code's redemption limits, expiration, active status, or plan restrictions.
+     * Update a promo code's billing interval, redemption limits, expiration, active status, or plan restrictions.
      * @param string[]|null $planIds
      * @return ApiResponse<PromoCode>
      */
     public function update(
         string $id,
+        ?BillingInterval $billingInterval = null,
         ?int $maxRedemptions = null,
         ?string $expiresAt = null,
         ?bool $active = null,
@@ -132,6 +136,7 @@ class PromoCodesResource
         $response = $this->http->put(
             "/promo-codes/{$id}",
             HttpClient::buildBody([
+                "billing_interval" => $billingInterval?->value,
                 "max_redemptions" => $maxRedemptions,
                 "expires_at" => $expiresAt,
                 "active" => $active,

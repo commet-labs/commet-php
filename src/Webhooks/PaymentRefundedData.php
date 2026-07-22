@@ -28,7 +28,7 @@ final class PaymentRefundedData
     {
         return new self(
             paymentTransactionId: $data["paymentTransactionId"],
-            provider: PaymentProvider::fromArray($data["provider"]),
+            provider: PaymentProvider::from($data["provider"]),
             paymentLinkId: $data["paymentLinkId"] ?? null,
             invoiceId: $data["invoiceId"] ?? null,
             invoiceNumber: $data["invoiceNumber"] ?? null,

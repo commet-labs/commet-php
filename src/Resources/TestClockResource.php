@@ -69,7 +69,7 @@ class TestClockResource
     }
 
     /**
-     * Discovers customers due for billing at the org's current (simulated) time and enqueues a billing cycle for each — renewals, expired trials, pending cancellations. Enqueueing is asynchronous. Sandbox only.
+     * Discovers customers due for billing at the org's current (simulated) time and enqueues a billing cycle for each — renewals, expired trials, pending cancellations. Also fires any dunning retry whose scheduled time has passed. Enqueueing is asynchronous. Sandbox only.
      * @return ApiResponse<TestClockBilling>
      */
     public function processBilling(

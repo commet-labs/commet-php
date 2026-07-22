@@ -129,6 +129,8 @@ class TestClockTest extends TestCase
                 'customers_found' => 12,
                 'enqueued' => 11,
                 'failed' => 1,
+                'dunning_retried' => 2,
+                'dunning_failed' => 3,
                 'object' => 'test_clock_billing',
                 'livemode' => false,
             ]),
@@ -145,5 +147,7 @@ class TestClockTest extends TestCase
         $this->assertSame(12, $result->data->customersFound);
         $this->assertSame(11, $result->data->enqueued);
         $this->assertSame(1, $result->data->failed);
+        $this->assertSame(2, $result->data->dunningRetried);
+        $this->assertSame(3, $result->data->dunningFailed);
     }
 }

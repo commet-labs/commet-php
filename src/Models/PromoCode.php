@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
+use Commet\Enums\BillingInterval;
 use Commet\Enums\DiscountType;
 
 class PromoCode
@@ -20,6 +21,7 @@ class PromoCode
         public readonly string $object,
         public readonly bool $livemode,
         public readonly ?int $durationCycles = null,
+        public readonly ?BillingInterval $billingInterval = null,
         public readonly ?int $maxRedemptions = null,
         public readonly ?string $expiresAt = null,
     ) {}
@@ -41,6 +43,7 @@ class PromoCode
             object: $data["object"],
             livemode: $data["livemode"],
             durationCycles: $data["duration_cycles"] ?? null,
+            billingInterval: isset($data["billing_interval"]) ? BillingInterval::from($data["billing_interval"]) : null,
             maxRedemptions: $data["max_redemptions"] ?? null,
             expiresAt: $data["expires_at"] ?? null,
         );
