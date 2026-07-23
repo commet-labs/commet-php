@@ -7,6 +7,7 @@ namespace Commet\Resources;
 use Commet\ApiResponse;
 use Commet\Enums\BillingInterval;
 use Commet\Enums\DiscountType;
+use Commet\Enums\PaymentProvider;
 use Commet\Enums\SubscriptionStatus;
 use Commet\HttpClient;
 use Commet\Models\BalanceAdjustment;
@@ -80,6 +81,7 @@ class SubscriptionsResource
         ?int $customTrialDays = null,
         ?array $introOffer = null,
         ?string $promoCode = null,
+        ?PaymentProvider $provider = null,
         ?string $name = null,
         ?string $startDate = null,
         ?string $successUrl = null,
@@ -97,6 +99,7 @@ class SubscriptionsResource
                 "custom_trial_days" => $customTrialDays,
                 "intro_offer" => $introOffer,
                 "promo_code" => $promoCode,
+                "provider" => $provider?->value,
                 "name" => $name,
                 "start_date" => $startDate,
                 "success_url" => $successUrl,
