@@ -6,20 +6,19 @@ namespace Commet\Models;
 
 class UsageEvent
 {
-    /**
-     * @param UsageEventProperty[] $properties
-     */
     public function __construct(
         public readonly string $id,
-        public readonly string $object,
-        public readonly bool $livemode,
-        public readonly string $organizationId,
+        public readonly string $featureCode,
+        public readonly float $value,
         public readonly string $customerId,
-        public readonly string $feature,
         public readonly string $ts,
         public readonly string $createdAt,
-        public readonly ?string $idempotencyKey = null,
-        public readonly array $properties = [],
+        /** @var UsageEventPropertiesItem[] */
+        public readonly array $properties,
+        public readonly string $object,
+        public readonly bool $livemode,
+        public readonly ?string $eventId = null,
+        public readonly ?UsageEventConsumption $consumption = null,
     ) {}
 
     /**
@@ -27,22 +26,18 @@ class UsageEvent
      */
     public static function fromArray(array $data): self
     {
-        $properties = array_map(
-            fn(array $prop) => UsageEventProperty::fromArray($prop),
-            $data['properties'] ?? [],
-        );
-
         return new self(
-            id: $data['id'],
-            object: $data['object'] ?? 'usage_event',
-            livemode: $data['livemode'] ?? false,
-            organizationId: $data['organization_id'],
-            customerId: $data['customer_id'],
-            feature: $data['feature'],
-            ts: $data['ts'],
-            createdAt: $data['created_at'],
-            idempotencyKey: $data['idempotency_key'] ?? null,
-            properties: $properties,
+            id: $data["id"],
+            featureCode: $data["feature_code"],
+            value: $data["value"],
+            customerId: $data["customer_id"],
+            ts: $data["ts"],
+            createdAt: $data["created_at"],
+            properties: array_map(fn(array $item) => UsageEventPropertiesItem::fromArray($item), $data["properties"]),
+            object: $data["object"],
+            livemode: $data["livemode"],
+            eventId: $data["event_id"] ?? null,
+            consumption: isset($data["consumption"]) ? UsageEventConsumption::fromArray($data["consumption"]) : null,
         );
     }
 }

@@ -17,6 +17,7 @@ class PreviewChange
         public readonly bool $isUpgrade,
         public readonly string $object,
         public readonly bool $livemode,
+        public readonly ?PreviewChangeOfferApplication $offerApplication = null,
     ) {}
 
     /**
@@ -35,6 +36,7 @@ class PreviewChange
             isUpgrade: $data["is_upgrade"],
             object: $data["object"],
             livemode: $data["livemode"],
+            offerApplication: isset($data["offer_application"]) ? PreviewChangeOfferApplication::fromArray($data["offer_application"]) : null,
         );
     }
 }

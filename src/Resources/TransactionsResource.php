@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Commet\Resources;
 
-use Commet\ApiResponse;
 use Commet\Enums\TransactionStatus;
 use Commet\HttpClient;
+use Commet\Models\Refund;
 use Commet\Models\Transaction;
-use Commet\Models\TransactionRefund;
 use Commet\Models\TransactionRetry;
+use Commet\Models\TransactionsListResult;
 
 class TransactionsResource
 {
@@ -18,114 +18,87 @@ class TransactionsResource
     ) {}
 
     /**
-     * List payment transactions with cursor-based pagination. Filter by status or customer email.
-     * @return ApiResponse<Transaction[]>
-     */
-    public function list(
-        ?TransactionStatus $status = null,
-        ?string $customerEmail = null,
-        ?int $limit = null,
-        ?string $cursor = null,
-    ): ApiResponse {
-        $response = $this->http->get(
-            "/transactions",
-            HttpClient::buildBody([
-                "status" => $status?->value,
-                "customer_email" => $customerEmail,
-                "limit" => $limit,
-                "cursor" => $cursor,
-            ]),
-        );
-
-        if ($response->success && is_array($response->data)) {
-            $items = array_map(
-                fn(array $item) => Transaction::fromArray($item),
-                $response->data,
-            );
-
-            return new ApiResponse(
-                success: true,
-                data: $items,
-                code: $response->code,
-                message: $response->message,
-                hasMore: $response->hasMore,
-                nextCursor: $response->nextCursor,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Retrieve a single payment transaction by its public ID, including provider details.
-     * @return ApiResponse<Transaction>
-     */
-    public function get(
-        string $id,
-    ): ApiResponse {
-        $response = $this->http->get(
-            "/transactions/{$id}",
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: Transaction::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Issue a full refund for a payment transaction.
-     * @return ApiResponse<TransactionRefund>
+     * Issue a full refund and return the provider-neutral refund resource with its actual status.
+     * @return Refund
      */
     public function refund(
         string $id,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
+    ): Refund {
         $response = $this->http->post(
             "/transactions/{$id}/refund",
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: TransactionRefund::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Refund response payload");
         }
 
-        return $response;
+        return Refund::fromArray($response->data);
     }
 
     /**
-     * Retry a failed subscription renewal. Re-charges the outstanding renewal invoice through the recovery engine.
-     * @return ApiResponse<TransactionRetry>
+     * Retry a failed subscription renewal and return an honest retry result. The original failed transaction remains immutable.
+     * @return TransactionRetry
      */
     public function retry(
         string $id,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
+    ): TransactionRetry {
         $response = $this->http->post(
             "/transactions/{$id}/retry",
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: TransactionRetry::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid TransactionRetry response payload");
         }
 
-        return $response;
+        return TransactionRetry::fromArray($response->data);
+    }
+
+    /**
+     * Retrieve a single payment transaction by its public ID, including provider details.
+     * @return Transaction
+     */
+    public function get(
+        string $id,
+    ): Transaction {
+        $response = $this->http->get(
+            "/transactions/{$id}",
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Transaction response payload");
+        }
+
+        return Transaction::fromArray($response->data);
+    }
+
+    /**
+     * List payment transactions with cursor-based pagination. Filter by status or customer email.
+     * @return TransactionsListResult
+     */
+    public function list(
+        ?string $cursor = null,
+        ?int $limit = null,
+        ?TransactionStatus $status = null,
+        ?string $customerEmail = null,
+    ): TransactionsListResult {
+        $response = $this->http->get(
+            "/transactions",
+            HttpClient::buildBody([
+                "cursor" => $cursor,
+                "limit" => $limit,
+                "status" => $status?->value,
+                "customer_email" => $customerEmail,
+            ]),
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid TransactionsListResult response payload");
+        }
+
+        return TransactionsListResult::fromArray($response->data);
     }
 }

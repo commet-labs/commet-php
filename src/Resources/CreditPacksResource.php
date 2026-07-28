@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Commet\Resources;
 
-use Commet\ApiResponse;
 use Commet\HttpClient;
 use Commet\Models\CreditPack;
+use Commet\Models\CreditPacksListResult;
 use Commet\Models\DeletedObject;
 
 class CreditPacksResource
@@ -16,74 +16,8 @@ class CreditPacksResource
     ) {}
 
     /**
-     * List all active credit packs.
-     * @return ApiResponse<CreditPack[]>
-     */
-    public function list(
-
-    ): ApiResponse {
-        $response = $this->http->get(
-            "/credit-packs",
-        );
-
-        if ($response->success && is_array($response->data)) {
-            $items = array_map(
-                fn(array $item) => CreditPack::fromArray($item),
-                $response->data,
-            );
-
-            return new ApiResponse(
-                success: true,
-                data: $items,
-                code: $response->code,
-                message: $response->message,
-                hasMore: $response->hasMore,
-                nextCursor: $response->nextCursor,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Create a new credit pack.
-     * @return ApiResponse<CreditPack>
-     */
-    public function create(
-        string $name,
-        int $credits,
-        int $price,
-        ?string $description = null,
-        ?bool $isActive = null,
-        ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->post(
-            "/credit-packs/manage",
-            HttpClient::buildBody([
-                "name" => $name,
-                "description" => $description,
-                "credits" => $credits,
-                "price" => $price,
-                "is_active" => $isActive,
-            ]),
-            idempotencyKey: $idempotencyKey,
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: CreditPack::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
      * Update a credit pack's name, description, credits, price, or active status.
-     * @return ApiResponse<CreditPack>
+     * @return CreditPack
      */
     public function update(
         string $id,
@@ -93,8 +27,8 @@ class CreditPacksResource
         ?int $price = null,
         ?bool $isActive = null,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->put(
+    ): CreditPack {
+        $response = $this->http->patch(
             "/credit-packs/{$id}",
             HttpClient::buildBody([
                 "name" => $name,
@@ -106,38 +40,77 @@ class CreditPacksResource
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: CreditPack::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid CreditPack response payload");
         }
 
-        return $response;
+        return CreditPack::fromArray($response->data);
     }
 
     /**
      * Soft-delete a credit pack.
-     * @return ApiResponse<DeletedObject>
+     * @return DeletedObject
      */
     public function delete(
         string $id,
-    ): ApiResponse {
+    ): DeletedObject {
         $response = $this->http->delete(
             "/credit-packs/{$id}",
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: DeletedObject::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid DeletedObject response payload");
         }
 
-        return $response;
+        return DeletedObject::fromArray($response->data);
+    }
+
+    /**
+     * List all active credit packs.
+     * @return CreditPacksListResult
+     */
+    public function list(
+
+    ): CreditPacksListResult {
+        $response = $this->http->get(
+            "/credit-packs",
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid CreditPacksListResult response payload");
+        }
+
+        return CreditPacksListResult::fromArray($response->data);
+    }
+
+    /**
+     * Create a new credit pack.
+     * @return CreditPack
+     */
+    public function create(
+        string $name,
+        int $credits,
+        int $price,
+        ?string $description = null,
+        ?bool $isActive = null,
+        ?string $idempotencyKey = null,
+    ): CreditPack {
+        $response = $this->http->post(
+            "/credit-packs",
+            HttpClient::buildBody([
+                "name" => $name,
+                "description" => $description,
+                "credits" => $credits,
+                "price" => $price,
+                "is_active" => $isActive,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid CreditPack response payload");
+        }
+
+        return CreditPack::fromArray($response->data);
     }
 }

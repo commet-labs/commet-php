@@ -6,6 +6,7 @@ namespace Commet\Tests;
 
 use Commet\HttpClient;
 use Commet\Models\CreditPack;
+use Commet\Models\CreditPackListItem;
 use Commet\Resources\CreditPacksResource;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -38,10 +39,7 @@ class CreditPacksTest extends TestCase
 
     private function response(mixed $data): Response
     {
-        return new Response(200, ['Content-Type' => 'application/json'], json_encode([
-            'success' => true,
-            'data' => $data,
-        ], JSON_THROW_ON_ERROR));
+        return new Response(200, ['Content-Type' => 'application/json'], json_encode($data, JSON_THROW_ON_ERROR));
     }
 
     public function testCreateSendsIsActiveAsCamelCaseAndHydratesPack(): void
@@ -57,6 +55,7 @@ class CreditPacksTest extends TestCase
                 'currency' => 'USD',
                 'is_active' => true,
                 'created_at' => '2026-06-08T00:00:00Z',
+                'updated_at' => '2026-06-08T00:00:00Z',
             ]),
         ]);
 
@@ -75,34 +74,37 @@ class CreditPacksTest extends TestCase
         // description was null -> omitted.
         $this->assertArrayNotHasKey('description', $body);
 
-        $this->assertInstanceOf(CreditPack::class, $result->data);
-        $this->assertSame('cp_1', $result->data->id);
-        $this->assertTrue($result->data->isActive);
-        $this->assertSame('2026-06-08T00:00:00Z', $result->data->createdAt);
-        $this->assertNull($result->data->description);
+        $this->assertInstanceOf(CreditPack::class, $result);
+        $this->assertSame('cp_1', $result->id);
+        $this->assertTrue($result->isActive);
+        $this->assertSame('2026-06-08T00:00:00Z', $result->createdAt);
+        $this->assertNull($result->description);
     }
 
     public function testListHydratesPackCollection(): void
     {
         $creditPacks = $this->creditPacksWithResponses([
             $this->response([
-                [
+                'object' => 'list',
+                'data' => [[
                     'id' => 'cp_1',
                     'name' => 'Small',
                     'credits' => 100,
                     'price' => 999,
                     'object' => 'credit_pack',
                     'livemode' => false,
-                ],
-                [
+                    'currency' => 'USD',
+                ], [
                     'id' => 'cp_2',
                     'name' => 'Large',
                     'credits' => 1000,
                     'price' => 8999,
                     'object' => 'credit_pack',
                     'livemode' => false,
+                    'currency' => 'USD',
                     'description' => 'Bulk pack',
-                ],
+                ]],
+                'has_more' => false,
             ]),
         ]);
 
@@ -110,7 +112,7 @@ class CreditPacksTest extends TestCase
 
         $this->assertIsArray($result->data);
         $this->assertCount(2, $result->data);
-        $this->assertInstanceOf(CreditPack::class, $result->data[0]);
+        $this->assertInstanceOf(CreditPackListItem::class, $result->data[0]);
         $this->assertSame(100, $result->data[0]->credits);
         $this->assertNull($result->data[0]->description);
         $this->assertSame('Bulk pack', $result->data[1]->description);

@@ -39,10 +39,7 @@ class TestClockTest extends TestCase
 
     private function response(array $data): Response
     {
-        return new Response(200, ['Content-Type' => 'application/json'], json_encode([
-            'success' => true,
-            'data' => $data,
-        ], JSON_THROW_ON_ERROR));
+        return new Response(200, ['Content-Type' => 'application/json'], json_encode($data, JSON_THROW_ON_ERROR));
     }
 
     public function testGetHydratesClockStateFromSnakeCaseWire(): void
@@ -60,9 +57,9 @@ class TestClockTest extends TestCase
         $result = $clock->get();
 
         $this->assertSame('GET', $this->history[0]['request']->getMethod());
-        $this->assertInstanceOf(TestClock::class, $result->data);
-        $this->assertTrue($result->data->isActive);
-        $this->assertSame('2026-07-01T00:00:00Z', $result->data->simulatedTime);
+        $this->assertInstanceOf(TestClock::class, $result);
+        $this->assertTrue($result->isActive);
+        $this->assertSame('2026-07-01T00:00:00Z', $result->simulatedTime);
     }
 
     public function testGetNullSimulatedTimeWireMapsToNullProperty(): void
@@ -79,9 +76,9 @@ class TestClockTest extends TestCase
 
         $result = $clock->get();
 
-        $this->assertInstanceOf(TestClock::class, $result->data);
-        $this->assertFalse($result->data->isActive);
-        $this->assertNull($result->data->simulatedTime);
+        $this->assertInstanceOf(TestClock::class, $result);
+        $this->assertFalse($result->isActive);
+        $this->assertNull($result->simulatedTime);
     }
 
     public function testAdvanceSendsAdvanceDaysAsCamelCase(): void
@@ -143,11 +140,11 @@ class TestClockTest extends TestCase
         // No-param POST must not send a JSON body.
         $this->assertSame('', (string) $request->getBody());
 
-        $this->assertInstanceOf(TestClockBilling::class, $result->data);
-        $this->assertSame(12, $result->data->customersFound);
-        $this->assertSame(11, $result->data->enqueued);
-        $this->assertSame(1, $result->data->failed);
-        $this->assertSame(2, $result->data->dunningRetried);
-        $this->assertSame(3, $result->data->dunningFailed);
+        $this->assertInstanceOf(TestClockBilling::class, $result);
+        $this->assertSame(12, $result->customersFound);
+        $this->assertSame(11, $result->enqueued);
+        $this->assertSame(1, $result->failed);
+        $this->assertSame(2, $result->dunningRetried);
+        $this->assertSame(3, $result->dunningFailed);
     }
 }

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Commet\Resources;
 
-use Commet\ApiResponse;
 use Commet\HttpClient;
 use Commet\Models\Payment;
+use Commet\Models\PaymentsListResult;
 
 class PaymentsResource
 {
@@ -15,46 +15,104 @@ class PaymentsResource
     ) {}
 
     /**
+     * Cancel a pending payment link so it can no longer be paid. Only a link that has not been paid or started processing can be canceled; canceling an already canceled link is a no-op. Charges cannot be canceled.
+     * @return Payment
+     */
+    public function cancel(
+        string $id,
+        ?string $idempotencyKey = null,
+    ): Payment {
+        $response = $this->http->post(
+            "/payments/{$id}/cancel",
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Payment response payload");
+        }
+
+        return Payment::fromArray($response->data);
+    }
+
+    /**
+     * Retrieve a payment by its public ID.
+     * @return Payment
+     */
+    public function get(
+        string $id,
+    ): Payment {
+        $response = $this->http->get(
+            "/payments/{$id}",
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Payment response payload");
+        }
+
+        return Payment::fromArray($response->data);
+    }
+
+    /**
+     * Charge a customer's vaulted payment method off-session. Calculates tax, generates an invoice, and sends a receipt. Requires the customer to have a subscription in active, trialing, or past_due state.
+     * @param array<string, string>|null $metadata
+     * @return Payment
+     */
+    public function charge(
+        string $customerId,
+        int $amount,
+        string $currency,
+        string $description,
+        ?array $metadata = null,
+        ?string $idempotencyKey = null,
+    ): Payment {
+        $response = $this->http->post(
+            "/payments/charge",
+            HttpClient::buildBody([
+                "customer_id" => $customerId,
+                "amount" => $amount,
+                "currency" => $currency,
+                "description" => $description,
+                "metadata" => $metadata,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Payment response payload");
+        }
+
+        return Payment::fromArray($response->data);
+    }
+
+    /**
      * List payments with cursor-based pagination. Filter by customer.
-     * @return ApiResponse<Payment[]>
+     * @return PaymentsListResult
      */
     public function list(
-        ?string $customerId = null,
         ?string $cursor = null,
         ?int $limit = null,
-    ): ApiResponse {
+        ?string $customerId = null,
+    ): PaymentsListResult {
         $response = $this->http->get(
             "/payments",
             HttpClient::buildBody([
-                "customer_id" => $customerId,
                 "cursor" => $cursor,
                 "limit" => $limit,
+                "customer_id" => $customerId,
             ]),
         );
 
-        if ($response->success && is_array($response->data)) {
-            $items = array_map(
-                fn(array $item) => Payment::fromArray($item),
-                $response->data,
-            );
-
-            return new ApiResponse(
-                success: true,
-                data: $items,
-                code: $response->code,
-                message: $response->message,
-                hasMore: $response->hasMore,
-                nextCursor: $response->nextCursor,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid PaymentsListResult response payload");
         }
 
-        return $response;
+        return PaymentsListResult::fromArray($response->data);
     }
 
     /**
      * Create a hosted payment link. Returns a url the customer opens to pay with any card. Calculates tax, generates an invoice, and vaults the payment method on confirmation. No subscription or plan required.
      * @param array<string, string>|null $metadata
-     * @return ApiResponse<Payment>
+     * @return Payment
      */
     public function create(
         int $amount,
@@ -64,7 +122,7 @@ class PaymentsResource
         ?string $successUrl = null,
         ?array $metadata = null,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
+    ): Payment {
         $response = $this->http->post(
             "/payments",
             HttpClient::buildBody([
@@ -78,100 +136,10 @@ class PaymentsResource
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: Payment::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Payment response payload");
         }
 
-        return $response;
-    }
-
-    /**
-     * Charge a customer's vaulted payment method off-session. Calculates tax, generates an invoice, and sends a receipt. Requires the customer to have a subscription in active, trialing, or past_due state.
-     * @param array<string, string>|null $metadata
-     * @return ApiResponse<Payment>
-     */
-    public function charge(
-        string $customerId,
-        int $amount,
-        string $currency,
-        string $description,
-        ?array $metadata = null,
-        ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->post(
-            "/payments/charge",
-            HttpClient::buildBody([
-                "customer_id" => $customerId,
-                "amount" => $amount,
-                "currency" => $currency,
-                "description" => $description,
-                "metadata" => $metadata,
-            ]),
-            idempotencyKey: $idempotencyKey,
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: Payment::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Retrieve a payment by its public ID.
-     * @return ApiResponse<Payment>
-     */
-    public function get(
-        string $id,
-    ): ApiResponse {
-        $response = $this->http->get(
-            "/payments/{$id}",
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: Payment::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Cancel a pending payment link so it can no longer be paid. Only a link that has not been paid or started processing can be canceled; canceling an already canceled link is a no-op. Charges cannot be canceled.
-     * @return ApiResponse<Payment>
-     */
-    public function cancel(
-        string $id,
-        ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->post(
-            "/payments/{$id}/cancel",
-            idempotencyKey: $idempotencyKey,
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: Payment::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
+        return Payment::fromArray($response->data);
     }
 }

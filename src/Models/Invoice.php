@@ -27,16 +27,16 @@ class Invoice
         public readonly array $metadata,
         public readonly string $createdAt,
         public readonly string $updatedAt,
+        public readonly int $creditApplied,
+        /** @var InvoiceLineItemsItem[] */
+        public readonly array $lineItems,
         public readonly string $object,
         public readonly bool $livemode,
         public readonly ?string $subscriptionId = null,
-        public readonly ?int $creditApplied = null,
-        public readonly ?string $planName = null,
         public readonly ?string $memo = null,
+        public readonly ?string $planName = null,
         public readonly ?string $poNumber = null,
         public readonly ?string $reference = null,
-        /** @var list<array<string, mixed>>|null */
-        public readonly ?array $lineItems = null,
     ) {}
 
     /**
@@ -62,15 +62,15 @@ class Invoice
             metadata: $data["metadata"],
             createdAt: $data["created_at"],
             updatedAt: $data["updated_at"],
+            creditApplied: $data["credit_applied"],
+            lineItems: array_map(fn(array $item) => InvoiceLineItemsItem::fromArray($item), $data["line_items"]),
             object: $data["object"],
             livemode: $data["livemode"],
             subscriptionId: $data["subscription_id"] ?? null,
-            creditApplied: $data["credit_applied"] ?? null,
-            planName: $data["plan_name"] ?? null,
             memo: $data["memo"] ?? null,
+            planName: $data["plan_name"] ?? null,
             poNumber: $data["po_number"] ?? null,
             reference: $data["reference"] ?? null,
-            lineItems: $data["line_items"] ?? null,
         );
     }
 }

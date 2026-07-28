@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Commet\Resources;
 
-use Commet\ApiResponse;
-use Commet\Enums\BillingInterval;
-use Commet\Enums\DiscountType;
 use Commet\HttpClient;
 use Commet\Models\PromoCode;
+use Commet\Models\PromoCodesListResult;
 
 class PromoCodesResource
 {
@@ -17,126 +15,41 @@ class PromoCodesResource
     ) {}
 
     /**
-     * List promo codes with cursor-based pagination.
-     * @return ApiResponse<PromoCode[]>
-     */
-    public function list(
-        ?int $limit = null,
-        ?string $cursor = null,
-    ): ApiResponse {
-        $response = $this->http->get(
-            "/promo-codes",
-            HttpClient::buildBody([
-                "limit" => $limit,
-                "cursor" => $cursor,
-            ]),
-        );
-
-        if ($response->success && is_array($response->data)) {
-            $items = array_map(
-                fn(array $item) => PromoCode::fromArray($item),
-                $response->data,
-            );
-
-            return new ApiResponse(
-                success: true,
-                data: $items,
-                code: $response->code,
-                message: $response->message,
-                hasMore: $response->hasMore,
-                nextCursor: $response->nextCursor,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
      * Retrieve a promo code by its public ID.
-     * @return ApiResponse<PromoCode>
+     * @return PromoCode
      */
     public function get(
         string $id,
-    ): ApiResponse {
+    ): PromoCode {
         $response = $this->http->get(
             "/promo-codes/{$id}",
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: PromoCode::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid PromoCode response payload");
         }
 
-        return $response;
-    }
-
-    /**
-     * Create a new promo code. Optionally restrict it to specific plans and a billing interval.
-
-**100% discounts are not supported.** Percentage codes must be strictly less than 100% (`discountValue` < 10000 basis points). For full waivers, use an introductory offer on the plan instead. At checkout, any code — percentage or fixed amount — that would reduce the total below the currency's minimum charge ($0.50 USD equivalent) is silently dropped.
-     * @param string[]|null $planIds
-     * @return ApiResponse<PromoCode>
-     */
-    public function create(
-        string $code,
-        DiscountType $discountType,
-        int $discountValue,
-        ?int $durationCycles = null,
-        ?BillingInterval $billingInterval = null,
-        ?int $maxRedemptions = null,
-        ?string $expiresAt = null,
-        ?array $planIds = null,
-        ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->post(
-            "/promo-codes",
-            HttpClient::buildBody([
-                "code" => $code,
-                "discount_type" => $discountType->value,
-                "discount_value" => $discountValue,
-                "duration_cycles" => $durationCycles,
-                "billing_interval" => $billingInterval?->value,
-                "max_redemptions" => $maxRedemptions,
-                "expires_at" => $expiresAt,
-                "plan_ids" => $planIds,
-            ]),
-            idempotencyKey: $idempotencyKey,
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: PromoCode::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
+        return PromoCode::fromArray($response->data);
     }
 
     /**
      * Update a promo code's billing interval, redemption limits, expiration, active status, or plan restrictions.
      * @param string[]|null $planIds
-     * @return ApiResponse<PromoCode>
+     * @return PromoCode
      */
     public function update(
         string $id,
-        ?BillingInterval $billingInterval = null,
+        ?string $billingInterval = null,
         ?int $maxRedemptions = null,
         ?string $expiresAt = null,
         ?bool $active = null,
         ?array $planIds = null,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->put(
+    ): PromoCode {
+        $response = $this->http->patch(
             "/promo-codes/{$id}",
             HttpClient::buildBody([
-                "billing_interval" => $billingInterval?->value,
+                "billing_interval" => $billingInterval,
                 "max_redemptions" => $maxRedemptions,
                 "expires_at" => $expiresAt,
                 "active" => $active,
@@ -145,15 +58,67 @@ class PromoCodesResource
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: PromoCode::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid PromoCode response payload");
         }
 
-        return $response;
+        return PromoCode::fromArray($response->data);
+    }
+
+    /**
+     * List promo codes with cursor-based pagination.
+     * @return PromoCodesListResult
+     */
+    public function list(
+        ?string $cursor = null,
+        ?int $limit = null,
+    ): PromoCodesListResult {
+        $response = $this->http->get(
+            "/promo-codes",
+            HttpClient::buildBody([
+                "cursor" => $cursor,
+                "limit" => $limit,
+            ]),
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid PromoCodesListResult response payload");
+        }
+
+        return PromoCodesListResult::fromArray($response->data);
+    }
+
+    /**
+     * Create a distribution code for an existing promotional offer. Offer economics remain owned by the referenced Offer.
+     * @param string[]|null $planIds
+     * @return PromoCode
+     */
+    public function create(
+        string $code,
+        string $offerId,
+        ?string $billingInterval = null,
+        ?int $maxRedemptions = null,
+        ?string $expiresAt = null,
+        ?array $planIds = null,
+        ?string $idempotencyKey = null,
+    ): PromoCode {
+        $response = $this->http->post(
+            "/promo-codes",
+            HttpClient::buildBody([
+                "code" => $code,
+                "offer_id" => $offerId,
+                "billing_interval" => $billingInterval,
+                "max_redemptions" => $maxRedemptions,
+                "expires_at" => $expiresAt,
+                "plan_ids" => $planIds,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid PromoCode response payload");
+        }
+
+        return PromoCode::fromArray($response->data);
     }
 }

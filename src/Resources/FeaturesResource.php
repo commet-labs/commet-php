@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Commet\Resources;
 
-use Commet\ApiResponse;
-use Commet\Enums\FeatureType;
 use Commet\HttpClient;
 use Commet\Models\DeletedObject;
 use Commet\Models\Feature;
+use Commet\Models\FeaturesListResult;
 
 class FeaturesResource
 {
@@ -17,97 +16,26 @@ class FeaturesResource
     ) {}
 
     /**
-     * List every feature defined in the organization. This is the organization's feature catalog (definitions), not a customer's feature access.
-     * @return ApiResponse<Feature[]>
-     */
-    public function list(
-
-    ): ApiResponse {
-        $response = $this->http->get(
-            "/features",
-        );
-
-        if ($response->success && is_array($response->data)) {
-            $items = array_map(
-                fn(array $item) => Feature::fromArray($item),
-                $response->data,
-            );
-
-            return new ApiResponse(
-                success: true,
-                data: $items,
-                code: $response->code,
-                message: $response->message,
-                hasMore: $response->hasMore,
-                nextCursor: $response->nextCursor,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
      * Get a single feature definition by code from the organization's feature catalog.
-     * @return ApiResponse<Feature>
+     * @return Feature
      */
     public function get(
         string $code,
-    ): ApiResponse {
+    ): Feature {
         $response = $this->http->get(
             "/features/{$code}",
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: Feature::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Feature response payload");
         }
 
-        return $response;
-    }
-
-    /**
-     * Create a new feature. Code must be lowercase alphanumeric with underscores.
-     * @return ApiResponse<Feature>
-     */
-    public function create(
-        string $name,
-        string $code,
-        FeatureType $type,
-        ?string $description = null,
-        ?string $unitName = null,
-        ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->post(
-            "/features/manage",
-            HttpClient::buildBody([
-                "name" => $name,
-                "code" => $code,
-                "type" => $type->value,
-                "description" => $description,
-                "unit_name" => $unitName,
-            ]),
-            idempotencyKey: $idempotencyKey,
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: Feature::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
+        return Feature::fromArray($response->data);
     }
 
     /**
      * Update a feature's name, description, or unit name. At least one field must be provided.
-     * @return ApiResponse<Feature>
+     * @return Feature
      */
     public function update(
         string $code,
@@ -115,9 +43,9 @@ class FeaturesResource
         ?string $description = null,
         ?string $unitName = null,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->put(
-            "/features/{$code}/manage",
+    ): Feature {
+        $response = $this->http->patch(
+            "/features/{$code}",
             HttpClient::buildBody([
                 "name" => $name,
                 "description" => $description,
@@ -126,38 +54,77 @@ class FeaturesResource
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: Feature::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Feature response payload");
         }
 
-        return $response;
+        return Feature::fromArray($response->data);
     }
 
     /**
      * Delete a feature. Fails if the feature is attached to active plans or has an active add-on.
-     * @return ApiResponse<DeletedObject>
+     * @return DeletedObject
      */
     public function delete(
         string $code,
-    ): ApiResponse {
+    ): DeletedObject {
         $response = $this->http->delete(
-            "/features/{$code}/manage",
+            "/features/{$code}",
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: DeletedObject::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid DeletedObject response payload");
         }
 
-        return $response;
+        return DeletedObject::fromArray($response->data);
+    }
+
+    /**
+     * List every feature defined in the organization. This is the organization's feature catalog (definitions), not a customer's feature access.
+     * @return FeaturesListResult
+     */
+    public function list(
+
+    ): FeaturesListResult {
+        $response = $this->http->get(
+            "/features",
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid FeaturesListResult response payload");
+        }
+
+        return FeaturesListResult::fromArray($response->data);
+    }
+
+    /**
+     * Create a new feature. Code must be lowercase alphanumeric with underscores.
+     * @return Feature
+     */
+    public function create(
+        string $name,
+        string $code,
+        string $type,
+        ?string $description = null,
+        ?string $unitName = null,
+        ?string $idempotencyKey = null,
+    ): Feature {
+        $response = $this->http->post(
+            "/features",
+            HttpClient::buildBody([
+                "name" => $name,
+                "code" => $code,
+                "type" => $type,
+                "description" => $description,
+                "unit_name" => $unitName,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Feature response payload");
+        }
+
+        return Feature::fromArray($response->data);
     }
 }

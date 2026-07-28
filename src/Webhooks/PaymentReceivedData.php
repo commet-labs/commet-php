@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Commet\Webhooks;
 
-use Commet\Enums\PaymentProvider;
-
 /** Fired every time a payment settles successfully — the first payment and every renewal alike. subscription.activated fires alongside it only on the first one. */
 final class PaymentReceivedData
 {
@@ -16,7 +14,7 @@ final class PaymentReceivedData
         public readonly string $customerId,
         public readonly ?string $subscriptionId,
         public readonly ?string $paymentTransactionId,
-        public readonly ?PaymentProvider $provider,
+        public readonly ?string $provider,
         public readonly ?float $grossAmount,
         public readonly ?string $currency,
         public readonly ?float $orgNetAmount,
@@ -36,7 +34,7 @@ final class PaymentReceivedData
             customerId: $data["customerId"],
             subscriptionId: $data["subscriptionId"] ?? null,
             paymentTransactionId: $data["paymentTransactionId"] ?? null,
-            provider: isset($data["provider"]) ? PaymentProvider::from($data["provider"]) : null,
+            provider: $data["provider"] ?? null,
             grossAmount: $data["grossAmount"] ?? null,
             currency: $data["currency"] ?? null,
             orgNetAmount: $data["orgNetAmount"] ?? null,

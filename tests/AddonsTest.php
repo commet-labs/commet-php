@@ -40,10 +40,7 @@ class AddonsTest extends TestCase
 
     private function response(mixed $data): Response
     {
-        return new Response(200, ['Content-Type' => 'application/json'], json_encode([
-            'success' => true,
-            'data' => $data,
-        ], JSON_THROW_ON_ERROR));
+        return new Response(200, ['Content-Type' => 'application/json'], json_encode($data, JSON_THROW_ON_ERROR));
     }
 
     public function testCreateSendsSnakeCaseBodyAsCamelCaseAndHydratesAddon(): void
@@ -85,19 +82,20 @@ class AddonsTest extends TestCase
         // creditCost was null -> never sent.
         $this->assertArrayNotHasKey('creditCost', $body);
 
-        $this->assertInstanceOf(Addon::class, $result->data);
-        $this->assertSame('extra-seats', $result->data->slug);
-        $this->assertSame(5000, $result->data->basePrice);
-        $this->assertSame(5, $result->data->includedUnits);
-        $this->assertSame(200, $result->data->overageRate);
-        $this->assertNull($result->data->creditCost);
+        $this->assertInstanceOf(Addon::class, $result);
+        $this->assertSame('extra-seats', $result->slug);
+        $this->assertSame(5000, $result->basePrice);
+        $this->assertSame(5, $result->includedUnits);
+        $this->assertSame(200, $result->overageRate);
+        $this->assertNull($result->creditCost);
     }
 
     public function testListActiveHydratesFeatureTypeEnum(): void
     {
         $addons = $this->addonsWithResponses([
             $this->response([
-                [
+                'object' => 'list',
+                'data' => [[
                     'slug' => 'extra-seats',
                     'name' => 'Extra Seats',
                     'base_price' => 5000,
@@ -108,7 +106,8 @@ class AddonsTest extends TestCase
                     'activated_at' => '2026-06-08T00:00:00Z',
                     'object' => 'active_addon',
                     'livemode' => false,
-                ],
+                ]],
+                'has_more' => false,
             ]),
         ]);
 

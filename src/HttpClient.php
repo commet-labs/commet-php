@@ -20,9 +20,9 @@ class HttpClient
 
     private const RETRY_AFTER_CAP_MS = 30000;
 
-    public const API_VERSION = '2026-07-11';
+    public const API_VERSION = '2026-07-24';
 
-    private const VERSION = '7.10.0';
+    private const VERSION = '8.0.0';
 
     private const BODY_METHODS = ['POST', 'PUT', 'PATCH'];
 
@@ -157,6 +157,20 @@ class HttpClient
         ?float $timeout = null,
     ): ApiResponse {
         return $this->request('PUT', $endpoint, body: $body, apiVersion: $apiVersion, idempotencyKey: $idempotencyKey, timeout: $timeout);
+    }
+
+    /**
+     * @param array<string, mixed>|null $body
+     * @return ApiResponse<mixed>
+     */
+    public function patch(
+        string $endpoint,
+        ?array $body = null,
+        ?string $apiVersion = null,
+        ?string $idempotencyKey = null,
+        ?float $timeout = null,
+    ): ApiResponse {
+        return $this->request('PATCH', $endpoint, body: $body, apiVersion: $apiVersion, idempotencyKey: $idempotencyKey, timeout: $timeout);
     }
 
     /**
@@ -350,6 +364,13 @@ class HttpClient
 
         $converted = self::convertKeys($data, [self::class, 'toSnakeCase']);
         $envelope = is_array($converted) ? $converted : [];
+        $isEnvelope = isset($envelope['success'])
+            && is_bool($envelope['success'])
+            && array_key_exists('data', $envelope);
+
+        if (!$isEnvelope) {
+            return new ApiResponse(success: true, data: $converted);
+        }
 
         return new ApiResponse(
             success: $envelope['success'] ?? true,

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Commet\Resources;
 
-use Commet\ApiResponse;
 use Commet\HttpClient;
-use Commet\Models\ActiveAddon;
 use Commet\Models\Addon;
+use Commet\Models\AddonsListActiveResult;
+use Commet\Models\AddonsListResult;
 use Commet\Models\DeletedObject;
 
 class AddonsResource
@@ -18,11 +18,11 @@ class AddonsResource
 
     /**
      * List all active add-ons for a customer's subscription.
-     * @return ApiResponse<ActiveAddon[]>
+     * @return AddonsListActiveResult
      */
     public function listActive(
         string $customerId,
-    ): ApiResponse {
+    ): AddonsListActiveResult {
         $response = $this->http->get(
             "/active-addons",
             HttpClient::buildBody([
@@ -30,86 +30,107 @@ class AddonsResource
             ]),
         );
 
-        if ($response->success && is_array($response->data)) {
-            $items = array_map(
-                fn(array $item) => ActiveAddon::fromArray($item),
-                $response->data,
-            );
-
-            return new ApiResponse(
-                success: true,
-                data: $items,
-                code: $response->code,
-                message: $response->message,
-                hasMore: $response->hasMore,
-                nextCursor: $response->nextCursor,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid AddonsListActiveResult response payload");
         }
 
-        return $response;
-    }
-
-    /**
-     * List all add-ons with cursor-based pagination.
-     * @return ApiResponse<Addon[]>
-     */
-    public function list(
-        ?int $limit = null,
-        ?string $cursor = null,
-    ): ApiResponse {
-        $response = $this->http->get(
-            "/addons",
-            HttpClient::buildBody([
-                "limit" => $limit,
-                "cursor" => $cursor,
-            ]),
-        );
-
-        if ($response->success && is_array($response->data)) {
-            $items = array_map(
-                fn(array $item) => Addon::fromArray($item),
-                $response->data,
-            );
-
-            return new ApiResponse(
-                success: true,
-                data: $items,
-                code: $response->code,
-                message: $response->message,
-                hasMore: $response->hasMore,
-                nextCursor: $response->nextCursor,
-            );
-        }
-
-        return $response;
+        return AddonsListActiveResult::fromArray($response->data);
     }
 
     /**
      * Retrieve an add-on by its public ID or slug.
-     * @return ApiResponse<Addon>
+     * @return Addon
      */
     public function get(
         string $id,
-    ): ApiResponse {
+    ): Addon {
         $response = $this->http->get(
             "/addons/{$id}",
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: Addon::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Addon response payload");
         }
 
-        return $response;
+        return Addon::fromArray($response->data);
+    }
+
+    /**
+     * Update an add-on's name, description, or pricing.
+     * @return Addon
+     */
+    public function update(
+        string $id,
+        ?string $name = null,
+        ?string $description = null,
+        ?int $basePrice = null,
+        ?int $includedUnits = null,
+        ?int $overageRate = null,
+        ?string $idempotencyKey = null,
+    ): Addon {
+        $response = $this->http->patch(
+            "/addons/{$id}",
+            HttpClient::buildBody([
+                "name" => $name,
+                "description" => $description,
+                "base_price" => $basePrice,
+                "included_units" => $includedUnits,
+                "overage_rate" => $overageRate,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Addon response payload");
+        }
+
+        return Addon::fromArray($response->data);
+    }
+
+    /**
+     * Soft-delete an add-on. Fails if the add-on has active subscriptions.
+     * @return DeletedObject
+     */
+    public function delete(
+        string $id,
+    ): DeletedObject {
+        $response = $this->http->delete(
+            "/addons/{$id}",
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid DeletedObject response payload");
+        }
+
+        return DeletedObject::fromArray($response->data);
+    }
+
+    /**
+     * List all add-ons with cursor-based pagination.
+     * @return AddonsListResult
+     */
+    public function list(
+        ?string $cursor = null,
+        ?int $limit = null,
+    ): AddonsListResult {
+        $response = $this->http->get(
+            "/addons",
+            HttpClient::buildBody([
+                "cursor" => $cursor,
+                "limit" => $limit,
+            ]),
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid AddonsListResult response payload");
+        }
+
+        return AddonsListResult::fromArray($response->data);
     }
 
     /**
      * Create a new add-on linked to a feature. Each feature can only be assigned to one add-on.
-     * @return ApiResponse<Addon>
+     * @return Addon
      */
     public function create(
         string $name,
@@ -121,7 +142,7 @@ class AddonsResource
         ?int $overageRate = null,
         ?int $creditCost = null,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
+    ): Addon {
         $response = $this->http->post(
             "/addons",
             HttpClient::buildBody([
@@ -137,75 +158,10 @@ class AddonsResource
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: Addon::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Addon response payload");
         }
 
-        return $response;
-    }
-
-    /**
-     * Update an add-on's name, description, or pricing.
-     * @return ApiResponse<Addon>
-     */
-    public function update(
-        string $id,
-        ?string $name = null,
-        ?string $description = null,
-        ?int $basePrice = null,
-        ?int $includedUnits = null,
-        ?int $overageRate = null,
-        ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->put(
-            "/addons/{$id}",
-            HttpClient::buildBody([
-                "name" => $name,
-                "description" => $description,
-                "base_price" => $basePrice,
-                "included_units" => $includedUnits,
-                "overage_rate" => $overageRate,
-            ]),
-            idempotencyKey: $idempotencyKey,
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: Addon::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Soft-delete an add-on. Fails if the add-on has active subscriptions.
-     * @return ApiResponse<DeletedObject>
-     */
-    public function delete(
-        string $id,
-    ): ApiResponse {
-        $response = $this->http->delete(
-            "/addons/{$id}",
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: DeletedObject::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
+        return Addon::fromArray($response->data);
     }
 }

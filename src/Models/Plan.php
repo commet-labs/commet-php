@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-use Commet\Enums\BillingInterval;
 use Commet\Enums\ConsumptionModel;
-use Commet\Enums\DiscountType;
-use Commet\Enums\FeatureType;
 
 class Plan
 {
@@ -21,6 +18,12 @@ class Plan
         public readonly int $sortOrder,
         public readonly string $createdAt,
         public readonly string $updatedAt,
+        /** @var PlanFeaturesItem[] */
+        public readonly array $features,
+        /** @var PlanPricesItem[] */
+        public readonly array $prices,
+        /** @var PlanExchangeRatesItem[] */
+        public readonly array $exchangeRates,
         public readonly string $object,
         public readonly bool $livemode,
         public readonly ?string $description = null,
@@ -29,12 +32,6 @@ class Plan
         public readonly ?string $planGroupId = null,
         /** @var array<string, mixed>|null */
         public readonly ?array $metadata = null,
-        /** @var list<array<string, mixed>>|null */
-        public readonly ?array $features = null,
-        /** @var list<array<string, mixed>>|null */
-        public readonly ?array $prices = null,
-        /** @var list<array<string, mixed>>|null */
-        public readonly ?array $exchangeRates = null,
     ) {}
 
     /**
@@ -52,6 +49,9 @@ class Plan
             sortOrder: $data["sort_order"],
             createdAt: $data["created_at"],
             updatedAt: $data["updated_at"],
+            features: array_map(fn(array $item) => PlanFeaturesItem::fromArray($item), $data["features"]),
+            prices: array_map(fn(array $item) => PlanPricesItem::fromArray($item), $data["prices"]),
+            exchangeRates: array_map(fn(array $item) => PlanExchangeRatesItem::fromArray($item), $data["exchange_rates"]),
             object: $data["object"],
             livemode: $data["livemode"],
             description: $data["description"] ?? null,
@@ -59,9 +59,6 @@ class Plan
             blockOnExhaustion: $data["block_on_exhaustion"] ?? null,
             planGroupId: $data["plan_group_id"] ?? null,
             metadata: $data["metadata"] ?? null,
-            features: $data["features"] ?? null,
-            prices: $data["prices"] ?? null,
-            exchangeRates: $data["exchange_rates"] ?? null,
         );
     }
 }

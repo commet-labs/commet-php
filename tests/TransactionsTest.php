@@ -6,8 +6,8 @@ namespace Commet\Tests;
 
 use Commet\Enums\TransactionStatus;
 use Commet\HttpClient;
+use Commet\Models\Refund;
 use Commet\Models\Transaction;
-use Commet\Models\TransactionRefund;
 use Commet\Models\TransactionRetry;
 use Commet\Resources\TransactionsResource;
 use GuzzleHttp\Handler\MockHandler;
@@ -35,16 +35,17 @@ class TransactionsTest extends TestCase
 
     private function response(mixed $data): Response
     {
-        return new Response(200, ['Content-Type' => 'application/json'], json_encode([
-            'success' => true,
-            'data' => $data,
-        ], JSON_THROW_ON_ERROR));
+        return new Response(200, ['Content-Type' => 'application/json'], json_encode($data, JSON_THROW_ON_ERROR));
     }
 
     public function testListSerializesStatusEnumToWireStringInQuery(): void
     {
         $transactions = $this->transactionsWithResponses([
-            $this->response([]),
+            $this->response([
+                'object' => 'list',
+                'data' => [],
+                'has_more' => false,
+            ]),
         ]);
 
         $transactions->list(
@@ -82,13 +83,13 @@ class TransactionsTest extends TestCase
 
         $result = $transactions->get('txn_1');
 
-        $this->assertInstanceOf(Transaction::class, $result->data);
-        $this->assertSame(TransactionStatus::Pending, $result->data->status);
-        $this->assertSame('a@b.com', $result->data->customerEmail);
+        $this->assertInstanceOf(Transaction::class, $result);
+        $this->assertSame(TransactionStatus::Pending, $result->status);
+        $this->assertSame('a@b.com', $result->customerEmail);
         // Omitted optional timestamps map to null, not empty string.
-        $this->assertNull($result->data->paidAt);
-        $this->assertNull($result->data->availableAt);
-        $this->assertNull($result->data->invoiceId);
+        $this->assertNull($result->paidAt);
+        $this->assertNull($result->availableAt);
+        $this->assertNull($result->invoiceId);
     }
 
     public function testRefundPostsNoBodyAndHydratesRefund(): void
@@ -96,8 +97,11 @@ class TransactionsTest extends TestCase
         $transactions = $this->transactionsWithResponses([
             $this->response([
                 'id' => 're_1',
+                'transaction_id' => 'txn_1',
+                'amount' => 10000,
+                'currency' => 'USD',
                 'status' => 'succeeded',
-                'object' => 'transaction_refund',
+                'object' => 'refund',
                 'livemode' => false,
             ]),
         ]);
@@ -108,16 +112,17 @@ class TransactionsTest extends TestCase
         $this->assertSame('POST', $request->getMethod());
         $this->assertSame('', (string) $request->getBody());
 
-        $this->assertInstanceOf(TransactionRefund::class, $result->data);
-        $this->assertSame('re_1', $result->data->id);
-        $this->assertSame('succeeded', $result->data->status);
+        $this->assertInstanceOf(Refund::class, $result);
+        $this->assertSame('re_1', $result->id);
+        $this->assertSame('succeeded', $result->status);
     }
 
     public function testRetryParsesProcessingStatus(): void
     {
         $transactions = $this->transactionsWithResponses([
             $this->response([
-                'id' => 'txn_2',
+                'original_transaction_id' => 'txn_1',
+                'invoice_id' => 'inv_1',
                 'status' => 'processing',
                 'object' => 'transaction_retry',
                 'livemode' => false,
@@ -126,7 +131,7 @@ class TransactionsTest extends TestCase
 
         $result = $transactions->retry('txn_1');
 
-        $this->assertInstanceOf(TransactionRetry::class, $result->data);
-        $this->assertSame('processing', $result->data->status);
+        $this->assertInstanceOf(TransactionRetry::class, $result);
+        $this->assertSame('processing', $result->status);
     }
 }

@@ -16,35 +16,26 @@ use Commet\Commet;
 $commet = new Commet(apiKey: 'ck_xxx');
 
 // Create a customer
-$commet->customers->create(email: 'user@example.com', externalId: 'user_123');
+$customer = $commet->customers->create(email: 'user@example.com');
 
 // Create a subscription
-$commet->subscriptions->create(externalId: 'user_123', planCode: 'pro');
+$commet->subscriptions->create(customerId: $customer->id, planCode: 'pro');
 
 // Track usage
-$commet->usage->track(feature: 'api_calls', externalId: 'user_123');
+$commet->usage->track(
+    featureCode: 'api_calls',
+    customerId: $customer->id,
+    value: 1,
+);
 
 // Track AI token usage
 $commet->usage->track(
-    feature: 'ai_generation',
-    externalId: 'user_123',
+    featureCode: 'ai_generation',
+    customerId: $customer->id,
     model: 'claude-sonnet-4-20250514',
     inputTokens: 1000,
     outputTokens: 500,
 );
-```
-
-## Customer context
-
-Scope all operations to a customer to avoid repeating `externalId`:
-
-```php
-$customer = $commet->customer('user_123');
-
-$customer->usage->track('api_calls');
-$customer->features->check('custom_branding');
-$customer->seats->add('editor', count: 3);
-$customer->portal->getUrl();
 ```
 
 ## Quota
@@ -64,9 +55,9 @@ $allowances = $commet->quota->getAll(customerId: 'user_123');
 ## Webhook verification
 
 ```php
-use Commet\Webhooks;
+use Commet\Resources\WebhooksResource;
 
-$webhooks = new Webhooks();
+$webhooks = new WebhooksResource();
 
 $payload = $webhooks->verifyAndParse(
     rawBody: $requestBody,

@@ -15,8 +15,6 @@ class PlanGroup
         public readonly string $object,
         public readonly bool $livemode,
         public readonly ?string $description = null,
-        /** @var list<array<string, mixed>>|null */
-        public readonly ?array $plans = null,
     ) {}
 
     /**
@@ -33,7 +31,6 @@ class PlanGroup
             object: $data["object"],
             livemode: $data["livemode"],
             description: $data["description"] ?? null,
-            plans: $data["plans"] ?? null,
         );
     }
 }

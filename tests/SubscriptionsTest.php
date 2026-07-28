@@ -38,33 +38,28 @@ class SubscriptionsTest extends TestCase
     private function changePlanResponse(): Response
     {
         return new Response(200, ['Content-Type' => 'application/json'], json_encode([
-            'success' => true,
-            'data' => [
-                'object' => 'plan_change',
-                'livemode' => false,
-                'requires_checkout' => true,
-                'checkout_url' => 'https://commet.co/checkout/abc',
-            ],
+            'outcome' => 'checkout_required',
+            'object' => 'plan_change',
+            'livemode' => false,
+            'requires_checkout' => true,
+            'checkout_url' => 'https://commet.co/checkout/abc',
         ], JSON_THROW_ON_ERROR));
     }
 
     private function createResponse(): Response
     {
         return new Response(200, ['Content-Type' => 'application/json'], json_encode([
-            'success' => true,
-            'data' => [
-                'id' => 'sub_123',
-                'customerId' => 'cus_123',
-                'plan' => ['id' => 'plan_pro', 'name' => 'Pro'],
-                'name' => 'Pro',
-                'status' => 'active',
-                'cancelAtPeriodEnd' => false,
-                'startDate' => '2026-06-03',
-                'createdAt' => '2026-06-03T00:00:00Z',
-                'updatedAt' => '2026-06-03T00:00:00Z',
-                'object' => 'subscription',
-                'livemode' => false,
-            ],
+            'id' => 'sub_123',
+            'customerId' => 'cus_123',
+            'plan' => ['id' => 'plan_pro', 'name' => 'Pro'],
+            'name' => 'Pro',
+            'status' => 'active',
+            'cancelAtPeriodEnd' => false,
+            'startDate' => '2026-06-03',
+            'createdAt' => '2026-06-03T00:00:00Z',
+            'updatedAt' => '2026-06-03T00:00:00Z',
+            'object' => 'subscription',
+            'livemode' => false,
         ], JSON_THROW_ON_ERROR));
     }
 
@@ -84,28 +79,29 @@ class SubscriptionsTest extends TestCase
         $this->assertSame('plan_456', $body['newPlanId']);
     }
 
-    public function testCreateSendsIntroOfferAsNestedCamelCase(): void
+    public function testCreateSendsOfferIdFromGeneratedContract(): void
     {
         $subscriptions = $this->subscriptionsWithResponses([$this->createResponse()]);
 
         $subscriptions->create(
             customerId: 'cus_123',
             planCode: 'pro',
-            introOffer: [
-                'discount_type' => 'percentage',
-                'discount_value' => 1000,
-                'duration_cycles' => 3,
-            ],
+            offerId: 'offer_123',
         );
 
         $body = $this->sentBody();
-        $this->assertArrayHasKey('introOffer', $body);
-        $this->assertArrayNotHasKey('intro_offer', $body);
+        $this->assertSame('offer_123', $body['offerId']);
+        $this->assertArrayNotHasKey('introOffer', $body);
+    }
 
-        $offer = $body['introOffer'];
-        $this->assertSame('percentage', $offer['discountType']);
-        $this->assertSame(1000, $offer['discountValue']);
-        $this->assertSame(3, $offer['durationCycles']);
-        $this->assertArrayNotHasKey('discount_type', $offer);
+    public function testGetActiveReturnsNullWhenCustomerHasNoSubscription(): void
+    {
+        $subscriptions = $this->subscriptionsWithResponses([
+            new Response(200, ['Content-Type' => 'application/json'], 'null'),
+        ]);
+
+        $result = $subscriptions->getActive(customerId: 'cus_123');
+
+        $this->assertNull($result);
     }
 }

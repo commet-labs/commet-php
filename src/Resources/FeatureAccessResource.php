@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Commet\Resources;
 
-use Commet\ApiResponse;
 use Commet\HttpClient;
 use Commet\Models\FeatureAccess;
-use Commet\Models\FeatureLookup;
+use Commet\Models\FeatureAccessListResult;
 
 class FeatureAccessResource
 {
@@ -16,12 +15,34 @@ class FeatureAccessResource
     ) {}
 
     /**
-     * List all features for a customer's active subscription, scoped by the customerId query parameter.
-     * @return ApiResponse<FeatureAccess[]>
+     * Get one feature's access and current usage for a customer. To evaluate a prospective consumption, use POST /usage/check.
+     * @return FeatureAccess
+     */
+    public function get(
+        string $code,
+        string $customerId,
+    ): FeatureAccess {
+        $response = $this->http->get(
+            "/feature-access/{$code}",
+            HttpClient::buildBody([
+                "customer_id" => $customerId,
+            ]),
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid FeatureAccess response payload");
+        }
+
+        return FeatureAccess::fromArray($response->data);
+    }
+
+    /**
+     * List a customer's feature access and current usage.
+     * @return FeatureAccessListResult
      */
     public function list(
         string $customerId,
-    ): ApiResponse {
+    ): FeatureAccessListResult {
         $response = $this->http->get(
             "/feature-access",
             HttpClient::buildBody([
@@ -29,79 +50,10 @@ class FeatureAccessResource
             ]),
         );
 
-        if ($response->success && is_array($response->data)) {
-            $items = array_map(
-                fn(array $item) => FeatureAccess::fromArray($item),
-                $response->data,
-            );
-
-            return new ApiResponse(
-                success: true,
-                data: $items,
-                code: $response->code,
-                message: $response->message,
-                hasMore: $response->hasMore,
-                nextCursor: $response->nextCursor,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid FeatureAccessListResult response payload");
         }
 
-        return $response;
-    }
-
-    /**
-     * Get feature access details for a customer. Use action=canUse to check if the customer can consume one more unit.
-     * @return ApiResponse<FeatureLookup>
-     */
-    public function get(
-        string $code,
-        string $customerId,
-        ?string $action = null,
-    ): ApiResponse {
-        $response = $this->http->get(
-            "/feature-access/{$code}",
-            HttpClient::buildBody([
-                "customer_id" => $customerId,
-                "action" => $action,
-            ]),
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: FeatureLookup::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Get feature access details for a customer. Use action=canUse to check if the customer can consume one more unit.
-     * @return ApiResponse<FeatureLookup>
-     */
-    public function canUse(
-        string $code,
-        string $customerId,
-    ): ApiResponse {
-        $response = $this->http->get(
-            "/feature-access/{$code}",
-            HttpClient::buildBody([
-                "action" => "canUse",
-                "customer_id" => $customerId,
-            ]),
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: FeatureLookup::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
+        return FeatureAccessListResult::fromArray($response->data);
     }
 }

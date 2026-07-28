@@ -43,10 +43,7 @@ class PlansTest extends TestCase
 
     private function response(mixed $data): Response
     {
-        return new Response(200, ['Content-Type' => 'application/json'], json_encode([
-            'success' => true,
-            'data' => $data,
-        ], JSON_THROW_ON_ERROR));
+        return new Response(200, ['Content-Type' => 'application/json'], json_encode($data, JSON_THROW_ON_ERROR));
     }
 
     public function testCreateSerializesConsumptionModelEnumToWireString(): void
@@ -65,13 +62,16 @@ class PlansTest extends TestCase
                 'object' => 'plan',
                 'livemode' => false,
                 'consumption_model' => 'metered',
+                'features' => [],
+                'prices' => [],
+                'exchange_rates' => [],
             ]),
         ]);
 
         $result = $plans->create(
             name: 'Pro',
             code: 'pro',
-            consumptionModel: ConsumptionModel::Metered,
+            consumptionModel: 'metered',
             isPublic: true,
         );
 
@@ -82,11 +82,11 @@ class PlansTest extends TestCase
         $this->assertArrayNotHasKey('consumption_model', $body);
 
         // Response hydrates enum from wire string.
-        $this->assertInstanceOf(Plan::class, $result->data);
-        $this->assertSame(ConsumptionModel::Metered, $result->data->consumptionModel);
+        $this->assertInstanceOf(Plan::class, $result);
+        $this->assertSame(ConsumptionModel::Metered, $result->consumptionModel);
     }
 
-    public function testAddPriceSerializesBillingIntervalEnumAndNestedIntroOffer(): void
+    public function testAddPriceUsesGeneratedContract(): void
     {
         $plans = $this->plansWithResponses([
             $this->response([
@@ -101,45 +101,29 @@ class PlansTest extends TestCase
                 'object' => 'plan_price',
                 'livemode' => false,
                 'included_credits' => 500,
-                'intro_offer' => [
-                    'discount_type' => 'percentage',
-                    'discount_value' => 2000,
-                    'duration_cycles' => 2,
-                ],
+                'offer_id' => 'offer_1',
+                'metadata' => [],
+                'market_prices' => [],
             ]),
         ]);
 
         $result = $plans->addPrice(
             id: 'plan_1',
-            billingInterval: BillingInterval::Yearly,
+            billingInterval: 'yearly',
             price: 99000,
             trialDays: 14,
             isDefault: true,
-            introOffer: [
-                'discount_type' => 'percentage',
-                'discount_value' => 2000,
-                'duration_cycles' => 2,
-            ],
         );
 
         $body = $this->sentBody();
         $this->assertSame('yearly', $body['billingInterval']);
         $this->assertSame(99000, $body['price']);
         $this->assertSame(14, $body['trialDays']);
-        // Nested intro offer keys converted recursively to camelCase.
-        $this->assertSame('percentage', $body['introOffer']['discountType']);
-        $this->assertSame(2000, $body['introOffer']['discountValue']);
-        $this->assertSame(2, $body['introOffer']['durationCycles']);
-        $this->assertArrayNotHasKey('intro_offer', $body);
-        $this->assertArrayNotHasKey('discount_type', $body['introOffer']);
-
-        // Response hydration: enum + nested intro offer preserved as snake_case array.
-        $this->assertInstanceOf(PlanPrice::class, $result->data);
-        $this->assertSame(BillingInterval::Yearly, $result->data->billingInterval);
-        $this->assertSame(500, $result->data->includedCredits);
-        $this->assertIsArray($result->data->introOffer);
-        $this->assertSame('percentage', $result->data->introOffer['discount_type']);
-        $this->assertNull($result->data->includedBalance);
+        $this->assertInstanceOf(PlanPrice::class, $result);
+        $this->assertSame(BillingInterval::Yearly, $result->billingInterval);
+        $this->assertSame(500, $result->includedCredits);
+        $this->assertSame('offer_1', $result->offerId);
+        $this->assertNull($result->includedBalance);
     }
 
     public function testSetRegionalPricesSendsOverridesArrayWithCamelCaseKeys(): void
@@ -171,9 +155,9 @@ class PlansTest extends TestCase
         $this->assertSame(400, $body['overrides'][0]['includedCredits']);
         $this->assertArrayNotHasKey('included_credits', $body['overrides'][0]);
 
-        $this->assertInstanceOf(PlanRegionalPricing::class, $result->data);
-        $this->assertSame('price_1', $result->data->priceId);
-        $this->assertSame('EUR', $result->data->overrides[0]['currency']);
+        $this->assertInstanceOf(PlanRegionalPricing::class, $result);
+        $this->assertSame('price_1', $result->priceId);
+        $this->assertSame('EUR', $result->overrides[0]->currency);
     }
 
     public function testSetRegionalPricingSendsExchangeRateAsCamelCaseFloat(): void
@@ -202,16 +186,17 @@ class PlansTest extends TestCase
         $this->assertArrayNotHasKey('exchange_rate', $body);
         $this->assertArrayNotHasKey('prices', $body);
 
-        $this->assertInstanceOf(PlanRegionalPricingResult::class, $result->data);
-        $this->assertSame(0.92, $result->data->exchangeRate);
-        $this->assertSame(2, $result->data->featuresConfigured);
+        $this->assertInstanceOf(PlanRegionalPricingResult::class, $result);
+        $this->assertSame(0.92, $result->exchangeRate);
+        $this->assertSame(2, $result->featuresConfigured);
     }
 
     public function testListHydratesPlansWithNestedPricesAndFeatures(): void
     {
         $plans = $this->plansWithResponses([
             $this->response([
-                [
+                'object' => 'list',
+                'data' => [[
                     'id' => 'plan_1',
                     'name' => 'Pro',
                     'code' => 'pro',
@@ -224,12 +209,31 @@ class PlansTest extends TestCase
                     'object' => 'plan',
                     'livemode' => false,
                     'prices' => [
-                        ['billing_interval' => 'monthly', 'price' => 9900],
+                        [
+                            'id' => 'price_1',
+                            'billing_interval' => 'monthly',
+                            'price' => 9900,
+                            'is_default' => true,
+                            'trial_days' => 0,
+                            'metadata' => [],
+                            'market_prices' => [],
+                            'regional_prices' => [],
+                        ],
                     ],
                     'features' => [
-                        ['code' => 'api_calls', 'included_amount' => 1000],
+                        [
+                            'code' => 'api_calls',
+                            'name' => 'API Calls',
+                            'type' => 'usage',
+                            'enabled' => true,
+                            'unlimited' => false,
+                            'included_amount' => 1000,
+                            'regional_prices' => [],
+                        ],
                     ],
-                ],
+                    'exchange_rates' => [],
+                ]],
+                'has_more' => false,
             ]),
         ]);
 
@@ -239,11 +243,10 @@ class PlansTest extends TestCase
         $this->assertCount(1, $result->data);
         $plan = $result->data[0];
         $this->assertInstanceOf(Plan::class, $plan);
-        // Nested collections are preserved as snake_case arrays (not re-mapped models).
-        $this->assertSame(9900, $plan->prices[0]['price']);
-        $this->assertSame('monthly', $plan->prices[0]['billing_interval']);
-        $this->assertSame('api_calls', $plan->features[0]['code']);
-        $this->assertSame(1000, $plan->features[0]['included_amount']);
+        $this->assertSame(9900, $plan->prices[0]->price);
+        $this->assertSame(BillingInterval::Monthly, $plan->prices[0]->billingInterval);
+        $this->assertSame('api_calls', $plan->features[0]->code);
+        $this->assertSame(1000, $plan->features[0]->includedAmount);
         $this->assertNull($plan->consumptionModel);
     }
 }

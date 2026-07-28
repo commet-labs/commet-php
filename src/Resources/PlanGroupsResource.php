@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Commet\Resources;
 
-use Commet\ApiResponse;
 use Commet\HttpClient;
 use Commet\Models\AddedPlanToGroup;
 use Commet\Models\DeletedObject;
 use Commet\Models\PlanGroup;
+use Commet\Models\PlanGroupDetail;
+use Commet\Models\PlanGroupsListResult;
 use Commet\Models\RemovedPlanFromGroup;
 use Commet\Models\ReorderedPlans;
 
@@ -19,161 +20,59 @@ class PlanGroupsResource
     ) {}
 
     /**
-     * List plan groups with cursor-based pagination.
-     * @return ApiResponse<PlanGroup[]>
+     * Remove a plan from a plan group.
+     * @return RemovedPlanFromGroup
      */
-    public function list(
-        ?int $limit = null,
-        ?string $cursor = null,
-    ): ApiResponse {
-        $response = $this->http->get(
-            "/plan-groups",
-            HttpClient::buildBody([
-                "limit" => $limit,
-                "cursor" => $cursor,
-            ]),
-        );
-
-        if ($response->success && is_array($response->data)) {
-            $items = array_map(
-                fn(array $item) => PlanGroup::fromArray($item),
-                $response->data,
-            );
-
-            return new ApiResponse(
-                success: true,
-                data: $items,
-                code: $response->code,
-                message: $response->message,
-                hasMore: $response->hasMore,
-                nextCursor: $response->nextCursor,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Retrieve a plan group by ID, including its plans ordered by sortOrder.
-     * @return ApiResponse<PlanGroup>
-     */
-    public function get(
+    public function removePlan(
         string $id,
-    ): ApiResponse {
-        $response = $this->http->get(
-            "/plan-groups/{$id}",
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: PlanGroup::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Create a new plan group for organizing plans.
-     * @return ApiResponse<PlanGroup>
-     */
-    public function create(
-        string $name,
-        ?string $description = null,
-        ?bool $isPublic = null,
-        ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->post(
-            "/plan-groups",
-            HttpClient::buildBody([
-                "name" => $name,
-                "description" => $description,
-                "is_public" => $isPublic,
-            ]),
-            idempotencyKey: $idempotencyKey,
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: PlanGroup::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Update a plan group's name, description, or visibility.
-     * @return ApiResponse<PlanGroup>
-     */
-    public function update(
-        string $id,
-        ?string $name = null,
-        ?string $description = null,
-        ?bool $isPublic = null,
-        ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->put(
-            "/plan-groups/{$id}",
-            HttpClient::buildBody([
-                "name" => $name,
-                "description" => $description,
-                "is_public" => $isPublic,
-            ]),
-            idempotencyKey: $idempotencyKey,
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: PlanGroup::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Delete a plan group. Plans in the group are unlinked, not deleted.
-     * @return ApiResponse<DeletedObject>
-     */
-    public function delete(
-        string $id,
-    ): ApiResponse {
+        string $planId,
+    ): RemovedPlanFromGroup {
         $response = $this->http->delete(
-            "/plan-groups/{$id}",
+            "/plan-groups/{$id}/plans/{$planId}",
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: DeletedObject::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid RemovedPlanFromGroup response payload");
         }
 
-        return $response;
+        return RemovedPlanFromGroup::fromArray($response->data);
+    }
+
+    /**
+     * Set the display order of plans within a group. All plan IDs in the group must be provided.
+     * @param string[] $planIds
+     * @return ReorderedPlans
+     */
+    public function reorderPlans(
+        string $id,
+        array $planIds,
+        ?string $idempotencyKey = null,
+    ): ReorderedPlans {
+        $response = $this->http->put(
+            "/plan-groups/{$id}/plans/reorder",
+            HttpClient::buildBody([
+                "plan_ids" => $planIds,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid ReorderedPlans response payload");
+        }
+
+        return ReorderedPlans::fromArray($response->data);
     }
 
     /**
      * Add an existing plan to a plan group with optional sort order.
-     * @return ApiResponse<AddedPlanToGroup>
+     * @return AddedPlanToGroup
      */
     public function addPlan(
         string $id,
         string $planId,
         ?int $sortOrder = null,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
+    ): AddedPlanToGroup {
         $response = $this->http->post(
             "/plan-groups/{$id}/plans",
             HttpClient::buildBody([
@@ -183,69 +82,124 @@ class PlanGroupsResource
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: AddedPlanToGroup::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid AddedPlanToGroup response payload");
         }
 
-        return $response;
+        return AddedPlanToGroup::fromArray($response->data);
     }
 
     /**
-     * Remove a plan from a plan group.
-     * @return ApiResponse<RemovedPlanFromGroup>
+     * Retrieve a plan group by ID, including its plans ordered by sortOrder.
+     * @return PlanGroupDetail
      */
-    public function removePlan(
+    public function get(
         string $id,
-        string $planId,
-    ): ApiResponse {
-        $response = $this->http->delete(
-            "/plan-groups/{$id}/plans/{$planId}",
+    ): PlanGroupDetail {
+        $response = $this->http->get(
+            "/plan-groups/{$id}",
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: RemovedPlanFromGroup::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid PlanGroupDetail response payload");
         }
 
-        return $response;
+        return PlanGroupDetail::fromArray($response->data);
     }
 
     /**
-     * Set the display order of plans within a group. All plan IDs in the group must be provided.
-     * @param string[] $planIds
-     * @return ApiResponse<ReorderedPlans>
+     * Update a plan group's name, description, or visibility.
+     * @return PlanGroup
      */
-    public function reorderPlans(
+    public function update(
         string $id,
-        array $planIds,
+        ?string $name = null,
+        ?string $description = null,
+        ?bool $isPublic = null,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->put(
-            "/plan-groups/{$id}/plans/reorder",
+    ): PlanGroup {
+        $response = $this->http->patch(
+            "/plan-groups/{$id}",
             HttpClient::buildBody([
-                "plan_ids" => $planIds,
+                "name" => $name,
+                "description" => $description,
+                "is_public" => $isPublic,
             ]),
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: ReorderedPlans::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid PlanGroup response payload");
         }
 
-        return $response;
+        return PlanGroup::fromArray($response->data);
+    }
+
+    /**
+     * Delete a plan group. Plans in the group are unlinked, not deleted.
+     * @return DeletedObject
+     */
+    public function delete(
+        string $id,
+    ): DeletedObject {
+        $response = $this->http->delete(
+            "/plan-groups/{$id}",
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid DeletedObject response payload");
+        }
+
+        return DeletedObject::fromArray($response->data);
+    }
+
+    /**
+     * List plan groups with cursor-based pagination.
+     * @return PlanGroupsListResult
+     */
+    public function list(
+        ?string $cursor = null,
+        ?int $limit = null,
+    ): PlanGroupsListResult {
+        $response = $this->http->get(
+            "/plan-groups",
+            HttpClient::buildBody([
+                "cursor" => $cursor,
+                "limit" => $limit,
+            ]),
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid PlanGroupsListResult response payload");
+        }
+
+        return PlanGroupsListResult::fromArray($response->data);
+    }
+
+    /**
+     * Create a new plan group for organizing plans.
+     * @return PlanGroup
+     */
+    public function create(
+        string $name,
+        ?string $description = null,
+        ?bool $isPublic = null,
+        ?string $idempotencyKey = null,
+    ): PlanGroup {
+        $response = $this->http->post(
+            "/plan-groups",
+            HttpClient::buildBody([
+                "name" => $name,
+                "description" => $description,
+                "is_public" => $isPublic,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid PlanGroup response payload");
+        }
+
+        return PlanGroup::fromArray($response->data);
     }
 }

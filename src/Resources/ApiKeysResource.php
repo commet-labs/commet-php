@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Commet\Resources;
 
-use Commet\ApiResponse;
 use Commet\HttpClient;
-use Commet\Models\ApiKey;
+use Commet\Models\ApiKeysListResult;
 use Commet\Models\CreatedApiKey;
 use Commet\Models\DeletedObject;
 
@@ -17,13 +16,31 @@ class ApiKeysResource
     ) {}
 
     /**
+     * Permanently revoke and delete an API key.
+     * @return DeletedObject
+     */
+    public function delete(
+        string $id,
+    ): DeletedObject {
+        $response = $this->http->delete(
+            "/api-keys/{$id}",
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid DeletedObject response payload");
+        }
+
+        return DeletedObject::fromArray($response->data);
+    }
+
+    /**
      * List API keys with cursor-based pagination. Keys are returned without the full secret.
-     * @return ApiResponse<ApiKey[]>
+     * @return ApiKeysListResult
      */
     public function list(
         ?string $cursor = null,
         ?int $limit = null,
-    ): ApiResponse {
+    ): ApiKeysListResult {
         $response = $this->http->get(
             "/api-keys",
             HttpClient::buildBody([
@@ -32,34 +49,22 @@ class ApiKeysResource
             ]),
         );
 
-        if ($response->success && is_array($response->data)) {
-            $items = array_map(
-                fn(array $item) => ApiKey::fromArray($item),
-                $response->data,
-            );
-
-            return new ApiResponse(
-                success: true,
-                data: $items,
-                code: $response->code,
-                message: $response->message,
-                hasMore: $response->hasMore,
-                nextCursor: $response->nextCursor,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid ApiKeysListResult response payload");
         }
 
-        return $response;
+        return ApiKeysListResult::fromArray($response->data);
     }
 
     /**
      * Create a new API key. The full key is only returned once in the response.
-     * @return ApiResponse<CreatedApiKey>
+     * @return CreatedApiKey
      */
     public function create(
         string $name,
         ?int $expiresInDays = null,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
+    ): CreatedApiKey {
         $response = $this->http->post(
             "/api-keys",
             HttpClient::buildBody([
@@ -69,38 +74,10 @@ class ApiKeysResource
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: CreatedApiKey::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid CreatedApiKey response payload");
         }
 
-        return $response;
-    }
-
-    /**
-     * Permanently revoke and delete an API key.
-     * @return ApiResponse<DeletedObject>
-     */
-    public function delete(
-        string $id,
-    ): ApiResponse {
-        $response = $this->http->delete(
-            "/api-keys/{$id}",
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: DeletedObject::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
+        return CreatedApiKey::fromArray($response->data);
     }
 }

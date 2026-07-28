@@ -6,8 +6,8 @@ namespace Commet\Tests;
 
 use Commet\Enums\InvoiceType;
 use Commet\HttpClient;
-use Commet\Models\CreatedInvoice;
 use Commet\Models\Invoice;
+use Commet\Models\InvoiceLineItemsItem;
 use Commet\Models\InvoiceDownload;
 use Commet\Resources\InvoicesResource;
 use GuzzleHttp\Handler\MockHandler;
@@ -41,10 +41,7 @@ class InvoicesTest extends TestCase
 
     private function response(mixed $data): Response
     {
-        return new Response(200, ['Content-Type' => 'application/json'], json_encode([
-            'success' => true,
-            'data' => $data,
-        ], JSON_THROW_ON_ERROR));
+        return new Response(200, ['Content-Type' => 'application/json'], json_encode($data, JSON_THROW_ON_ERROR));
     }
 
     private function invoiceWire(array $overrides = []): array
@@ -58,6 +55,7 @@ class InvoicesTest extends TestCase
             'currency' => 'USD',
             'subtotal' => 9000,
             'discount_amount' => 0,
+            'credit_applied' => 0,
             'tax_amount' => 1000,
             'total' => 10000,
             'period_start' => '2026-06-01T00:00:00Z',
@@ -67,6 +65,7 @@ class InvoicesTest extends TestCase
             'metadata' => [],
             'created_at' => '2026-06-01T00:00:00Z',
             'updated_at' => '2026-06-01T00:00:00Z',
+            'line_items' => [],
             'object' => 'invoice',
             'livemode' => false,
         ], $overrides);
@@ -80,19 +79,26 @@ class InvoicesTest extends TestCase
                 'subscription_id' => 'sub_1',
                 'credit_applied' => 500,
                 'line_items' => [
-                    ['description' => 'API overage', 'amount' => 9000],
+                    [
+                        'line_type' => 'feature_overage',
+                        'description' => 'API overage',
+                        'quantity' => 1,
+                        'unit_amount' => 9000,
+                        'amount' => 9000,
+                        'charge_type' => 'usage',
+                    ],
                 ],
             ])),
         ]);
 
         $result = $invoices->get('inv_1');
 
-        $this->assertInstanceOf(Invoice::class, $result->data);
-        $this->assertSame(InvoiceType::Overage, $result->data->invoiceType);
-        $this->assertSame('sub_1', $result->data->subscriptionId);
-        $this->assertSame(500, $result->data->creditApplied);
-        $this->assertIsArray($result->data->lineItems);
-        $this->assertSame('API overage', $result->data->lineItems[0]['description']);
+        $this->assertInstanceOf(Invoice::class, $result);
+        $this->assertSame(InvoiceType::Overage, $result->invoiceType);
+        $this->assertSame('sub_1', $result->subscriptionId);
+        $this->assertSame(500, $result->creditApplied);
+        $this->assertInstanceOf(InvoiceLineItemsItem::class, $result->lineItems[0]);
+        $this->assertSame('API overage', $result->lineItems[0]->description);
     }
 
     public function testGetOmittedOptionalFieldsAreNull(): void
@@ -103,12 +109,12 @@ class InvoicesTest extends TestCase
 
         $result = $invoices->get('inv_1');
 
-        $this->assertInstanceOf(Invoice::class, $result->data);
-        $this->assertSame(InvoiceType::Recurring, $result->data->invoiceType);
-        $this->assertNull($result->data->subscriptionId);
-        $this->assertNull($result->data->creditApplied);
-        $this->assertNull($result->data->lineItems);
-        $this->assertNull($result->data->memo);
+        $this->assertInstanceOf(Invoice::class, $result);
+        $this->assertSame(InvoiceType::Recurring, $result->invoiceType);
+        $this->assertNull($result->subscriptionId);
+        $this->assertSame(0, $result->creditApplied);
+        $this->assertSame([], $result->lineItems);
+        $this->assertNull($result->memo);
     }
 
     public function testCreateAdjustmentSendsNegativeAmountAndCamelCaseCustomerId(): void
@@ -122,13 +128,18 @@ class InvoicesTest extends TestCase
                 'invoice_type' => 'adjustment',
                 'currency' => 'USD',
                 'subtotal' => -2500,
+                'discount_amount' => 0,
+                'credit_applied' => 0,
                 'tax_amount' => 0,
                 'total' => -2500,
+                'period_start' => '2026-06-08T00:00:00Z',
+                'period_end' => '2026-06-08T00:00:00Z',
                 'issue_date' => '2026-06-08T00:00:00Z',
                 'due_date' => '2026-06-08T00:00:00Z',
                 'metadata' => ['reason' => 'goodwill'],
                 'created_at' => '2026-06-08T00:00:00Z',
                 'updated_at' => '2026-06-08T00:00:00Z',
+                'line_items' => [],
                 'object' => 'invoice',
                 'livemode' => false,
             ]),
@@ -148,15 +159,19 @@ class InvoicesTest extends TestCase
         $this->assertSame('goodwill', $body['metadata']['reason']);
         $this->assertArrayNotHasKey('customer_id', $body);
 
-        $this->assertInstanceOf(CreatedInvoice::class, $result->data);
-        $this->assertSame(InvoiceType::Adjustment, $result->data->invoiceType);
-        $this->assertSame(-2500, $result->data->total);
+        $this->assertInstanceOf(Invoice::class, $result);
+        $this->assertSame(InvoiceType::Adjustment, $result->invoiceType);
+        $this->assertSame(-2500, $result->total);
     }
 
     public function testListSendsFilterParamsAsCamelCaseQuery(): void
     {
         $invoices = $this->invoicesWithResponses([
-            $this->response([$this->invoiceWire()]),
+            $this->response([
+                'object' => 'list',
+                'data' => [$this->invoiceWire()],
+                'has_more' => false,
+            ]),
         ]);
 
         $invoices->list(customerId: 'cus_1', subscriptionId: 'sub_9', limit: 25);
@@ -184,8 +199,8 @@ class InvoicesTest extends TestCase
 
         $result = $invoices->getDownloadUrl('inv_1');
 
-        $this->assertInstanceOf(InvoiceDownload::class, $result->data);
-        $this->assertSame('https://files.commet.co/inv_1.pdf?sig=abc', $result->data->url);
-        $this->assertSame('2026-06-15T00:00:00Z', $result->data->expiresAt);
+        $this->assertInstanceOf(InvoiceDownload::class, $result);
+        $this->assertSame('https://files.commet.co/inv_1.pdf?sig=abc', $result->url);
+        $this->assertSame('2026-06-15T00:00:00Z', $result->expiresAt);
     }
 }

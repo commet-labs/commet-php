@@ -8,7 +8,7 @@ class PlanRegionalPricing
 {
     public function __construct(
         public readonly string $priceId,
-        /** @var list<array<string, mixed>> */
+        /** @var PlanRegionalPricingOverridesItem[] */
         public readonly array $overrides,
         public readonly string $object,
         public readonly bool $livemode,
@@ -21,7 +21,7 @@ class PlanRegionalPricing
     {
         return new self(
             priceId: $data["price_id"],
-            overrides: $data["overrides"] ?? [],
+            overrides: array_map(fn(array $item) => PlanRegionalPricingOverridesItem::fromArray($item), $data["overrides"]),
             object: $data["object"],
             livemode: $data["livemode"],
         );

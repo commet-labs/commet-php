@@ -12,8 +12,7 @@ class PlanFeature
         public readonly bool $enabled,
         public readonly int $includedAmount,
         public readonly bool $unlimited,
-        /** @var array<string, mixed> */
-        public readonly array $overage,
+        public readonly PlanFeatureOverage $overage,
         public readonly string $pricingMode,
         public readonly string $object,
         public readonly bool $livemode,
@@ -32,7 +31,7 @@ class PlanFeature
             enabled: $data["enabled"],
             includedAmount: $data["included_amount"],
             unlimited: $data["unlimited"],
-            overage: $data["overage"],
+            overage: PlanFeatureOverage::fromArray($data["overage"]),
             pricingMode: $data["pricing_mode"],
             object: $data["object"],
             livemode: $data["livemode"],

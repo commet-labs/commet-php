@@ -39,10 +39,7 @@ class FeaturesTest extends TestCase
 
     private function response(mixed $data): Response
     {
-        return new Response(200, ['Content-Type' => 'application/json'], json_encode([
-            'success' => true,
-            'data' => $data,
-        ], JSON_THROW_ON_ERROR));
+        return new Response(200, ['Content-Type' => 'application/json'], json_encode($data, JSON_THROW_ON_ERROR));
     }
 
     public function testCreateSerializesFeatureTypeEnumToWireString(): void
@@ -64,7 +61,7 @@ class FeaturesTest extends TestCase
         $result = $features->create(
             name: 'API Calls',
             code: 'api_calls',
-            type: FeatureType::Usage,
+            type: 'usage',
             unitName: 'call',
         );
 
@@ -76,16 +73,17 @@ class FeaturesTest extends TestCase
         $this->assertArrayNotHasKey('unit_name', $body);
         $this->assertArrayNotHasKey('description', $body);
 
-        $this->assertInstanceOf(Feature::class, $result->data);
-        $this->assertSame(FeatureType::Usage, $result->data->type);
-        $this->assertSame('call', $result->data->unitName);
+        $this->assertInstanceOf(Feature::class, $result);
+        $this->assertSame(FeatureType::Usage, $result->type);
+        $this->assertSame('call', $result->unitName);
     }
 
     public function testListHydratesFeatureCatalogWithoutParams(): void
     {
         $features = $this->featuresWithResponses([
             $this->response([
-                [
+                'object' => 'list',
+                'data' => [[
                     'id' => 'feat_1',
                     'name' => 'API Calls',
                     'code' => 'api_calls',
@@ -95,7 +93,8 @@ class FeaturesTest extends TestCase
                     'object' => 'feature',
                     'livemode' => false,
                     'unit_name' => 'call',
-                ],
+                ]],
+                'has_more' => false,
             ]),
         ]);
 
@@ -130,8 +129,8 @@ class FeaturesTest extends TestCase
         $result = $features->get(code: 'api_calls');
 
         $this->assertSame('/api/v1/features/api_calls', $this->history[0]['request']->getUri()->getPath());
-        $this->assertInstanceOf(Feature::class, $result->data);
-        $this->assertSame('api_calls', $result->data->code);
-        $this->assertSame(FeatureType::Usage, $result->data->type);
+        $this->assertInstanceOf(Feature::class, $result);
+        $this->assertSame('api_calls', $result->code);
+        $this->assertSame(FeatureType::Usage, $result->type);
     }
 }

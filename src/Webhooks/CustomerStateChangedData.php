@@ -6,7 +6,6 @@ namespace Commet\Webhooks;
 
 use Commet\Models\WebhookBalance;
 use Commet\Models\WebhookCreditsBalance;
-use Commet\Models\WebhookFeatureAccess;
 use Commet\Models\WebhookPlanRef;
 use Commet\Models\WebhookSeatSummary;
 
@@ -21,7 +20,7 @@ final class CustomerStateChangedData
         public readonly ?WebhookPlanRef $plan,
         public readonly ?string $billingInterval,
         public readonly ?string $consumptionModel,
-        /** @var WebhookFeatureAccess[] */
+        /** @var list<array<string, mixed>> */
         public readonly array $features,
         /** @var WebhookSeatSummary[] */
         public readonly array $seats,
@@ -42,7 +41,7 @@ final class CustomerStateChangedData
             plan: isset($data["plan"]) ? WebhookPlanRef::fromArray($data["plan"]) : null,
             billingInterval: $data["billingInterval"] ?? null,
             consumptionModel: $data["consumptionModel"] ?? null,
-            features: array_map(fn(array $item) => WebhookFeatureAccess::fromArray($item), $data["features"] ?? []),
+            features: $data["features"],
             seats: array_map(fn(array $item) => WebhookSeatSummary::fromArray($item), $data["seats"] ?? []),
             credits: isset($data["credits"]) ? WebhookCreditsBalance::fromArray($data["credits"]) : null,
             balance: isset($data["balance"]) ? WebhookBalance::fromArray($data["balance"]) : null,

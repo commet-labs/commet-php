@@ -11,13 +11,12 @@ class CreditPack
         public readonly string $name,
         public readonly int $credits,
         public readonly int $price,
+        public readonly bool $isActive,
+        public readonly string $createdAt,
+        public readonly string $updatedAt,
         public readonly string $object,
         public readonly bool $livemode,
         public readonly ?string $description = null,
-        public readonly ?string $currency = null,
-        public readonly ?bool $isActive = null,
-        public readonly ?string $createdAt = null,
-        public readonly ?string $updatedAt = null,
     ) {}
 
     /**
@@ -30,13 +29,12 @@ class CreditPack
             name: $data["name"],
             credits: $data["credits"],
             price: $data["price"],
+            isActive: $data["is_active"],
+            createdAt: $data["created_at"],
+            updatedAt: $data["updated_at"],
             object: $data["object"],
             livemode: $data["livemode"],
             description: $data["description"] ?? null,
-            currency: $data["currency"] ?? null,
-            isActive: $data["is_active"] ?? null,
-            createdAt: $data["created_at"] ?? null,
-            updatedAt: $data["updated_at"] ?? null,
         );
     }
 }

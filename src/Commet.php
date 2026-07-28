@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Commet;
 
-use Commet\Resources\UsageResource;
 use Commet\Resources\WebhooksResource;
 
 class Commet
 {
     use GeneratedResources;
 
-    public readonly UsageResource $usage;
     public readonly WebhooksResource $webhooks;
 
     public function __construct(
@@ -34,7 +32,6 @@ class Commet
 
         $this->initResources($http);
 
-        $this->usage = new UsageResource($http);
         $this->webhooks = new WebhooksResource($http);
     }
 }

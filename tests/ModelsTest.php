@@ -71,13 +71,14 @@ class ModelsTest extends TestCase
         $subscription = Subscription::fromArray([
             'id' => 'sub_123',
             'customer_id' => 'cus_456',
-            'plan' => ['id' => 'plan_pro', 'name' => 'Pro'],
+            'plan' => ['id' => 'plan_pro', 'name' => 'Pro', 'base_price' => 9900],
             'name' => 'Pro Subscription',
             'status' => 'active',
             'cancel_at_period_end' => false,
             'start_date' => '2024-01-01T00:00:00Z',
             'created_at' => '2024-01-01T00:00:00Z',
             'updated_at' => '2024-01-02T00:00:00Z',
+            'features' => [],
             'object' => 'subscription',
             'livemode' => false,
             'billing_interval' => 'monthly',
@@ -89,12 +90,13 @@ class ModelsTest extends TestCase
         $this->assertSame(SubscriptionStatus::Active, $subscription->status);
         $this->assertSame(BillingInterval::Monthly, $subscription->billingInterval);
         $this->assertSame(ConsumptionModel::Metered, $subscription->consumptionModel);
-        $this->assertSame(['id' => 'plan_pro', 'name' => 'Pro'], $subscription->plan);
+        $this->assertSame('plan_pro', $subscription->plan->id);
+        $this->assertSame('Pro', $subscription->plan->name);
         $this->assertSame('https://checkout.example.com/abc', $subscription->checkoutUrl);
         $this->assertNull($subscription->trialEndsAt);
     }
 
-    public function testPlanFromArrayKeepsInlineCollectionsAsArrays(): void
+    public function testPlanFromArrayHydratesInlineCollections(): void
     {
         $plan = Plan::fromArray([
             'id' => 'plan_pro',
@@ -108,15 +110,32 @@ class ModelsTest extends TestCase
             'updated_at' => '2024-01-01T00:00:00Z',
             'object' => 'plan',
             'livemode' => false,
-            'prices' => [['billing_interval' => 'monthly', 'price' => 9900]],
-            'features' => [['code' => 'api_calls', 'name' => 'API Calls']],
+            'prices' => [[
+                'id' => 'price_1',
+                'billing_interval' => 'monthly',
+                'price' => 9900,
+                'is_default' => true,
+                'trial_days' => 0,
+                'metadata' => [],
+                'market_prices' => [],
+                'regional_prices' => [],
+            ]],
+            'features' => [[
+                'code' => 'api_calls',
+                'name' => 'API Calls',
+                'type' => 'usage',
+                'enabled' => true,
+                'unlimited' => false,
+                'regional_prices' => [],
+            ]],
+            'exchange_rates' => [],
         ]);
 
         $this->assertSame('plan_pro', $plan->id);
         $this->assertIsArray($plan->prices);
-        $this->assertSame(9900, $plan->prices[0]['price']);
+        $this->assertSame(9900, $plan->prices[0]->price);
         $this->assertIsArray($plan->features);
-        $this->assertSame('api_calls', $plan->features[0]['code']);
+        $this->assertSame('api_calls', $plan->features[0]->code);
     }
 
     public function testSeatEventFromArray(): void
@@ -223,6 +242,9 @@ class ModelsTest extends TestCase
             'object' => 'credit_pack',
             'livemode' => false,
             'currency' => 'USD',
+            'is_active' => true,
+            'created_at' => '2026-06-08T00:00:00Z',
+            'updated_at' => '2026-06-08T00:00:00Z',
             'description' => 'Starter credit pack',
         ]);
 
@@ -259,26 +281,25 @@ class ModelsTest extends TestCase
     {
         $event = UsageEvent::fromArray([
             'id' => 'evt_123',
-            'organization_id' => 'org_456',
             'customer_id' => 'cust_789',
-            'feature' => 'api_calls',
+            'feature_code' => 'api_calls',
+            'value' => 1,
             'ts' => '2024-01-15T10:00:00Z',
             'created_at' => '2024-01-15T10:00:00Z',
-            'idempotency_key' => 'idem_abc',
+            'object' => 'usage_event',
+            'livemode' => false,
+            'event_id' => 'idem_abc',
             'properties' => [
                 [
-                    'id' => 'prop_1',
-                    'usage_event_id' => 'evt_123',
                     'property' => 'model',
                     'value' => 'gpt-4',
-                    'created_at' => '2024-01-15T10:00:00Z',
                 ],
             ],
         ]);
 
         $this->assertSame('evt_123', $event->id);
-        $this->assertSame('api_calls', $event->feature);
-        $this->assertSame('idem_abc', $event->idempotencyKey);
+        $this->assertSame('api_calls', $event->featureCode);
+        $this->assertSame('idem_abc', $event->eventId);
         $this->assertCount(1, $event->properties);
         $this->assertSame('model', $event->properties[0]->property);
         $this->assertSame('gpt-4', $event->properties[0]->value);

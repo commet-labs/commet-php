@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Commet\Resources;
 
-use Commet\ApiResponse;
 use Commet\HttpClient;
 use Commet\Models\PortalAccess;
 
@@ -16,33 +15,28 @@ class PortalResource
 
     /**
      * Generate a customer portal URL. Exactly one identifier (email or customerId) is required.
-     * @return ApiResponse<PortalAccess>
+     * @return PortalAccess
      */
     public function getUrl(
         ?string $email = null,
-        ?string $customerId = null,
         ?string $returnUrl = null,
+        ?string $customerId = null,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
+    ): PortalAccess {
         $response = $this->http->post(
-            "/portal/request-access",
+            "/portal/sessions",
             HttpClient::buildBody([
                 "email" => $email,
-                "customer_id" => $customerId,
                 "return_url" => $returnUrl,
+                "customer_id" => $customerId,
             ]),
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: PortalAccess::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid PortalAccess response payload");
         }
 
-        return $response;
+        return PortalAccess::fromArray($response->data);
     }
 }

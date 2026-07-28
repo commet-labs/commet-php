@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace Commet\Tests;
 
 use Commet\HttpClient;
+use Commet\Models\CompletePayoutVerificationParamsBank;
+use Commet\Models\CompletePayoutVerificationParamsIndividual;
+use Commet\Models\CompletePayoutVerificationParamsIndividualAddress;
 use Commet\Models\Payout;
 use Commet\Models\PayoutBankAccount;
 use Commet\Models\PayoutVerification;
+use Commet\Models\PayoutVerificationVariant2;
 use Commet\Resources\PayoutsResource;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -40,10 +44,7 @@ class PayoutsTest extends TestCase
 
     private function response(array $data): Response
     {
-        return new Response(200, ['Content-Type' => 'application/json'], json_encode([
-            'success' => true,
-            'data' => $data,
-        ], JSON_THROW_ON_ERROR));
+        return new Response(200, ['Content-Type' => 'application/json'], json_encode($data, JSON_THROW_ON_ERROR));
     }
 
     public function testRequestSendsAmountAndOmitsNullDescription(): void
@@ -69,11 +70,11 @@ class PayoutsTest extends TestCase
         $this->assertSame(5000, $body['amount']);
         $this->assertArrayNotHasKey('description', $body);
 
-        $this->assertInstanceOf(Payout::class, $result->data);
-        $this->assertSame('po_123', $result->data->id);
-        $this->assertSame(5000, $result->data->netAmount);
-        $this->assertSame('tr_abc', $result->data->providerTransferId);
-        $this->assertNull($result->data->description);
+        $this->assertInstanceOf(Payout::class, $result);
+        $this->assertSame('po_123', $result->id);
+        $this->assertSame(5000, $result->netAmount);
+        $this->assertSame('tr_abc', $result->providerTransferId);
+        $this->assertNull($result->description);
     }
 
     public function testAddBankAccountSerializesSnakeCaseFieldsAsCamelCaseWire(): void
@@ -114,13 +115,13 @@ class PayoutsTest extends TestCase
         $this->assertArrayNotHasKey('set_default', $body);
 
         // camelCase response hydrates the typed model from snake_case wire.
-        $this->assertInstanceOf(PayoutBankAccount::class, $result->data);
-        $this->assertSame('Jane Doe', $result->data->holderName);
-        $this->assertSame('6789', $result->data->last4);
-        $this->assertTrue($result->data->isDefault);
-        $this->assertSame('Chase', $result->data->bankName);
-        $this->assertSame('checking', $result->data->accountType);
-        $this->assertNull($result->data->providerExternalAccountId);
+        $this->assertInstanceOf(PayoutBankAccount::class, $result);
+        $this->assertSame('Jane Doe', $result->holderName);
+        $this->assertSame('6789', $result->last4);
+        $this->assertTrue($result->isDefault);
+        $this->assertSame('Chase', $result->bankName);
+        $this->assertSame('checking', $result->accountType);
+        $this->assertNull($result->providerExternalAccountId);
     }
 
     public function testAddBankAccountOmitsNullOptionalFields(): void
@@ -160,9 +161,9 @@ class PayoutsTest extends TestCase
                 'provider_account_id' => 'acct_xyz',
                 'status' => 'pending_verification',
                 'transfers_enabled' => false,
-                'object' => 'payout_verification',
+                'object' => 'payout_account',
                 'livemode' => false,
-                'already_exists' => false,
+                'outcome' => 'created',
                 'business_type' => 'individual',
                 'country' => 'US',
             ]),
@@ -173,15 +174,24 @@ class PayoutsTest extends TestCase
             businessType: 'individual',
             businessUrl: 'https://acme.com',
             documentUrl: 'https://files.commet.co/doc.pdf',
-            bank: [
-                'account_number' => '000999888777',
-                'routing_number' => '021000021',
-                'account_holder_name' => 'Acme LLC',
-            ],
-            individual: [
-                'first_name' => 'Jane',
-                'last_name' => 'Doe',
-            ],
+            bank: new CompletePayoutVerificationParamsBank(
+                accountNumber: '000999888777',
+                accountHolderName: 'Acme LLC',
+                routingNumber: '021000021',
+            ),
+            individual: new CompletePayoutVerificationParamsIndividual(
+                firstName: 'Jane',
+                lastName: 'Doe',
+                phone: '+15555555555',
+                dateOfBirth: '1990-01-01',
+                address: new CompletePayoutVerificationParamsIndividualAddress(
+                    line1: '1 Main Street',
+                    city: 'New York',
+                    state: 'NY',
+                    postalCode: '10001',
+                    country: 'US',
+                ),
+            ),
         );
 
         $body = $this->sentBody();
@@ -204,11 +214,12 @@ class PayoutsTest extends TestCase
         // company omitted when null.
         $this->assertArrayNotHasKey('company', $body);
 
-        $this->assertInstanceOf(PayoutVerification::class, $result->data);
-        $this->assertSame('acct_xyz', $result->data->providerAccountId);
-        $this->assertFalse($result->data->transfersEnabled);
-        $this->assertFalse($result->data->alreadyExists);
-        $this->assertSame('individual', $result->data->businessType);
+        $this->assertInstanceOf(PayoutVerification::class, $result);
+        $this->assertInstanceOf(PayoutVerificationVariant2::class, $result);
+        $this->assertSame('acct_xyz', $result->providerAccountId);
+        $this->assertFalse($result->transfersEnabled);
+        $this->assertSame('created', $result->outcome);
+        $this->assertSame('individual', $result->businessType);
     }
 
     public function testPayoutFromArrayHydratesNumericFields(): void

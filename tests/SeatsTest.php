@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Commet\Tests;
 
 use Commet\HttpClient;
-use Commet\Models\BulkSeatUpdate;
 use Commet\Models\SeatBalance;
 use Commet\Models\SeatEvent;
 use Commet\Resources\SeatsResource;
@@ -40,10 +39,7 @@ class SeatsTest extends TestCase
 
     private function response(mixed $data): Response
     {
-        return new Response(200, ['Content-Type' => 'application/json'], json_encode([
-            'success' => true,
-            'data' => $data,
-        ], JSON_THROW_ON_ERROR));
+        return new Response(200, ['Content-Type' => 'application/json'], json_encode($data, JSON_THROW_ON_ERROR));
     }
 
     public function testAddSendsCustomerIdAndFeatureCodeAsCamelCase(): void
@@ -71,35 +67,39 @@ class SeatsTest extends TestCase
         $this->assertArrayNotHasKey('customer_id', $body);
         $this->assertArrayNotHasKey('feature_code', $body);
 
-        $this->assertInstanceOf(SeatEvent::class, $result->data);
-        $this->assertSame(5, $result->data->previousBalance);
-        $this->assertSame(8, $result->data->newBalance);
+        $this->assertInstanceOf(SeatEvent::class, $result);
+        $this->assertSame(5, $result->previousBalance);
+        $this->assertSame(8, $result->newBalance);
     }
 
     public function testSetAllSendsSeatsMapAndHydratesBulkUpdateList(): void
     {
         $seats = $this->seatsWithResponses([
             $this->response([
-                [
+                'object' => 'list',
+                'data' => [[
                     'id' => 'se_a',
+                    'customer_id' => 'cus_1',
                     'feature_code' => 'editor',
                     'previous_balance' => 2,
                     'new_balance' => 5,
                     'ts' => '2026-06-08T00:00:00Z',
                     'created_at' => '2026-06-08T00:00:00Z',
-                    'object' => 'bulk_seat_update',
+                    'object' => 'seat_event',
                     'livemode' => false,
                 ],
                 [
                     'id' => 'se_b',
+                    'customer_id' => 'cus_1',
                     'feature_code' => 'admin',
                     'previous_balance' => 1,
                     'new_balance' => 1,
                     'ts' => '2026-06-08T00:00:00Z',
                     'created_at' => '2026-06-08T00:00:00Z',
-                    'object' => 'bulk_seat_update',
+                    'object' => 'seat_event',
                     'livemode' => false,
-                ],
+                ]],
+                'has_more' => false,
             ]),
         ]);
 
@@ -113,7 +113,7 @@ class SeatsTest extends TestCase
 
         $this->assertIsArray($result->data);
         $this->assertCount(2, $result->data);
-        $this->assertInstanceOf(BulkSeatUpdate::class, $result->data[0]);
+        $this->assertInstanceOf(SeatEvent::class, $result->data[0]);
         $this->assertSame('editor', $result->data[0]->featureCode);
         $this->assertSame(5, $result->data[0]->newBalance);
     }
@@ -135,8 +135,8 @@ class SeatsTest extends TestCase
         $this->assertStringContainsString('customerId=cus_1', $query);
         $this->assertStringContainsString('featureCode=editor', $query);
 
-        $this->assertInstanceOf(SeatBalance::class, $result->data);
-        $this->assertSame(10, $result->data->current);
-        $this->assertSame('2026-06-08T00:00:00Z', $result->data->asOf);
+        $this->assertInstanceOf(SeatBalance::class, $result);
+        $this->assertSame(10, $result->current);
+        $this->assertSame('2026-06-08T00:00:00Z', $result->asOf);
     }
 }

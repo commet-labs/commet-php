@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Commet\Resources;
 
-use Commet\ApiResponse;
 use Commet\HttpClient;
+use Commet\Models\CompletePayoutVerificationParamsBank;
+use Commet\Models\CompletePayoutVerificationParamsCompany;
+use Commet\Models\CompletePayoutVerificationParamsIndividual;
 use Commet\Models\Payout;
 use Commet\Models\PayoutBankAccount;
 use Commet\Models\PayoutVerification;
@@ -18,7 +20,7 @@ class PayoutsResource
 
     /**
      * Add an additional destination bank account to the organization's existing payout account. Country and currency are resolved from the organization. The full account number is never returned — only `last4`.
-     * @return ApiResponse<PayoutBankAccount>
+     * @return PayoutBankAccount
      */
     public function addBankAccount(
         string $accountNumber,
@@ -27,7 +29,7 @@ class PayoutsResource
         ?string $accountType = null,
         ?bool $setDefault = null,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
+    ): PayoutBankAccount {
         $response = $this->http->post(
             "/payouts/bank-accounts",
             HttpClient::buildBody([
@@ -40,27 +42,22 @@ class PayoutsResource
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: PayoutBankAccount::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid PayoutBankAccount response payload");
         }
 
-        return $response;
+        return PayoutBankAccount::fromArray($response->data);
     }
 
     /**
      * Withdraw available balance to the organization's verified payout account. `amount` is in cents (USD, minimum 1000 = $10). The payout is created in `pending` and settles to `paid` asynchronously as provider webhooks arrive.
-     * @return ApiResponse<Payout>
+     * @return Payout
      */
     public function request(
         int $amount,
         ?string $description = null,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
+    ): Payout {
         $response = $this->http->post(
             "/payouts",
             HttpClient::buildBody([
@@ -70,58 +67,45 @@ class PayoutsResource
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: Payout::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Payout response payload");
         }
 
-        return $response;
+        return Payout::fromArray($response->data);
     }
 
     /**
      * Provision the organization's payout account in a single call with the full KYC + bank payload. Uploads the identity document, persists the destination bank, and creates the connected account through the org's payout provider. The account starts `pending_verification` and flips to `verified` via the provider's webhook. Idempotent: returns the existing account if the org already has one.
-     * @param array<string, mixed> $bank
-     * @param array<string, mixed>|null $individual
-     * @param array<string, mixed>|null $company
-     * @return ApiResponse<PayoutVerification>
+     * @return PayoutVerification
      */
     public function completeVerification(
         string $email,
-        string $businessType,
         string $businessUrl,
         string $documentUrl,
-        array $bank,
-        ?array $individual = null,
-        ?array $company = null,
+        CompletePayoutVerificationParamsBank $bank,
+        string $businessType,
+        ?CompletePayoutVerificationParamsIndividual $individual = null,
+        ?CompletePayoutVerificationParamsCompany $company = null,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
+    ): PayoutVerification {
         $response = $this->http->post(
             "/payouts/verification",
             HttpClient::buildBody([
                 "email" => $email,
-                "business_type" => $businessType,
                 "business_url" => $businessUrl,
                 "document_url" => $documentUrl,
                 "bank" => $bank,
+                "business_type" => $businessType,
                 "individual" => $individual,
                 "company" => $company,
             ]),
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: PayoutVerification::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid PayoutVerification response payload");
         }
 
-        return $response;
+        return PayoutVerification::fromArray($response->data);
     }
 }

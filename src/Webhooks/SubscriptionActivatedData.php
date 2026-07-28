@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Commet\Webhooks;
 
-use Commet\Enums\PaymentProvider;
-
 /** Fired once, when the subscription's first charge succeeds and it becomes active — this is where you grant access. Never re-fired on renewals; use payment.received for per-charge notifications. */
 final class SubscriptionActivatedData
 {
@@ -20,7 +18,7 @@ final class SubscriptionActivatedData
         public readonly string $invoiceNumber,
         public readonly float $invoiceTotal,
         public readonly string $invoiceCurrency,
-        public readonly ?PaymentProvider $provider,
+        public readonly ?string $provider,
     ) {}
 
     /**
@@ -39,7 +37,7 @@ final class SubscriptionActivatedData
             invoiceNumber: $data["invoiceNumber"],
             invoiceTotal: $data["invoiceTotal"],
             invoiceCurrency: $data["invoiceCurrency"],
-            provider: isset($data["provider"]) ? PaymentProvider::from($data["provider"]) : null,
+            provider: $data["provider"] ?? null,
         );
     }
 }

@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace Commet\Resources;
 
-use Commet\ApiResponse;
-use Commet\Enums\BillingInterval;
-use Commet\Enums\ConsumptionModel;
-use Commet\Enums\DiscountType;
 use Commet\HttpClient;
-use Commet\Models\DefaultPlanPrice;
+use Commet\Models\AddPlanFeatureParamsOverage;
+use Commet\Models\AddPlanPriceParamsMarketPricesItem;
 use Commet\Models\DeletedObject;
 use Commet\Models\DeletedPlanRegionalPricing;
 use Commet\Models\Plan;
@@ -17,8 +14,13 @@ use Commet\Models\PlanFeature;
 use Commet\Models\PlanPrice;
 use Commet\Models\PlanRegionalPricing;
 use Commet\Models\PlanRegionalPricingResult;
-use Commet\Models\PlanVisibility;
+use Commet\Models\PlansListResult;
 use Commet\Models\RemovedPlanFeature;
+use Commet\Models\SetPlanRegionalPricingParamsFeaturesItem;
+use Commet\Models\SetPlanRegionalPricingParamsPricesItem;
+use Commet\Models\UpdatePlanFeatureParamsOverage;
+use Commet\Models\UpdatePlanPriceParamsMarketPricesItem;
+use Commet\Models\UpsertRegionalPricesParamsOverridesItem;
 
 class PlansResource
 {
@@ -27,198 +29,60 @@ class PlansResource
     ) {}
 
     /**
-     * List all plans with their prices and features. Optionally include private plans.
-     * @return ApiResponse<Plan[]>
+     * Update limits, overage, or enabled status of a feature on a plan.
+     * @return PlanFeature
      */
-    public function list(
-        ?string $includePrivate = null,
-    ): ApiResponse {
-        $response = $this->http->get(
-            "/plans",
-            HttpClient::buildBody([
-                "include_private" => $includePrivate,
-            ]),
-        );
-
-        if ($response->success && is_array($response->data)) {
-            $items = array_map(
-                fn(array $item) => Plan::fromArray($item),
-                $response->data,
-            );
-
-            return new ApiResponse(
-                success: true,
-                data: $items,
-                code: $response->code,
-                message: $response->message,
-                hasMore: $response->hasMore,
-                nextCursor: $response->nextCursor,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Get detailed plan information by code or ID.
-     * @return ApiResponse<Plan>
-     */
-    public function get(
+    public function updateFeature(
         string $id,
-    ): ApiResponse {
-        $response = $this->http->get(
-            "/plans/{$id}",
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: Plan::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Create a new plan with optional consumption model, visibility, and plan group assignment.
-     * @param array<string, mixed>|null $metadata
-     * @return ApiResponse<Plan>
-     */
-    public function create(
-        string $name,
-        string $code,
-        ?string $description = null,
-        ?ConsumptionModel $consumptionModel = null,
-        ?bool $isPublic = null,
-        ?bool $isFree = null,
-        ?bool $blockOnExhaustion = null,
-        ?string $planGroupId = null,
-        ?array $metadata = null,
+        string $featureId,
+        ?bool $enabled = null,
+        ?int $includedAmount = null,
+        ?bool $unlimited = null,
+        ?UpdatePlanFeatureParamsOverage $overage = null,
+        ?int $creditsPerUnit = null,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->post(
-            "/plans/manage",
+    ): PlanFeature {
+        $response = $this->http->patch(
+            "/plans/{$id}/features/{$featureId}",
             HttpClient::buildBody([
-                "name" => $name,
-                "code" => $code,
-                "description" => $description,
-                "consumption_model" => $consumptionModel?->value,
-                "is_public" => $isPublic,
-                "is_free" => $isFree,
-                "block_on_exhaustion" => $blockOnExhaustion,
-                "plan_group_id" => $planGroupId,
-                "metadata" => $metadata,
+                "enabled" => $enabled,
+                "included_amount" => $includedAmount,
+                "unlimited" => $unlimited,
+                "overage" => $overage,
+                "credits_per_unit" => $creditsPerUnit,
             ]),
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: Plan::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid PlanFeature response payload");
         }
 
-        return $response;
+        return PlanFeature::fromArray($response->data);
     }
 
     /**
-     * Update a plan's name, description, visibility, or metadata.
-     * @param array<string, mixed>|null $metadata
-     * @return ApiResponse<Plan>
+     * Detach a feature from a plan.
+     * @return RemovedPlanFeature
      */
-    public function update(
+    public function removeFeature(
         string $id,
-        ?string $name = null,
-        ?string $description = null,
-        ?array $metadata = null,
-        ?bool $isPublic = null,
-        ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->put(
-            "/plans/{$id}/manage",
-            HttpClient::buildBody([
-                "name" => $name,
-                "description" => $description,
-                "metadata" => $metadata,
-                "is_public" => $isPublic,
-            ]),
-            idempotencyKey: $idempotencyKey,
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: Plan::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Soft-delete a plan.
-     * @return ApiResponse<DeletedObject>
-     */
-    public function delete(
-        string $id,
-    ): ApiResponse {
+        string $featureId,
+    ): RemovedPlanFeature {
         $response = $this->http->delete(
-            "/plans/{$id}/manage",
+            "/plans/{$id}/features/{$featureId}",
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: DeletedObject::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid RemovedPlanFeature response payload");
         }
 
-        return $response;
-    }
-
-    /**
-     * Toggle a plan between public and private.
-     * @return ApiResponse<PlanVisibility>
-     */
-    public function setVisibility(
-        string $id,
-        bool $isPublic,
-        ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->put(
-            "/plans/{$id}/visibility",
-            HttpClient::buildBody([
-                "is_public" => $isPublic,
-            ]),
-            idempotencyKey: $idempotencyKey,
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: PlanVisibility::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
+        return RemovedPlanFeature::fromArray($response->data);
     }
 
     /**
      * Attach a feature to a plan with limits, overage, and credits configuration.
-     * @param array<string, mixed>|null $overage
-     * @return ApiResponse<PlanFeature>
+     * @return PlanFeature
      */
     public function addFeature(
         string $id,
@@ -226,12 +90,12 @@ class PlansResource
         ?bool $enabled = null,
         ?int $includedAmount = null,
         ?bool $unlimited = null,
-        ?array $overage = null,
+        ?AddPlanFeatureParamsOverage $overage = null,
         ?int $creditsPerUnit = null,
         ?string $pricingMode = null,
         ?int $margin = null,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
+    ): PlanFeature {
         $response = $this->http->post(
             "/plans/{$id}/features",
             HttpClient::buildBody([
@@ -247,127 +111,84 @@ class PlansResource
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: PlanFeature::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid PlanFeature response payload");
         }
 
-        return $response;
+        return PlanFeature::fromArray($response->data);
     }
 
     /**
-     * Update limits, overage, or enabled status of a feature on a plan.
-     * @param array<string, mixed>|null $overage
-     * @return ApiResponse<PlanFeature>
+     * Set a specific price as the default and return the updated plan price.
+     * @return PlanPrice
      */
-    public function updateFeature(
+    public function setDefaultPrice(
         string $id,
-        string $featureId,
-        ?bool $enabled = null,
-        ?int $includedAmount = null,
-        ?bool $unlimited = null,
-        ?array $overage = null,
-        ?int $creditsPerUnit = null,
+        string $priceId,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
+    ): PlanPrice {
         $response = $this->http->put(
-            "/plans/{$id}/features/{$featureId}",
-            HttpClient::buildBody([
-                "enabled" => $enabled,
-                "included_amount" => $includedAmount,
-                "unlimited" => $unlimited,
-                "overage" => $overage,
-                "credits_per_unit" => $creditsPerUnit,
-            ]),
+            "/plans/{$id}/prices/{$priceId}/default",
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: PlanFeature::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid PlanPrice response payload");
         }
 
-        return $response;
+        return PlanPrice::fromArray($response->data);
     }
 
     /**
-     * Detach a feature from a plan.
-     * @return ApiResponse<RemovedPlanFeature>
+     * Create or update regional currency price overrides for a plan price.
+     * @param UpsertRegionalPricesParamsOverridesItem[] $overrides
+     * @return PlanRegionalPricing
      */
-    public function removeFeature(
+    public function setRegionalPrices(
         string $id,
-        string $featureId,
-    ): ApiResponse {
-        $response = $this->http->delete(
-            "/plans/{$id}/features/{$featureId}",
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: RemovedPlanFeature::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Add a billing interval price to a plan with optional trial days and included balance/credits.
-     * @param array<string, mixed>|null $introOffer
-     * @return ApiResponse<PlanPrice>
-     */
-    public function addPrice(
-        string $id,
-        BillingInterval $billingInterval,
-        int $price,
-        ?int $trialDays = null,
-        ?bool $isDefault = null,
-        ?int $includedBalance = null,
-        ?int $includedCredits = null,
-        ?array $introOffer = null,
+        string $priceId,
+        array $overrides,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->post(
-            "/plans/{$id}/prices",
+    ): PlanRegionalPricing {
+        $response = $this->http->put(
+            "/plans/{$id}/prices/{$priceId}/regional",
             HttpClient::buildBody([
-                "billing_interval" => $billingInterval->value,
-                "price" => $price,
-                "trial_days" => $trialDays,
-                "is_default" => $isDefault,
-                "included_balance" => $includedBalance,
-                "included_credits" => $includedCredits,
-                "intro_offer" => $introOffer,
+                "overrides" => $overrides,
             ]),
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: PlanPrice::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid PlanRegionalPricing response payload");
         }
 
-        return $response;
+        return PlanRegionalPricing::fromArray($response->data);
     }
 
     /**
-     * Update an existing price on a plan.
-     * @param array<string, mixed>|null $introOffer
-     * @return ApiResponse<PlanPrice>
+     * Remove all regional currency overrides for a plan price. The request is rejected while billable subscriptions depend on an override.
+     * @return DeletedPlanRegionalPricing
+     */
+    public function deleteRegionalPrices(
+        string $id,
+        string $priceId,
+    ): DeletedPlanRegionalPricing {
+        $response = $this->http->delete(
+            "/plans/{$id}/prices/{$priceId}/regional",
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid DeletedPlanRegionalPricing response payload");
+        }
+
+        return DeletedPlanRegionalPricing::fromArray($response->data);
+    }
+
+    /**
+     * Update a base price or market price variant. Removing a base market override is rejected while a variant depends on it. Offer terms are managed through Offers.
+     * @param array<string, mixed>|null $metadata
+     * @param UpdatePlanPriceParamsMarketPricesItem[]|null $marketPrices
+     * @return PlanPrice
      */
     public function updatePrice(
         string $id,
@@ -377,10 +198,11 @@ class PlansResource
         ?int $trialDays = null,
         ?int $includedBalance = null,
         ?int $includedCredits = null,
-        ?array $introOffer = null,
+        ?array $metadata = null,
+        ?array $marketPrices = null,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->put(
+    ): PlanPrice {
+        $response = $this->http->patch(
             "/plans/{$id}/prices/{$priceId}",
             HttpClient::buildBody([
                 "price" => $price,
@@ -388,110 +210,85 @@ class PlansResource
                 "trial_days" => $trialDays,
                 "included_balance" => $includedBalance,
                 "included_credits" => $includedCredits,
-                "intro_offer" => $introOffer,
+                "metadata" => $metadata,
+                "market_prices" => $marketPrices,
             ]),
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: PlanPrice::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid PlanPrice response payload");
         }
 
-        return $response;
+        return PlanPrice::fromArray($response->data);
     }
 
     /**
-     * Remove a price from a plan.
-     * @return ApiResponse<DeletedObject>
+     * Archive a price for new subscriptions. Existing subscriptions that selected it continue using its current catalog value.
+     * @return DeletedObject
      */
     public function deletePrice(
         string $id,
         string $priceId,
-    ): ApiResponse {
+    ): DeletedObject {
         $response = $this->http->delete(
             "/plans/{$id}/prices/{$priceId}",
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: DeletedObject::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid DeletedObject response payload");
         }
 
-        return $response;
+        return DeletedObject::fromArray($response->data);
     }
 
     /**
-     * Set a specific price as the default for its plan. Unsets previous default.
-     * @return ApiResponse<DefaultPlanPrice>
+     * Add a base price or a selectable market price variant. Variants inherit their base price outside the markets they override. Configure introductory and promotional benefits through Offers.
+     * @param array<string, mixed>|null $metadata
+     * @param AddPlanPriceParamsMarketPricesItem[]|null $marketPrices
+     * @return PlanPrice
      */
-    public function setDefaultPrice(
+    public function addPrice(
         string $id,
-        string $priceId,
+        string $billingInterval,
+        ?array $metadata = null,
+        ?int $price = null,
+        ?int $trialDays = null,
+        ?bool $isDefault = null,
+        ?int $includedBalance = null,
+        ?int $includedCredits = null,
+        ?array $marketPrices = null,
+        ?string $inheritsFromPriceId = null,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->put(
-            "/plans/{$id}/prices/{$priceId}/default",
-            idempotencyKey: $idempotencyKey,
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: DefaultPlanPrice::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Create or update regional currency price overrides for a plan price.
-     * @param list<array<string, mixed>> $overrides
-     * @return ApiResponse<PlanRegionalPricing>
-     */
-    public function setRegionalPrices(
-        string $id,
-        string $priceId,
-        array $overrides,
-        ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->put(
-            "/plans/{$id}/prices/{$priceId}/regional",
+    ): PlanPrice {
+        $response = $this->http->post(
+            "/plans/{$id}/prices",
             HttpClient::buildBody([
-                "overrides" => $overrides,
+                "billing_interval" => $billingInterval,
+                "metadata" => $metadata,
+                "price" => $price,
+                "trial_days" => $trialDays,
+                "is_default" => $isDefault,
+                "included_balance" => $includedBalance,
+                "included_credits" => $includedCredits,
+                "market_prices" => $marketPrices,
+                "inherits_from_price_id" => $inheritsFromPriceId,
             ]),
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: PlanRegionalPricing::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid PlanPrice response payload");
         }
 
-        return $response;
+        return PlanPrice::fromArray($response->data);
     }
 
     /**
-     * Configure a plan's regional pricing for one currency. USD configures the United States variant; exchangeRate acts as its price multiplier. Sending only currency and exchangeRate derives every regional value (base price, included balance, feature overage, intro offer) from the default USD value. Optional per-price and per-feature overrides are stored as manual values.
-     * @param list<array<string, mixed>>|null $prices
-     * @param list<array<string, mixed>>|null $features
-     * @param list<array<string, mixed>>|null $introOffers
-     * @return ApiResponse<PlanRegionalPricingResult>
+     * Configure regional prices and feature overage values for one currency. Currency-specific offer terms are managed through Offers.
+     * @param SetPlanRegionalPricingParamsPricesItem[]|null $prices
+     * @param SetPlanRegionalPricingParamsFeaturesItem[]|null $features
+     * @return PlanRegionalPricingResult
      */
     public function setRegionalPricing(
         string $id,
@@ -499,9 +296,8 @@ class PlansResource
         float $exchangeRate,
         ?array $prices = null,
         ?array $features = null,
-        ?array $introOffers = null,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
+    ): PlanRegionalPricingResult {
         $response = $this->http->put(
             "/plans/{$id}/regional",
             HttpClient::buildBody([
@@ -509,44 +305,166 @@ class PlansResource
                 "exchange_rate" => $exchangeRate,
                 "prices" => $prices,
                 "features" => $features,
-                "intro_offers" => $introOffers,
             ]),
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: PlanRegionalPricingResult::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid PlanRegionalPricingResult response payload");
         }
 
-        return $response;
+        return PlanRegionalPricingResult::fromArray($response->data);
     }
 
     /**
-     * Remove all regional currency overrides for a plan price.
-     * @return ApiResponse<DeletedPlanRegionalPricing>
+     * Get a plan with public price IDs and their automatic introductory offer IDs.
+     * @return Plan
      */
-    public function deleteRegionalPrices(
+    public function get(
         string $id,
-        string $priceId,
-    ): ApiResponse {
-        $response = $this->http->delete(
-            "/plans/{$id}/prices/{$priceId}/regional",
+    ): Plan {
+        $response = $this->http->get(
+            "/plans/{$id}",
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: DeletedPlanRegionalPricing::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Plan response payload");
         }
 
-        return $response;
+        return Plan::fromArray($response->data);
+    }
+
+    /**
+     * Update a plan's name, description, visibility, or metadata.
+     * @param array<string, mixed>|null $metadata
+     * @return Plan
+     */
+    public function update(
+        string $id,
+        ?string $name = null,
+        ?string $description = null,
+        ?array $metadata = null,
+        ?bool $isPublic = null,
+        ?string $idempotencyKey = null,
+    ): Plan {
+        $response = $this->http->patch(
+            "/plans/{$id}",
+            HttpClient::buildBody([
+                "name" => $name,
+                "description" => $description,
+                "metadata" => $metadata,
+                "is_public" => $isPublic,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Plan response payload");
+        }
+
+        return Plan::fromArray($response->data);
+    }
+
+    /**
+     * Soft-delete a plan.
+     * @return DeletedObject
+     */
+    public function delete(
+        string $id,
+    ): DeletedObject {
+        $response = $this->http->delete(
+            "/plans/{$id}",
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid DeletedObject response payload");
+        }
+
+        return DeletedObject::fromArray($response->data);
+    }
+
+    /**
+     * Set a plan's public visibility and return the updated plan.
+     * @return Plan
+     */
+    public function setVisibility(
+        string $id,
+        bool $isPublic,
+        ?string $idempotencyKey = null,
+    ): Plan {
+        $response = $this->http->put(
+            "/plans/{$id}/visibility",
+            HttpClient::buildBody([
+                "is_public" => $isPublic,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Plan response payload");
+        }
+
+        return Plan::fromArray($response->data);
+    }
+
+    /**
+     * List plans with public price IDs and their automatic introductory offer IDs.
+     * @return PlansListResult
+     */
+    public function list(
+        ?bool $includePrivate = null,
+    ): PlansListResult {
+        $response = $this->http->get(
+            "/plans",
+            HttpClient::buildBody([
+                "include_private" => $includePrivate,
+            ]),
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid PlansListResult response payload");
+        }
+
+        return PlansListResult::fromArray($response->data);
+    }
+
+    /**
+     * Create a new plan with optional consumption model, visibility, and plan group assignment.
+     * @param array<string, mixed>|null $metadata
+     * @return Plan
+     */
+    public function create(
+        string $name,
+        string $code,
+        ?string $description = null,
+        ?string $consumptionModel = null,
+        ?bool $isPublic = null,
+        ?bool $isFree = null,
+        ?bool $blockOnExhaustion = null,
+        ?string $planGroupId = null,
+        ?array $metadata = null,
+        ?string $idempotencyKey = null,
+    ): Plan {
+        $response = $this->http->post(
+            "/plans",
+            HttpClient::buildBody([
+                "name" => $name,
+                "code" => $code,
+                "description" => $description,
+                "consumption_model" => $consumptionModel,
+                "is_public" => $isPublic,
+                "is_free" => $isFree,
+                "block_on_exhaustion" => $blockOnExhaustion,
+                "plan_group_id" => $planGroupId,
+                "metadata" => $metadata,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Plan response payload");
+        }
+
+        return Plan::fromArray($response->data);
     }
 }

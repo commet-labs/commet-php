@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Commet\Models;
 
 use Commet\Enums\BillingInterval;
-use Commet\Enums\DiscountType;
 
 class PlanPrice
 {
@@ -16,14 +15,18 @@ class PlanPrice
         public readonly int $price,
         public readonly bool $isDefault,
         public readonly int $trialDays,
+        /** @var array<string, mixed> */
+        public readonly array $metadata,
+        /** @var PlanPriceMarketPricesItem[] */
+        public readonly array $marketPrices,
         public readonly string $createdAt,
         public readonly string $updatedAt,
         public readonly string $object,
         public readonly bool $livemode,
         public readonly ?int $includedBalance = null,
         public readonly ?int $includedCredits = null,
-        /** @var array<string, mixed>|null */
-        public readonly ?array $introOffer = null,
+        public readonly ?string $offerId = null,
+        public readonly ?string $inheritsFromPriceId = null,
     ) {}
 
     /**
@@ -38,13 +41,16 @@ class PlanPrice
             price: $data["price"],
             isDefault: $data["is_default"],
             trialDays: $data["trial_days"],
+            metadata: $data["metadata"],
+            marketPrices: array_map(fn(array $item) => PlanPriceMarketPricesItem::fromArray($item), $data["market_prices"]),
             createdAt: $data["created_at"],
             updatedAt: $data["updated_at"],
             object: $data["object"],
             livemode: $data["livemode"],
             includedBalance: $data["included_balance"] ?? null,
             includedCredits: $data["included_credits"] ?? null,
-            introOffer: $data["intro_offer"] ?? null,
+            offerId: $data["offer_id"] ?? null,
+            inheritsFromPriceId: $data["inherits_from_price_id"] ?? null,
         );
     }
 }

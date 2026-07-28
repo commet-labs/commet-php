@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Commet\Resources;
 
-use Commet\ApiResponse;
 use Commet\HttpClient;
+use Commet\Models\TrackUsageParamsPropertiesItem;
 use Commet\Models\UsageAdjustment;
-use Commet\Models\UsageCheckResult;
+use Commet\Models\UsageCheck;
 use Commet\Models\UsageEvent;
 
 class UsageResource
@@ -17,160 +17,102 @@ class UsageResource
     ) {}
 
     /**
-     * @param array<string, string>|null $properties
-     * @return ApiResponse<UsageEvent>
-     */
-    public function track(
-        string $feature,
-        ?string $customerId = null,
-        ?int $value = null,
-        ?string $idempotencyKey = null,
-        ?string $timestamp = null,
-        ?array $properties = null,
-    ): ApiResponse {
-        $formattedProperties = null;
-        if ($properties !== null) {
-            $formattedProperties = [];
-            foreach ($properties as $key => $propertyValue) {
-                $formattedProperties[] = ['property' => $key, 'value' => $propertyValue];
-            }
-        }
-
-        $body = HttpClient::buildBody([
-            'feature' => $feature,
-            'customer_id' => $customerId,
-            'idempotency_key' => $idempotencyKey,
-            'timestamp' => $timestamp ?? gmdate('c'),
-            'properties' => $formattedProperties,
-            'value' => $value,
-        ]);
-
-        $response = $this->http->post('/usage/events', $body, idempotencyKey: $idempotencyKey);
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: UsageEvent::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * @param array<string, string>|null $properties
-     * @return ApiResponse<UsageEvent>
-     */
-    public function trackModelTokens(
-        string $feature,
-        string $model,
-        int $inputTokens,
-        int $outputTokens,
-        ?string $customerId = null,
-        ?int $cacheReadTokens = null,
-        ?int $cacheWriteTokens = null,
-        ?string $idempotencyKey = null,
-        ?string $timestamp = null,
-        ?array $properties = null,
-    ): ApiResponse {
-        $formattedProperties = null;
-        if ($properties !== null) {
-            $formattedProperties = [];
-            foreach ($properties as $key => $propertyValue) {
-                $formattedProperties[] = ['property' => $key, 'value' => $propertyValue];
-            }
-        }
-
-        $body = HttpClient::buildBody([
-            'feature' => $feature,
-            'customer_id' => $customerId,
-            'idempotency_key' => $idempotencyKey,
-            'timestamp' => $timestamp ?? gmdate('c'),
-            'properties' => $formattedProperties,
-            'model' => $model,
-            'input_tokens' => $inputTokens,
-            'output_tokens' => $outputTokens,
-            'cache_read_tokens' => $cacheReadTokens,
-            'cache_write_tokens' => $cacheWriteTokens,
-        ]);
-
-        $response = $this->http->post('/usage/events', $body, idempotencyKey: $idempotencyKey);
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: UsageEvent::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Dry-run: checks if a usage event would be allowed without tracking it.
-     *
-     * @return ApiResponse<UsageCheckResult>
+     * Check if a customer can consume a feature before actual consumption. Returns availability and cost estimates based on the plan's consumption model.
+     * @return UsageCheck
      */
     public function check(
         string $customerId,
         string $featureCode,
-        int $quantity,
-    ): ApiResponse {
-        $response = $this->http->post('/usage/check', [
-            'customer_id' => $customerId,
-            'feature_code' => $featureCode,
-            'quantity' => $quantity,
-        ]);
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: UsageCheckResult::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Set a metered feature's usage to an exact value for the current period.
-     *
-     * @return ApiResponse<UsageAdjustment>
-     */
-    public function set(
-        string $customerId,
-        string $feature,
-        int $value,
-        ?string $reason = null,
+        ?int $quantity = null,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->put(
-            '/usage',
+    ): UsageCheck {
+        $response = $this->http->post(
+            "/usage/check",
             HttpClient::buildBody([
-                'customer_id' => $customerId,
-                'feature' => $feature,
-                'value' => $value,
-                'idempotency_key' => $idempotencyKey,
-                'reason' => $reason,
+                "customer_id" => $customerId,
+                "feature_code" => $featureCode,
+                "quantity" => $quantity,
             ]),
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: UsageAdjustment::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid UsageCheck response payload");
         }
 
-        return $response;
+        return UsageCheck::fromArray($response->data);
+    }
+
+    /**
+     * Track a usage event for a metered feature. Deducts from balance/credits if applicable.
+     * @param TrackUsageParamsPropertiesItem[]|null $properties
+     * @return UsageEvent
+     */
+    public function track(
+        string $featureCode,
+        string $customerId,
+        ?string $eventId = null,
+        ?string $timestamp = null,
+        ?array $properties = null,
+        ?string $model = null,
+        ?int $inputTokens = null,
+        ?int $outputTokens = null,
+        ?float $value = null,
+        ?int $cacheReadTokens = null,
+        ?int $cacheWriteTokens = null,
+        ?string $idempotencyKey = null,
+    ): UsageEvent {
+        $response = $this->http->post(
+            "/usage/events",
+            HttpClient::buildBody([
+                "feature_code" => $featureCode,
+                "customer_id" => $customerId,
+                "event_id" => $eventId,
+                "timestamp" => $timestamp,
+                "properties" => $properties,
+                "model" => $model,
+                "input_tokens" => $inputTokens,
+                "output_tokens" => $outputTokens,
+                "value" => $value,
+                "cache_read_tokens" => $cacheReadTokens,
+                "cache_write_tokens" => $cacheWriteTokens,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid UsageEvent response payload");
+        }
+
+        return UsageEvent::fromArray($response->data);
+    }
+
+    /**
+     * Set a metered feature's usage to an exact value for the current period. Use the Idempotency-Key header to make retries safe.
+     * @return UsageAdjustment
+     */
+    public function set(
+        string $customerId,
+        string $featureCode,
+        int $value,
+        ?string $reason = null,
+        ?string $idempotencyKey = null,
+    ): UsageAdjustment {
+        $response = $this->http->put(
+            "/usage",
+            HttpClient::buildBody([
+                "customer_id" => $customerId,
+                "feature_code" => $featureCode,
+                "value" => $value,
+                "reason" => $reason,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid UsageAdjustment response payload");
+        }
+
+        return UsageAdjustment::fromArray($response->data);
     }
 }

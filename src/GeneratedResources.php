@@ -11,11 +11,13 @@ use Commet\Resources\CustomersResource;
 use Commet\Resources\FeatureAccessResource;
 use Commet\Resources\FeaturesResource;
 use Commet\Resources\InvoicesResource;
+use Commet\Resources\OffersResource;
 use Commet\Resources\PaymentsResource;
 use Commet\Resources\PayoutsResource;
 use Commet\Resources\PlanGroupsResource;
 use Commet\Resources\PlansResource;
 use Commet\Resources\PortalResource;
+use Commet\Resources\PricingResource;
 use Commet\Resources\PromoCodesResource;
 use Commet\Resources\ProvisioningResource;
 use Commet\Resources\QuotaResource;
@@ -23,6 +25,7 @@ use Commet\Resources\SeatsResource;
 use Commet\Resources\SubscriptionsResource;
 use Commet\Resources\TestClockResource;
 use Commet\Resources\TransactionsResource;
+use Commet\Resources\UsageResource;
 
 trait GeneratedResources
 {
@@ -33,11 +36,13 @@ trait GeneratedResources
     public FeatureAccessResource $featureAccess;
     public FeaturesResource $features;
     public InvoicesResource $invoices;
+    public OffersResource $offers;
     public PaymentsResource $payments;
     public PayoutsResource $payouts;
     public PlanGroupsResource $planGroups;
     public PlansResource $plans;
     public PortalResource $portal;
+    public PricingResource $pricing;
     public PromoCodesResource $promoCodes;
     public ProvisioningResource $provisioning;
     public QuotaResource $quota;
@@ -45,6 +50,7 @@ trait GeneratedResources
     public SubscriptionsResource $subscriptions;
     public TestClockResource $testClock;
     public TransactionsResource $transactions;
+    public UsageResource $usage;
 
     private function initResources(HttpClient $http): void
     {
@@ -55,11 +61,13 @@ trait GeneratedResources
         $this->featureAccess = new FeatureAccessResource($http);
         $this->features = new FeaturesResource($http);
         $this->invoices = new InvoicesResource($http);
+        $this->offers = new OffersResource($http);
         $this->payments = new PaymentsResource($http);
         $this->payouts = new PayoutsResource($http);
         $this->planGroups = new PlanGroupsResource($http);
         $this->plans = new PlansResource($http);
         $this->portal = new PortalResource($http);
+        $this->pricing = new PricingResource($http);
         $this->promoCodes = new PromoCodesResource($http);
         $this->provisioning = new ProvisioningResource($http);
         $this->quota = new QuotaResource($http);
@@ -67,5 +75,6 @@ trait GeneratedResources
         $this->subscriptions = new SubscriptionsResource($http);
         $this->testClock = new TestClockResource($http);
         $this->transactions = new TransactionsResource($http);
+        $this->usage = new UsageResource($http);
     }
 }

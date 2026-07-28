@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Commet\Resources;
 
-use Commet\ApiResponse;
 use Commet\Enums\Timezone;
 use Commet\HttpClient;
+use Commet\Models\BatchCreateCustomersParamsCustomersItem;
+use Commet\Models\CreateCustomerParamsAddress;
 use Commet\Models\Customer;
 use Commet\Models\CustomerBatch;
+use Commet\Models\CustomersListResult;
+use Commet\Models\UpdateCustomerParamsAddress;
 
 class CustomersResource
 {
@@ -17,47 +20,113 @@ class CustomersResource
     ) {}
 
     /**
+     * Retrieve a customer by their public ID, including subscription status and metadata.
+     * @return Customer
+     */
+    public function get(
+        string $id,
+    ): Customer {
+        $response = $this->http->get(
+            "/customers/{$id}",
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Customer response payload");
+        }
+
+        return Customer::fromArray($response->data);
+    }
+
+    /**
+     * Update a customer's name, external ID, or metadata.
+     * @param array<string, mixed>|null $metadata
+     * @return Customer
+     */
+    public function update(
+        string $id,
+        ?string $email = null,
+        ?string $fullName = null,
+        ?string $taxDocument = null,
+        ?string $externalId = null,
+        ?Timezone $timezone = null,
+        ?array $metadata = null,
+        ?UpdateCustomerParamsAddress $address = null,
+        ?string $idempotencyKey = null,
+    ): Customer {
+        $response = $this->http->patch(
+            "/customers/{$id}",
+            HttpClient::buildBody([
+                "email" => $email,
+                "full_name" => $fullName,
+                "tax_document" => $taxDocument,
+                "external_id" => $externalId,
+                "timezone" => $timezone?->value,
+                "metadata" => $metadata,
+                "address" => $address,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Customer response payload");
+        }
+
+        return Customer::fromArray($response->data);
+    }
+
+    /**
+     * Create up to 100 customers in a single request.
+     * @param BatchCreateCustomersParamsCustomersItem[] $customers
+     * @return CustomerBatch
+     */
+    public function createBatch(
+        array $customers,
+        ?string $idempotencyKey = null,
+    ): CustomerBatch {
+        $response = $this->http->post(
+            "/customers/batch",
+            HttpClient::buildBody([
+                "customers" => $customers,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid CustomerBatch response payload");
+        }
+
+        return CustomerBatch::fromArray($response->data);
+    }
+
+    /**
      * List customers with cursor-based pagination.
-     * @return ApiResponse<Customer[]>
+     * @return CustomersListResult
      */
     public function list(
-        ?string $externalId = null,
-        ?int $limit = null,
         ?string $cursor = null,
-    ): ApiResponse {
+        ?int $limit = null,
+        ?string $externalId = null,
+    ): CustomersListResult {
         $response = $this->http->get(
             "/customers",
             HttpClient::buildBody([
-                "external_id" => $externalId,
-                "limit" => $limit,
                 "cursor" => $cursor,
+                "limit" => $limit,
+                "external_id" => $externalId,
             ]),
         );
 
-        if ($response->success && is_array($response->data)) {
-            $items = array_map(
-                fn(array $item) => Customer::fromArray($item),
-                $response->data,
-            );
-
-            return new ApiResponse(
-                success: true,
-                data: $items,
-                code: $response->code,
-                message: $response->message,
-                hasMore: $response->hasMore,
-                nextCursor: $response->nextCursor,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid CustomersListResult response payload");
         }
 
-        return $response;
+        return CustomersListResult::fromArray($response->data);
     }
 
     /**
      * Create a new customer. Idempotent when customerId is provided.
-     * @param array<string, mixed>|null $address
      * @param array<string, mixed>|null $metadata
-     * @return ApiResponse<Customer>
+     * @return Customer
      */
     public function create(
         string $email,
@@ -65,12 +134,12 @@ class CustomersResource
         ?string $externalId = null,
         ?string $fullName = null,
         ?string $taxDocument = null,
-        ?array $address = null,
+        ?CreateCustomerParamsAddress $address = null,
         ?string $addressId = null,
         ?Timezone $timezone = null,
         ?array $metadata = null,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
+    ): Customer {
         $response = $this->http->post(
             "/customers",
             HttpClient::buildBody([
@@ -87,110 +156,10 @@ class CustomersResource
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: Customer::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Customer response payload");
         }
 
-        return $response;
-    }
-
-    /**
-     * Retrieve a customer by their public ID, including subscription status and metadata.
-     * @return ApiResponse<Customer>
-     */
-    public function get(
-        string $id,
-    ): ApiResponse {
-        $response = $this->http->get(
-            "/customers/{$id}",
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: Customer::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Update a customer's name, external ID, or metadata.
-     * @param array<string, mixed>|null $metadata
-     * @param array<string, mixed>|null $address
-     * @return ApiResponse<Customer>
-     */
-    public function update(
-        string $id,
-        ?string $email = null,
-        ?string $fullName = null,
-        ?string $taxDocument = null,
-        ?string $externalId = null,
-        ?Timezone $timezone = null,
-        ?array $metadata = null,
-        ?array $address = null,
-        ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->put(
-            "/customers/{$id}",
-            HttpClient::buildBody([
-                "email" => $email,
-                "full_name" => $fullName,
-                "tax_document" => $taxDocument,
-                "external_id" => $externalId,
-                "timezone" => $timezone?->value,
-                "metadata" => $metadata,
-                "address" => $address,
-            ]),
-            idempotencyKey: $idempotencyKey,
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: Customer::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Create up to 100 customers in a single request.
-     * @param list<array<string, mixed>> $customers
-     * @return ApiResponse<CustomerBatch>
-     */
-    public function createBatch(
-        array $customers,
-        ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->post(
-            "/customers/batch",
-            HttpClient::buildBody([
-                "customers" => $customers,
-            ]),
-            idempotencyKey: $idempotencyKey,
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: CustomerBatch::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
+        return Customer::fromArray($response->data);
     }
 }

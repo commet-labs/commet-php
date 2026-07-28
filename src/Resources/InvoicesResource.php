@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace Commet\Resources;
 
-use Commet\ApiResponse;
 use Commet\HttpClient;
-use Commet\Models\CreatedInvoice;
 use Commet\Models\Invoice;
 use Commet\Models\InvoiceDownload;
-use Commet\Models\InvoiceStatus;
+use Commet\Models\InvoicesListResult;
 use Commet\Models\SentInvoice;
 
 class InvoicesResource
@@ -19,73 +17,120 @@ class InvoicesResource
     ) {}
 
     /**
-     * List invoices with cursor-based pagination. Filter by customer, status, or subscription.
-     * @return ApiResponse<Invoice[]>
+     * Generate a signed URL to download the invoice as a PDF. The URL expires after 7 days.
+     * @return InvoiceDownload
      */
-    public function list(
-        ?string $customerId = null,
-        ?string $status = null,
-        ?string $subscriptionId = null,
-        ?string $cursor = null,
-        ?int $limit = null,
-    ): ApiResponse {
-        $response = $this->http->get(
-            "/invoices",
-            HttpClient::buildBody([
-                "customer_id" => $customerId,
-                "status" => $status,
-                "subscription_id" => $subscriptionId,
-                "cursor" => $cursor,
-                "limit" => $limit,
-            ]),
+    public function getDownloadUrl(
+        string $id,
+        ?string $idempotencyKey = null,
+    ): InvoiceDownload {
+        $response = $this->http->post(
+            "/invoices/{$id}/download-links",
+            idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            $items = array_map(
-                fn(array $item) => Invoice::fromArray($item),
-                $response->data,
-            );
-
-            return new ApiResponse(
-                success: true,
-                data: $items,
-                code: $response->code,
-                message: $response->message,
-                hasMore: $response->hasMore,
-                nextCursor: $response->nextCursor,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid InvoiceDownload response payload");
         }
 
-        return $response;
+        return InvoiceDownload::fromArray($response->data);
     }
 
     /**
      * Retrieve a single invoice by its public ID, including line items.
-     * @return ApiResponse<Invoice>
+     * @return Invoice
      */
     public function get(
         string $id,
-    ): ApiResponse {
+    ): Invoice {
         $response = $this->http->get(
             "/invoices/{$id}",
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: Invoice::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Invoice response payload");
         }
 
-        return $response;
+        return Invoice::fromArray($response->data);
     }
 
     /**
-     * Create a one-off adjustment invoice. Use a negative amount for a credit.
+     * Send the invoice to the customer via email.
+     * @return SentInvoice
+     */
+    public function send(
+        string $id,
+        ?string $idempotencyKey = null,
+    ): SentInvoice {
+        $response = $this->http->post(
+            "/invoices/{$id}/send",
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid SentInvoice response payload");
+        }
+
+        return SentInvoice::fromArray($response->data);
+    }
+
+    /**
+     * Mark an outstanding invoice as "paid" or "void" and return the updated invoice. Cannot change the status of already paid or voided invoices.
+     * @return Invoice
+     */
+    public function updateStatus(
+        string $id,
+        string $status,
+        ?string $idempotencyKey = null,
+    ): Invoice {
+        $response = $this->http->patch(
+            "/invoices/{$id}/status",
+            HttpClient::buildBody([
+                "status" => $status,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Invoice response payload");
+        }
+
+        return Invoice::fromArray($response->data);
+    }
+
+    /**
+     * List invoices with cursor-based pagination. Filter by customer, status, or subscription.
+     * @return InvoicesListResult
+     */
+    public function list(
+        ?string $cursor = null,
+        ?int $limit = null,
+        ?string $customerId = null,
+        ?string $status = null,
+        ?string $subscriptionId = null,
+    ): InvoicesListResult {
+        $response = $this->http->get(
+            "/invoices",
+            HttpClient::buildBody([
+                "cursor" => $cursor,
+                "limit" => $limit,
+                "customer_id" => $customerId,
+                "status" => $status,
+                "subscription_id" => $subscriptionId,
+            ]),
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid InvoicesListResult response payload");
+        }
+
+        return InvoicesListResult::fromArray($response->data);
+    }
+
+    /**
+     * Create a one-off adjustment invoice and return the created invoice. Use a negative amount for a credit.
      * @param array<string, mixed>|null $metadata
-     * @return ApiResponse<CreatedInvoice>
+     * @return Invoice
      */
     public function createAdjustment(
         string $customerId,
@@ -93,7 +138,7 @@ class InvoicesResource
         string $description,
         ?array $metadata = null,
         ?string $idempotencyKey = null,
-    ): ApiResponse {
+    ): Invoice {
         $response = $this->http->post(
             "/invoices",
             HttpClient::buildBody([
@@ -105,92 +150,10 @@ class InvoicesResource
             idempotencyKey: $idempotencyKey,
         );
 
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: CreatedInvoice::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Invoice response payload");
         }
 
-        return $response;
-    }
-
-    /**
-     * Generate a signed URL to download the invoice as a PDF. The URL expires after 7 days.
-     * @return ApiResponse<InvoiceDownload>
-     */
-    public function getDownloadUrl(
-        string $id,
-    ): ApiResponse {
-        $response = $this->http->get(
-            "/invoices/{$id}/download",
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: InvoiceDownload::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Send the invoice to the customer via email.
-     * @return ApiResponse<SentInvoice>
-     */
-    public function send(
-        string $id,
-        ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->post(
-            "/invoices/{$id}/send",
-            idempotencyKey: $idempotencyKey,
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: SentInvoice::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Mark an outstanding invoice as "paid" or "void". Cannot change the status of already paid or voided invoices.
-     * @return ApiResponse<InvoiceStatus>
-     */
-    public function updateStatus(
-        string $id,
-        string $status,
-        ?string $idempotencyKey = null,
-    ): ApiResponse {
-        $response = $this->http->put(
-            "/invoices/{$id}/status",
-            HttpClient::buildBody([
-                "status" => $status,
-            ]),
-            idempotencyKey: $idempotencyKey,
-        );
-
-        if ($response->success && is_array($response->data)) {
-            return new ApiResponse(
-                success: true,
-                data: InvoiceStatus::fromArray($response->data),
-                code: $response->code,
-                message: $response->message,
-            );
-        }
-
-        return $response;
+        return Invoice::fromArray($response->data);
     }
 }

@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-use Commet\Enums\PaymentProvider;
-
 class Payment
 {
     public function __construct(
         public readonly string $id,
         public readonly string $kind,
         public readonly string $status,
-        public readonly PaymentProvider $provider,
+        public readonly string $provider,
         public readonly int $amountSubtotal,
         public readonly int $taxAmount,
         public readonly int $amountTotal,
@@ -38,7 +36,7 @@ class Payment
             id: $data["id"],
             kind: $data["kind"],
             status: $data["status"],
-            provider: PaymentProvider::from($data["provider"]),
+            provider: $data["provider"],
             amountSubtotal: $data["amount_subtotal"],
             taxAmount: $data["tax_amount"],
             amountTotal: $data["amount_total"],
