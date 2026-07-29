@@ -22,7 +22,7 @@ class HttpClient
 
     public const API_VERSION = '2026-07-24';
 
-    private const VERSION = '8.0.0';
+    private const VERSION = '8.0.1';
 
     private const BODY_METHODS = ['POST', 'PUT', 'PATCH'];
 
