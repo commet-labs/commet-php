@@ -16,6 +16,7 @@ class PlanChangeVariant3OfferApplication
         public readonly int $total,
         /** @var PlanChangeVariant3OfferApplicationPhasesItem[] */
         public readonly array $phases,
+        public readonly PlanChangeVariant3OfferApplicationAppliesTo $appliesTo,
     ) {}
 
     /**
@@ -32,6 +33,7 @@ class PlanChangeVariant3OfferApplication
             discountAmount: $data["discount_amount"],
             total: $data["total"],
             phases: array_map(fn(array $item) => PlanChangeVariant3OfferApplicationPhasesItem::fromArray($item), $data["phases"]),
+            appliesTo: PlanChangeVariant3OfferApplicationAppliesTo::fromArray($data["applies_to"]),
         );
     }
 }

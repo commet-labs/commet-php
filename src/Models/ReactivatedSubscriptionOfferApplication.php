@@ -16,6 +16,7 @@ class ReactivatedSubscriptionOfferApplication
         public readonly int $total,
         /** @var ReactivatedSubscriptionOfferApplicationPhasesItem[] */
         public readonly array $phases,
+        public readonly ReactivatedSubscriptionOfferApplicationAppliesTo $appliesTo,
     ) {}
 
     /**
@@ -32,6 +33,7 @@ class ReactivatedSubscriptionOfferApplication
             discountAmount: $data["discount_amount"],
             total: $data["total"],
             phases: array_map(fn(array $item) => ReactivatedSubscriptionOfferApplicationPhasesItem::fromArray($item), $data["phases"]),
+            appliesTo: ReactivatedSubscriptionOfferApplicationAppliesTo::fromArray($data["applies_to"]),
         );
     }
 }

@@ -18,7 +18,7 @@ class OffersResource
     ) {}
 
     /**
-     * Retrieve a canonical offer by its public ID.
+     * Retrieve reusable offer terms by public ID.
      * @return Offer
      */
     public function get(
@@ -36,8 +36,7 @@ class OffersResource
     }
 
     /**
-     * Replace an offer's catalog definition. Existing offer applications keep their immutable accepted terms.
-     * @param string[] $planPriceIds
+     * Replace reusable offer terms. Existing applications keep their immutable accepted terms.
      * @param UpdateOfferParamsPhasesItem[] $phases
      * @param array<string, mixed>|null $metadata
      * @return Offer
@@ -45,8 +44,6 @@ class OffersResource
     public function update(
         string $id,
         string $name,
-        string $purpose,
-        array $planPriceIds,
         array $phases,
         ?array $metadata = null,
         ?string $startsAt = null,
@@ -58,8 +55,6 @@ class OffersResource
             "/offers/{$id}",
             HttpClient::buildBody([
                 "name" => $name,
-                "purpose" => $purpose,
-                "plan_price_ids" => $planPriceIds,
                 "phases" => $phases,
                 "metadata" => $metadata,
                 "starts_at" => $startsAt,
@@ -77,7 +72,7 @@ class OffersResource
     }
 
     /**
-     * Soft-delete an offer. Existing applications and their accepted terms remain available for billing and audit.
+     * Soft-delete an Offer. Existing applications and their accepted terms remain available for billing and audit.
      * @return DeletedOffer
      */
     public function delete(
@@ -95,14 +90,12 @@ class OffersResource
     }
 
     /**
-     * List the organization's canonical introductory and promotional offers.
+     * List reusable offer terms. Offers are independent from plans, prices, eligibility, and distribution channels.
      * @return OffersListResult
      */
     public function list(
         ?string $cursor = null,
         ?int $limit = null,
-        ?string $planPriceId = null,
-        ?string $purpose = null,
         ?bool $active = null,
     ): OffersListResult {
         $response = $this->http->get(
@@ -110,8 +103,6 @@ class OffersResource
             HttpClient::buildBody([
                 "cursor" => $cursor,
                 "limit" => $limit,
-                "plan_price_id" => $planPriceId,
-                "purpose" => $purpose,
                 "active" => $active,
             ]),
         );
@@ -124,16 +115,13 @@ class OffersResource
     }
 
     /**
-     * Create a canonical offer scoped to one or more plan prices. Currency-specific phases require an explicit USD value and never fall back across currencies.
-     * @param string[] $planPriceIds
+     * Create reusable offer terms without assigning a plan, price, eligibility rule, or distribution channel.
      * @param CreateOfferParamsPhasesItem[] $phases
      * @param array<string, mixed>|null $metadata
      * @return Offer
      */
     public function create(
         string $name,
-        string $purpose,
-        array $planPriceIds,
         array $phases,
         ?array $metadata = null,
         ?string $startsAt = null,
@@ -145,8 +133,6 @@ class OffersResource
             "/offers",
             HttpClient::buildBody([
                 "name" => $name,
-                "purpose" => $purpose,
-                "plan_price_ids" => $planPriceIds,
                 "phases" => $phases,
                 "metadata" => $metadata,
                 "starts_at" => $startsAt,

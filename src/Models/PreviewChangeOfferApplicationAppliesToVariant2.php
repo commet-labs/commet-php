@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class CreatedSubscriptionDiscount
+class PreviewChangeOfferApplicationAppliesToVariant2 extends PreviewChangeOfferApplicationAppliesTo
 {
     public function __construct(
         public readonly string $type,
-        public readonly float $value,
-        public readonly ?string $name = null,
-        public readonly ?string $endsAt = null,
+        public readonly string $id,
     ) {}
 
     /**
@@ -20,9 +18,7 @@ class CreatedSubscriptionDiscount
     {
         return new self(
             type: $data["type"],
-            value: $data["value"],
-            name: $data["name"] ?? null,
-            endsAt: $data["ends_at"] ?? null,
+            id: $data["id"],
         );
     }
 }

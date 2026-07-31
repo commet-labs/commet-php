@@ -8,8 +8,7 @@ class PlanChangeVariant1OfferApplicationPhasesItemVariant1 extends PlanChangeVar
 {
     public function __construct(
         public readonly string $type,
-        public readonly int $durationCycles,
-        public readonly int $percentage,
+        public readonly int $durationDays,
         public readonly ?string $startsAt = null,
         public readonly ?string $endsAt = null,
     ) {}
@@ -21,8 +20,7 @@ class PlanChangeVariant1OfferApplicationPhasesItemVariant1 extends PlanChangeVar
     {
         return new self(
             type: $data["type"],
-            durationCycles: $data["duration_cycles"],
-            percentage: $data["percentage"],
+            durationDays: $data["duration_days"],
             startsAt: $data["starts_at"] ?? null,
             endsAt: $data["ends_at"] ?? null,
         );

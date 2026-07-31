@@ -40,20 +40,18 @@ $commet->usage->track(
 
 ## Offers and pricing Markets
 
-SDK v8 exposes reusable Offers, country Market Groups, and selectable `priceId` variants:
+SDK v9 exposes independent Offers, top-level Markets, and selectable `priceId` variants:
 
 ```php
 use Commet\Models\CreateOfferParamsPhasesItemVariant2;
 
-$market = $commet->pricing->createMarketGroup(
+$market = $commet->markets->create(
     name: 'Argentina',
     countryCodes: ['AR'],
 );
 
 $offer = $commet->offers->create(
     name: 'First three months at 25% off',
-    purpose: 'promotional',
-    planPriceIds: ['pp_monthly'],
     phases: [
         new CreateOfferParamsPhasesItemVariant2(
             type: 'percentage',
@@ -64,7 +62,7 @@ $offer = $commet->offers->create(
 );
 ```
 
-Promo Codes reference Promotional Offers. Omitting `priceId` during subscription creation keeps normal default-price resolution.
+Promo Codes reference compatible Offers. Omitting `priceId` during subscription creation keeps normal default-price resolution.
 
 ## Quota
 

@@ -58,6 +58,7 @@ class SubscriptionsTest extends TestCase
             'startDate' => '2026-06-03',
             'createdAt' => '2026-06-03T00:00:00Z',
             'updatedAt' => '2026-06-03T00:00:00Z',
+            'offerApplications' => [],
             'object' => 'subscription',
             'livemode' => false,
         ], JSON_THROW_ON_ERROR));

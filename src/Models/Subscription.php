@@ -20,6 +20,8 @@ class Subscription
         public readonly string $startDate,
         public readonly string $createdAt,
         public readonly string $updatedAt,
+        /** @var SubscriptionOfferApplication[] */
+        public readonly array $offerApplications,
         /** @var SubscriptionFeaturesItem[] */
         public readonly array $features,
         public readonly string $object,
@@ -30,7 +32,6 @@ class Subscription
         public readonly ?SubscriptionCurrentPeriod $currentPeriod = null,
         public readonly ?SubscriptionCancellation $cancellation = null,
         public readonly ?SubscriptionScheduledPlanChange $scheduledPlanChange = null,
-        public readonly ?SubscriptionDiscount $discount = null,
         public readonly ?string $endDate = null,
         public readonly ?int $billingDayOfMonth = null,
         public readonly ?string $nextBillingDate = null,
@@ -56,6 +57,7 @@ class Subscription
             startDate: $data["start_date"],
             createdAt: $data["created_at"],
             updatedAt: $data["updated_at"],
+            offerApplications: array_map(fn(array $item) => SubscriptionOfferApplication::fromArray($item), $data["offer_applications"]),
             features: array_map(fn(array $item) => SubscriptionFeaturesItem::fromArray($item), $data["features"]),
             object: $data["object"],
             livemode: $data["livemode"],
@@ -65,7 +67,6 @@ class Subscription
             currentPeriod: isset($data["current_period"]) ? SubscriptionCurrentPeriod::fromArray($data["current_period"]) : null,
             cancellation: isset($data["cancellation"]) ? SubscriptionCancellation::fromArray($data["cancellation"]) : null,
             scheduledPlanChange: isset($data["scheduled_plan_change"]) ? SubscriptionScheduledPlanChange::fromArray($data["scheduled_plan_change"]) : null,
-            discount: isset($data["discount"]) ? SubscriptionDiscount::fromArray($data["discount"]) : null,
             endDate: $data["end_date"] ?? null,
             billingDayOfMonth: $data["billing_day_of_month"] ?? null,
             nextBillingDate: $data["next_billing_date"] ?? null,

@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class SubscriptionDiscount
+class SubscriptionOfferApplicationPhaseVariant2 extends SubscriptionOfferApplicationPhase
 {
     public function __construct(
         public readonly string $type,
-        public readonly float $value,
-        public readonly ?string $name = null,
+        public readonly int $percentage,
+        public readonly ?int $durationCycles = null,
+        public readonly ?string $startsAt = null,
         public readonly ?string $endsAt = null,
     ) {}
 
@@ -20,8 +21,9 @@ class SubscriptionDiscount
     {
         return new self(
             type: $data["type"],
-            value: $data["value"],
-            name: $data["name"] ?? null,
+            percentage: $data["percentage"],
+            durationCycles: $data["duration_cycles"] ?? null,
+            startsAt: $data["starts_at"] ?? null,
             endsAt: $data["ends_at"] ?? null,
         );
     }

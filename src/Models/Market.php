@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class MarketGroup
+class Market
 {
     public function __construct(
         public readonly string $id,

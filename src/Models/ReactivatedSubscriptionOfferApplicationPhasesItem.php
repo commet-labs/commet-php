@@ -12,9 +12,10 @@ abstract class ReactivatedSubscriptionOfferApplicationPhasesItem
     public static function fromArray(array $data): self
     {
         return match ($data["type"] ?? null) {
-            "percentage" => ReactivatedSubscriptionOfferApplicationPhasesItemVariant1::fromArray($data),
-            "amount_off" => ReactivatedSubscriptionOfferApplicationPhasesItemVariant2::fromArray($data),
-            "fixed_price" => ReactivatedSubscriptionOfferApplicationPhasesItemVariant3::fromArray($data),
+            "free_trial" => ReactivatedSubscriptionOfferApplicationPhasesItemVariant1::fromArray($data),
+            "percentage" => ReactivatedSubscriptionOfferApplicationPhasesItemVariant2::fromArray($data),
+            "amount_off" => ReactivatedSubscriptionOfferApplicationPhasesItemVariant3::fromArray($data),
+            "fixed_price" => ReactivatedSubscriptionOfferApplicationPhasesItemVariant4::fromArray($data),
             default => ReactivatedSubscriptionOfferApplicationPhasesItemVariant1::fromArray($data),
         };
     }

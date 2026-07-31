@@ -8,9 +8,9 @@ class OfferPhasesItemVariant4 extends OfferPhasesItem
 {
     public function __construct(
         public readonly string $type,
-        public readonly int $durationCycles,
         /** @var OfferPhasesItemVariant4PricesItem[] */
         public readonly array $prices,
+        public readonly ?int $durationCycles = null,
     ) {}
 
     /**
@@ -20,8 +20,8 @@ class OfferPhasesItemVariant4 extends OfferPhasesItem
     {
         return new self(
             type: $data["type"],
-            durationCycles: $data["duration_cycles"],
             prices: array_map(fn(array $item) => OfferPhasesItemVariant4PricesItem::fromArray($item), $data["prices"]),
+            durationCycles: $data["duration_cycles"] ?? null,
         );
     }
 }

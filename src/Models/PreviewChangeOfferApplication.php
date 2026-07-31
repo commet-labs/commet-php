@@ -16,6 +16,7 @@ class PreviewChangeOfferApplication
         public readonly int $total,
         /** @var PreviewChangeOfferApplicationPhasesItem[] */
         public readonly array $phases,
+        public readonly PreviewChangeOfferApplicationAppliesTo $appliesTo,
     ) {}
 
     /**
@@ -32,6 +33,7 @@ class PreviewChangeOfferApplication
             discountAmount: $data["discount_amount"],
             total: $data["total"],
             phases: array_map(fn(array $item) => PreviewChangeOfferApplicationPhasesItem::fromArray($item), $data["phases"]),
+            appliesTo: PreviewChangeOfferApplicationAppliesTo::fromArray($data["applies_to"]),
         );
     }
 }

@@ -6,48 +6,48 @@ namespace Commet\Resources;
 
 use Commet\HttpClient;
 use Commet\Models\DeletedObject;
-use Commet\Models\MarketGroup;
-use Commet\Models\PricingListMarketGroupsResult;
+use Commet\Models\Market;
+use Commet\Models\MarketsListResult;
 
-class PricingResource
+class MarketsResource
 {
     public function __construct(
         private readonly HttpClient $http,
     ) {}
 
     /**
-     * Get one reusable pricing market group.
-     * @return MarketGroup
+     * Get one reusable market.
+     * @return Market
      */
-    public function getMarketGroup(
+    public function get(
         string $id,
-    ): MarketGroup {
+    ): Market {
         $response = $this->http->get(
-            "/pricing/market-groups/{$id}",
+            "/markets/{$id}",
         );
 
         if (!is_array($response->data)) {
-            throw new \UnexpectedValueException("Invalid MarketGroup response payload");
+            throw new \UnexpectedValueException("Invalid Market response payload");
         }
 
-        return MarketGroup::fromArray($response->data);
+        return Market::fromArray($response->data);
     }
 
     /**
-     * Replace the name, countries, and metadata of a pricing market group.
+     * Replace the name, countries, and metadata of a market.
      * @param string[] $countryCodes
      * @param array<string, mixed>|null $metadata
-     * @return MarketGroup
+     * @return Market
      */
-    public function updateMarketGroup(
+    public function update(
         string $id,
         string $name,
         array $countryCodes,
         ?array $metadata = null,
         ?string $idempotencyKey = null,
-    ): MarketGroup {
+    ): Market {
         $response = $this->http->patch(
-            "/pricing/market-groups/{$id}",
+            "/markets/{$id}",
             HttpClient::buildBody([
                 "name" => $name,
                 "country_codes" => $countryCodes,
@@ -57,21 +57,21 @@ class PricingResource
         );
 
         if (!is_array($response->data)) {
-            throw new \UnexpectedValueException("Invalid MarketGroup response payload");
+            throw new \UnexpectedValueException("Invalid Market response payload");
         }
 
-        return MarketGroup::fromArray($response->data);
+        return Market::fromArray($response->data);
     }
 
     /**
-     * Delete an unused pricing market group. Groups referenced by prices or subscriptions cannot be deleted.
+     * Delete an unused market. Markets referenced by prices or subscriptions cannot be deleted.
      * @return DeletedObject
      */
-    public function deleteMarketGroup(
+    public function delete(
         string $id,
     ): DeletedObject {
         $response = $this->http->delete(
-            "/pricing/market-groups/{$id}",
+            "/markets/{$id}",
         );
 
         if (!is_array($response->data)) {
@@ -82,37 +82,37 @@ class PricingResource
     }
 
     /**
-     * List reusable country groups used to resolve market-specific prices independently from currency.
-     * @return PricingListMarketGroupsResult
+     * List reusable country groups that resolve market-specific prices independently from currency.
+     * @return MarketsListResult
      */
-    public function listMarketGroups(
+    public function list(
 
-    ): PricingListMarketGroupsResult {
+    ): MarketsListResult {
         $response = $this->http->get(
-            "/pricing/market-groups",
+            "/markets",
         );
 
         if (!is_array($response->data)) {
-            throw new \UnexpectedValueException("Invalid PricingListMarketGroupsResult response payload");
+            throw new \UnexpectedValueException("Invalid MarketsListResult response payload");
         }
 
-        return PricingListMarketGroupsResult::fromArray($response->data);
+        return MarketsListResult::fromArray($response->data);
     }
 
     /**
-     * Create a reusable country group. Countries can belong to only one active group; each price chooses its currency independently.
+     * Create a reusable market without attaching it to a plan or price. Countries can belong to only one active market.
      * @param string[] $countryCodes
      * @param array<string, mixed>|null $metadata
-     * @return MarketGroup
+     * @return Market
      */
-    public function createMarketGroup(
+    public function create(
         string $name,
         array $countryCodes,
         ?array $metadata = null,
         ?string $idempotencyKey = null,
-    ): MarketGroup {
+    ): Market {
         $response = $this->http->post(
-            "/pricing/market-groups",
+            "/markets",
             HttpClient::buildBody([
                 "name" => $name,
                 "country_codes" => $countryCodes,
@@ -122,9 +122,9 @@ class PricingResource
         );
 
         if (!is_array($response->data)) {
-            throw new \UnexpectedValueException("Invalid MarketGroup response payload");
+            throw new \UnexpectedValueException("Invalid Market response payload");
         }
 
-        return MarketGroup::fromArray($response->data);
+        return Market::fromArray($response->data);
     }
 }

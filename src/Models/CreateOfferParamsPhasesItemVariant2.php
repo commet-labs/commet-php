@@ -8,8 +8,8 @@ class CreateOfferParamsPhasesItemVariant2 extends CreateOfferParamsPhasesItem
 {
     public function __construct(
         public readonly string $type,
-        public readonly int $durationCycles,
         public readonly int $percentage,
+        public readonly ?int $durationCycles = null,
     ) {}
 
     /**
@@ -19,8 +19,8 @@ class CreateOfferParamsPhasesItemVariant2 extends CreateOfferParamsPhasesItem
     {
         return new self(
             type: $data["type"],
-            durationCycles: $data["duration_cycles"],
             percentage: $data["percentage"],
+            durationCycles: $data["duration_cycles"] ?? null,
         );
     }
 }

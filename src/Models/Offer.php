@@ -9,9 +9,6 @@ class Offer
     public function __construct(
         public readonly string $id,
         public readonly string $name,
-        public readonly string $purpose,
-        /** @var string[] */
-        public readonly array $planPriceIds,
         /** @var OfferPhasesItem[] */
         public readonly array $phases,
         /** @var array<string, mixed> */
@@ -33,8 +30,6 @@ class Offer
         return new self(
             id: $data["id"],
             name: $data["name"],
-            purpose: $data["purpose"],
-            planPriceIds: $data["plan_price_ids"],
             phases: array_map(fn(array $item) => OfferPhasesItem::fromArray($item), $data["phases"]),
             metadata: $data["metadata"],
             active: $data["active"],

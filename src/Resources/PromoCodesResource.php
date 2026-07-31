@@ -89,7 +89,7 @@ class PromoCodesResource
     }
 
     /**
-     * Create a distribution code for an existing promotional offer. Offer economics remain owned by the referenced Offer.
+     * Create a distribution code for an existing Offer. The referenced Offer owns the benefit and duration; the promo code owns redemption restrictions.
      * @param string[]|null $planIds
      * @return PromoCode
      */

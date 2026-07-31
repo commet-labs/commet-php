@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class PricingListMarketGroupsResult
+class MarketsListResult
 {
     public function __construct(
         public readonly string $object,
-        /** @var MarketGroup[] */
+        /** @var Market[] */
         public readonly array $data,
         public readonly bool $hasMore,
         public readonly ?string $nextCursor = null,
@@ -21,7 +21,7 @@ class PricingListMarketGroupsResult
     {
         return new self(
             object: $data["object"],
-            data: array_map(fn(array $item) => MarketGroup::fromArray($item), $data["data"]),
+            data: array_map(fn(array $item) => Market::fromArray($item), $data["data"]),
             hasMore: $data["has_more"],
             nextCursor: $data["next_cursor"] ?? null,
         );

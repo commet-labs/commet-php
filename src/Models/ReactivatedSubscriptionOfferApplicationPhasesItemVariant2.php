@@ -8,8 +8,8 @@ class ReactivatedSubscriptionOfferApplicationPhasesItemVariant2 extends Reactiva
 {
     public function __construct(
         public readonly string $type,
-        public readonly int $durationCycles,
-        public readonly int $amount,
+        public readonly int $percentage,
+        public readonly ?int $durationCycles = null,
         public readonly ?string $startsAt = null,
         public readonly ?string $endsAt = null,
     ) {}
@@ -21,8 +21,8 @@ class ReactivatedSubscriptionOfferApplicationPhasesItemVariant2 extends Reactiva
     {
         return new self(
             type: $data["type"],
-            durationCycles: $data["duration_cycles"],
-            amount: $data["amount"],
+            percentage: $data["percentage"],
+            durationCycles: $data["duration_cycles"] ?? null,
             startsAt: $data["starts_at"] ?? null,
             endsAt: $data["ends_at"] ?? null,
         );

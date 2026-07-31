@@ -12,9 +12,10 @@ abstract class PlanChangeVariant3OfferApplicationPhasesItem
     public static function fromArray(array $data): self
     {
         return match ($data["type"] ?? null) {
-            "percentage" => PlanChangeVariant3OfferApplicationPhasesItemVariant1::fromArray($data),
-            "amount_off" => PlanChangeVariant3OfferApplicationPhasesItemVariant2::fromArray($data),
-            "fixed_price" => PlanChangeVariant3OfferApplicationPhasesItemVariant3::fromArray($data),
+            "free_trial" => PlanChangeVariant3OfferApplicationPhasesItemVariant1::fromArray($data),
+            "percentage" => PlanChangeVariant3OfferApplicationPhasesItemVariant2::fromArray($data),
+            "amount_off" => PlanChangeVariant3OfferApplicationPhasesItemVariant3::fromArray($data),
+            "fixed_price" => PlanChangeVariant3OfferApplicationPhasesItemVariant4::fromArray($data),
             default => PlanChangeVariant3OfferApplicationPhasesItemVariant1::fromArray($data),
         };
     }
