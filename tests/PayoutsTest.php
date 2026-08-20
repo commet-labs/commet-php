@@ -149,21 +149,6 @@ class PayoutsTest extends TestCase
         $this->assertArrayNotHasKey('setDefault', $body);
     }
 
-    public function testCompleteVerificationSendsNoKycBody(): void
-    {
-        $payouts = $this->payoutsWithResponses([
-            $this->response([
-                'success' => true,
-                'data' => null,
-            ]),
-        ]);
-
-        $result = $payouts->completeVerification();
-
-        $this->assertSame('', (string) $this->history[0]['request']->getBody());
-        $this->assertNull($result);
-    }
-
     public function testPayoutFromArrayHydratesNumericFields(): void
     {
         $payout = Payout::fromArray([

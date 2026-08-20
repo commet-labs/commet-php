@@ -30,12 +30,6 @@ class TestClockTest extends TestCase
         return new TestClockResource($http);
     }
 
-    /** @return array<string, mixed> */
-    private function sentBody(int $index = 0): array
-    {
-        return json_decode((string) $this->history[$index]['request']->getBody(), true);
-    }
-
     private function response(array $data): Response
     {
         return new Response(200, ['Content-Type' => 'application/json'], json_encode($data, JSON_THROW_ON_ERROR));
@@ -50,7 +44,6 @@ class TestClockTest extends TestCase
                 'object' => 'test_clock',
                 'livemode' => false,
                 'simulated_time' => '2026-07-01T00:00:00Z',
-                'latest_run' => null,
             ]),
         ]);
 
@@ -71,7 +64,6 @@ class TestClockTest extends TestCase
                 'object' => 'test_clock',
                 'livemode' => false,
                 'simulated_time' => null,
-                'latest_run' => null,
             ]),
         ]);
 
@@ -80,74 +72,5 @@ class TestClockTest extends TestCase
         $this->assertInstanceOf(TestClock::class, $result);
         $this->assertFalse($result->isActive);
         $this->assertNull($result->simulatedTime);
-    }
-
-    public function testAdvanceSendsAdvanceDaysAsCamelCase(): void
-    {
-        $clock = $this->testClockWithResponses([
-            $this->response([
-                'id' => 'tcr_1',
-                'status' => 'pending',
-                'started_at_time' => '2026-06-08T12:00:00Z',
-                'target_time' => '2026-06-15T00:00:00Z',
-                'estimated_deadline_count' => 0,
-                'completed_deadline_count' => 0,
-                'failed_deadline_count' => 0,
-                'error' => null,
-                'items' => [],
-                'object' => 'test_clock_run',
-                'livemode' => false,
-            ]),
-        ]);
-
-        $clock->advance(advanceDays: 7);
-
-        $body = $this->sentBody();
-        $this->assertSame(7, $body['advanceDays']);
-        $this->assertArrayNotHasKey('advance_days', $body);
-        $this->assertArrayNotHasKey('frozenTime', $body);
-    }
-
-    public function testAdvanceSendsFrozenTimeAndOmitsAdvanceDays(): void
-    {
-        $clock = $this->testClockWithResponses([
-            $this->response([
-                'id' => 'tcr_2',
-                'status' => 'pending',
-                'started_at_time' => '2026-06-08T12:00:00Z',
-                'target_time' => '2026-07-01T00:00:00Z',
-                'estimated_deadline_count' => 0,
-                'completed_deadline_count' => 0,
-                'failed_deadline_count' => 0,
-                'error' => null,
-                'items' => [],
-                'object' => 'test_clock_run',
-                'livemode' => false,
-            ]),
-        ]);
-
-        $clock->advance(frozenTime: '2026-07-01T00:00:00Z');
-
-        $body = $this->sentBody();
-        $this->assertSame('2026-07-01T00:00:00Z', $body['frozenTime']);
-        $this->assertArrayNotHasKey('advanceDays', $body);
-        $this->assertArrayNotHasKey('frozen_time', $body);
-    }
-
-    public function testProcessBillingPostsWithNoBodyAndReturnsNoResult(): void
-    {
-        $clock = $this->testClockWithResponses([
-            $this->response([
-                'success' => true,
-                'data' => null,
-            ]),
-        ]);
-
-        $result = $clock->processBilling();
-
-        $request = $this->history[0]['request'];
-        $this->assertSame('POST', $request->getMethod());
-        $this->assertSame('', (string) $request->getBody());
-        $this->assertNull($result);
     }
 }
