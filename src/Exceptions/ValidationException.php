@@ -11,6 +11,7 @@ class ValidationException extends CommetException
      */
     public function __construct(
         string $message,
+        int $statusCode,
         public readonly array $validationErrors = [],
         mixed $details = null,
         ?string $type = null,
@@ -21,7 +22,7 @@ class ValidationException extends CommetException
         parent::__construct(
             $message,
             'validation_error',
-            422,
+            $statusCode,
             $details,
             $type,
             $param,

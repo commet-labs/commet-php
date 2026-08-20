@@ -48,17 +48,21 @@ class ErrorParsingTest extends TestCase
             'name' => ['Name is too short'],
         ];
 
-        $exception = new ValidationException('Validation failed', validationErrors: $errors);
+        $exception = new ValidationException('Validation failed', statusCode: 400, validationErrors: $errors);
 
         $this->assertSame('Validation failed', $exception->getMessage());
+        $this->assertSame(400, $exception->statusCode);
         $this->assertSame($errors, $exception->validationErrors);
         $this->assertCount(2, $exception->validationErrors['email']);
         $this->assertCount(1, $exception->validationErrors['name']);
+        $serialized = json_decode(json_encode($exception, JSON_THROW_ON_ERROR), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame(400, $serialized['statusCode']);
+        $this->assertSame($errors, $serialized['validationErrors']);
     }
 
     public function testValidationExceptionDefaultsToEmptyErrors(): void
     {
-        $exception = new ValidationException('Validation failed');
+        $exception = new ValidationException('Validation failed', statusCode: 422);
 
         $this->assertSame([], $exception->validationErrors);
     }
@@ -73,7 +77,7 @@ class ErrorParsingTest extends TestCase
 
     public function testValidationExceptionExtendsCommetException(): void
     {
-        $exception = new ValidationException('test');
+        $exception = new ValidationException('test', statusCode: 422);
 
         $this->assertInstanceOf(\Commet\Exceptions\CommetException::class, $exception);
         $this->assertInstanceOf(\RuntimeException::class, $exception);

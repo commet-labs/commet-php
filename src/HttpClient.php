@@ -420,6 +420,7 @@ class HttpClient
             }
             throw new ValidationException(
                 $message,
+                statusCode: $statusCode,
                 validationErrors: $errors,
                 details: $details,
                 type: $type,
