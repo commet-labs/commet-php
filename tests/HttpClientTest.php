@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace Commet\Tests;
 
+use Commet\Exceptions\ApiException;
 use Commet\HttpClient;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Uri;
 use PHPUnit\Framework\TestCase;
-use ReflectionMethod;
+use Psr\Http\Message\RequestInterface;
 
 class HttpClientTest extends TestCase
 {
@@ -111,11 +115,55 @@ class HttpClientTest extends TestCase
         $this->assertSame(['name' => '', 'count' => 0, 'active' => false], $result);
     }
 
-    public function testRequestIdNormalizationPreservesZero(): void
+    public function testErrorPreservesZeroRequestIdFromHttpHeader(): void
     {
-        $normalizeRequestId = new ReflectionMethod(HttpClient::class, 'normalizeRequestId');
+        $server = stream_socket_server('tcp://127.0.0.1:0', $errorCode, $errorMessage);
+        $this->assertIsResource($server, $errorMessage);
+        $address = stream_socket_get_name($server, false);
+        $this->assertIsString($address);
 
-        $this->assertSame('0', $normalizeRequestId->invoke(null, '0'));
-        $this->assertNull($normalizeRequestId->invoke(null, ''));
+        $processId = pcntl_fork();
+        $this->assertNotSame(-1, $processId);
+        if ($processId === 0) {
+            $connection = stream_socket_accept($server, 5);
+            if ($connection === false) {
+                exit(1);
+            }
+            stream_get_line($connection, 8192, "\r\n\r\n");
+            $body = '{"success":false,"code":"not_found","message":"Customer not found"}';
+            fwrite(
+                $connection,
+                "HTTP/1.1 400 Bad Request\r\n"
+                    . "Content-Type: application/json\r\n"
+                    . "x-request-id: 0\r\n"
+                    . 'Content-Length: ' . strlen($body) . "\r\n"
+                    . "Connection: close\r\n\r\n"
+                    . $body,
+            );
+            fclose($connection);
+            fclose($server);
+            exit(0);
+        }
+
+        fclose($server);
+        $handler = HandlerStack::create();
+        $handler->push(Middleware::mapRequest(
+            static fn(RequestInterface $request): RequestInterface => $request->withUri(
+                new Uri("http://{$address}{$request->getUri()->getPath()}"),
+            ),
+        ));
+        $http = new HttpClient('ck_test_123', retries: 0, handler: $handler);
+
+        try {
+            try {
+                $http->get('customers/cus_123');
+                self::fail('Expected an API exception');
+            } catch (ApiException $exception) {
+                $this->assertSame('0', $exception->requestId);
+            }
+        } finally {
+            pcntl_waitpid($processId, $status);
+            $this->assertSame(0, pcntl_wexitstatus($status));
+        }
     }
 }
