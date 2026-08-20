@@ -5,13 +5,8 @@ declare(strict_types=1);
 namespace Commet\Tests;
 
 use Commet\HttpClient;
-use Commet\Models\CompletePayoutVerificationParamsBank;
-use Commet\Models\CompletePayoutVerificationParamsIndividual;
-use Commet\Models\CompletePayoutVerificationParamsIndividualAddress;
 use Commet\Models\Payout;
 use Commet\Models\PayoutBankAccount;
-use Commet\Models\PayoutVerification;
-use Commet\Models\PayoutVerificationVariant2;
 use Commet\Resources\PayoutsResource;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -154,72 +149,19 @@ class PayoutsTest extends TestCase
         $this->assertArrayNotHasKey('setDefault', $body);
     }
 
-    public function testCompleteVerificationSendsNestedBankObjectAsCamelCase(): void
+    public function testCompleteVerificationSendsNoKycBody(): void
     {
         $payouts = $this->payoutsWithResponses([
             $this->response([
-                'provider_account_id' => 'acct_xyz',
-                'status' => 'pending_verification',
-                'transfers_enabled' => false,
-                'object' => 'payout_account',
-                'livemode' => false,
-                'outcome' => 'created',
-                'business_type' => 'individual',
-                'country' => 'US',
+                'success' => true,
+                'data' => null,
             ]),
         ]);
 
-        $result = $payouts->completeVerification(
-            email: 'owner@acme.com',
-            businessType: 'individual',
-            businessUrl: 'https://acme.com',
-            documentUrl: 'https://files.commet.co/doc.pdf',
-            bank: new CompletePayoutVerificationParamsBank(
-                accountNumber: '000999888777',
-                accountHolderName: 'Acme LLC',
-                routingNumber: '021000021',
-            ),
-            individual: new CompletePayoutVerificationParamsIndividual(
-                firstName: 'Jane',
-                lastName: 'Doe',
-                phone: '+15555555555',
-                dateOfBirth: '1990-01-01',
-                address: new CompletePayoutVerificationParamsIndividualAddress(
-                    line1: '1 Main Street',
-                    city: 'New York',
-                    state: 'NY',
-                    postalCode: '10001',
-                    country: 'US',
-                ),
-            ),
-        );
+        $result = $payouts->completeVerification();
 
-        $body = $this->sentBody();
-        // Top-level snake->camel.
-        $this->assertSame('individual', $body['businessType']);
-        $this->assertSame('https://acme.com', $body['businessUrl']);
-        $this->assertSame('https://files.commet.co/doc.pdf', $body['documentUrl']);
-        $this->assertArrayNotHasKey('business_type', $body);
-
-        // Nested bank object keys must also be converted recursively.
-        $this->assertSame('000999888777', $body['bank']['accountNumber']);
-        $this->assertSame('021000021', $body['bank']['routingNumber']);
-        $this->assertSame('Acme LLC', $body['bank']['accountHolderName']);
-        $this->assertArrayNotHasKey('account_number', $body['bank']);
-
-        // Nested individual object.
-        $this->assertSame('Jane', $body['individual']['firstName']);
-        $this->assertSame('Doe', $body['individual']['lastName']);
-
-        // company omitted when null.
-        $this->assertArrayNotHasKey('company', $body);
-
-        $this->assertInstanceOf(PayoutVerification::class, $result);
-        $this->assertInstanceOf(PayoutVerificationVariant2::class, $result);
-        $this->assertSame('acct_xyz', $result->providerAccountId);
-        $this->assertFalse($result->transfersEnabled);
-        $this->assertSame('created', $result->outcome);
-        $this->assertSame('individual', $result->businessType);
+        $this->assertSame('', (string) $this->history[0]['request']->getBody());
+        $this->assertNull($result);
     }
 
     public function testPayoutFromArrayHydratesNumericFields(): void

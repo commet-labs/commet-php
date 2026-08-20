@@ -218,6 +218,26 @@ final class WebhookEvent
         return CustomerStateChangedData::fromArray($this->data);
     }
 
+    public function asPlanGrantCreated(): PlanGrantCreatedData
+    {
+        return PlanGrantCreatedData::fromArray($this->data);
+    }
+
+    public function asPlanGrantUpdated(): PlanGrantUpdatedData
+    {
+        return PlanGrantUpdatedData::fromArray($this->data);
+    }
+
+    public function asPlanGrantExpired(): PlanGrantExpiredData
+    {
+        return PlanGrantExpiredData::fromArray($this->data);
+    }
+
+    public function asPlanGrantRevoked(): PlanGrantRevokedData
+    {
+        return PlanGrantRevokedData::fromArray($this->data);
+    }
+
     public function asCreditsGranted(): CreditsGrantedData
     {
         return CreditsGrantedData::fromArray($this->data);

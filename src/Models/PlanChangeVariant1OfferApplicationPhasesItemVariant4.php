@@ -10,6 +10,7 @@ class PlanChangeVariant1OfferApplicationPhasesItemVariant4 extends PlanChangeVar
         public readonly string $type,
         public readonly int $price,
         public readonly ?int $durationCycles = null,
+        public readonly ?string $durationInterval = null,
         public readonly ?string $startsAt = null,
         public readonly ?string $endsAt = null,
     ) {}
@@ -23,6 +24,7 @@ class PlanChangeVariant1OfferApplicationPhasesItemVariant4 extends PlanChangeVar
             type: $data["type"],
             price: $data["price"],
             durationCycles: $data["duration_cycles"] ?? null,
+            durationInterval: $data["duration_interval"] ?? null,
             startsAt: $data["starts_at"] ?? null,
             endsAt: $data["ends_at"] ?? null,
         );

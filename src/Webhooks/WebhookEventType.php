@@ -43,6 +43,10 @@ final class WebhookEventType
     public const CUSTOMER_CREATED = "customer.created";
     public const CUSTOMER_UPDATED = "customer.updated";
     public const CUSTOMER_STATE_CHANGED = "customer.state_changed";
+    public const PLAN_GRANT_CREATED = "plan_grant.created";
+    public const PLAN_GRANT_UPDATED = "plan_grant.updated";
+    public const PLAN_GRANT_EXPIRED = "plan_grant.expired";
+    public const PLAN_GRANT_REVOKED = "plan_grant.revoked";
     public const CREDITS_GRANTED = "credits.granted";
     public const CREDITS_PURCHASED = "credits.purchased";
     public const CREDITS_LOW = "credits.low";

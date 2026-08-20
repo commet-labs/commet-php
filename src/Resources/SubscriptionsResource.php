@@ -202,6 +202,50 @@ class SubscriptionsResource
     }
 
     /**
+     * Apply or replace a direct Offer on a subscription's pending payment checkout. The existing checkout URL remains unchanged. Offers whose first phase is a free trial cannot be applied after checkout creation.
+     * @return Subscription
+     */
+    public function applyOffer(
+        string $id,
+        string $offerId,
+        ?string $expiresAt = null,
+        ?string $idempotencyKey = null,
+    ): Subscription {
+        $response = $this->http->put(
+            "/subscriptions/{$id}/offer",
+            HttpClient::buildBody([
+                "offer_id" => $offerId,
+                "expires_at" => $expiresAt,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Subscription response payload");
+        }
+
+        return Subscription::fromArray($response->data);
+    }
+
+    /**
+     * Remove the quoted direct Offer from a subscription's pending payment checkout. The existing checkout URL remains unchanged and returns to its undiscounted price.
+     * @return Subscription
+     */
+    public function removeOffer(
+        string $id,
+    ): Subscription {
+        $response = $this->http->delete(
+            "/subscriptions/{$id}/offer",
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Subscription response payload");
+        }
+
+        return Subscription::fromArray($response->data);
+    }
+
+    /**
      * Creates a hosted checkout session for the customer to update the subscription's default payment method.
      * @return PaymentMethodUpdateCheckout
      */
@@ -226,7 +270,7 @@ class SubscriptionsResource
     }
 
     /**
-     * Preview proration details for an immediate plan change without applying it. Interval direction takes precedence: a longer interval is immediate and a shorter interval is scheduled. When the interval is unchanged, a higher-sort-order plan is immediate and a lower-sort-order plan is scheduled. A paid-to-free change is always scheduled. Returns credit, charge, and net amount. The target plan must belong to the same plan group as the current plan, otherwise a 400 with code `plans_not_in_same_group` is returned. A change between two free plans has nothing to prorate and returns a zero-amount estimate. Scheduled changes return a 400 with code `plan_change_scheduled`; apply those via the change-plan endpoint. Pass offerId to quote the destination plan with an Offer.
+     * Preview proration details for an immediate plan change without applying it. Free-to-paid changes are never scheduled and the change-plan endpoint always returns hosted checkout for them. For paid plans, interval direction takes precedence: a longer interval is immediate and a shorter interval is scheduled. When the interval is unchanged, a higher-sort-order plan is immediate and a lower-sort-order plan is scheduled. A paid-to-free change is always scheduled. Returns credit, charge, and net amount. The target plan must belong to the same plan group as the current plan, otherwise a 400 with code `plans_not_in_same_group` is returned. A change between two free plans has nothing to prorate and returns a zero-amount estimate. Scheduled changes return a 400 with code `plan_change_scheduled`; apply those via the change-plan endpoint. Pass offerId to quote the destination plan with an Offer.
      * @return PreviewChange
      */
     public function previewChange(
@@ -384,7 +428,7 @@ class SubscriptionsResource
     }
 
     /**
-     * Create a subscription for a customer. Commet selects the default price when priceId is omitted and resolves its market from the customer's billing country. Without an offer override, Commet applies the price's automatic introductory Offer. Pass offerId to apply any active compatible Offer directly; the Offer does not need a prior plan-price association.
+     * Create a subscription for a customer. Commet selects the default price when priceId is omitted and resolves its market from the customer's billing country. Without an offer override, Commet applies the price's automatic introductory Offer. Pass offerId to apply an active compatible Offer directly, or cardPromotionId to preselect a card-eligible Promotional Offer for the initial checkout when card promotions are enabled for the organization. For the initial checkout, provider accepts either a processor name or an exact payment connection ID.
      * @param array<string, int>|null $initialSeats
      * @return CreatedSubscription
      */
@@ -403,6 +447,7 @@ class SubscriptionsResource
         ?bool $skipTrial = null,
         ?string $planId = null,
         ?string $planCode = null,
+        ?string $cardPromotionId = null,
         ?string $idempotencyKey = null,
     ): CreatedSubscription {
         $response = $this->http->post(
@@ -422,6 +467,7 @@ class SubscriptionsResource
                 "skip_trial" => $skipTrial,
                 "plan_id" => $planId,
                 "plan_code" => $planCode,
+                "card_promotion_id" => $cardPromotionId,
             ]),
             idempotencyKey: $idempotencyKey,
         );

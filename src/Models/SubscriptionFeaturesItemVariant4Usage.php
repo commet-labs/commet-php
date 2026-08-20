@@ -1,0 +1,30 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Commet\Models;
+
+class SubscriptionFeaturesItemVariant4Usage
+{
+    public function __construct(
+        public readonly float $current,
+        public readonly float $included,
+        public readonly float $overageQuantity,
+        public readonly ?float $overageUnitPrice = null,
+        public readonly ?bool $unlimited = null,
+    ) {}
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            current: $data["current"],
+            included: $data["included"],
+            overageQuantity: $data["overage_quantity"],
+            overageUnitPrice: $data["overage_unit_price"] ?? null,
+            unlimited: $data["unlimited"] ?? null,
+        );
+    }
+}

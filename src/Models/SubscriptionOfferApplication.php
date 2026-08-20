@@ -20,6 +20,7 @@ class SubscriptionOfferApplication
         public readonly ?int $subtotal = null,
         public readonly ?int $discountAmount = null,
         public readonly ?int $total = null,
+        public readonly ?string $expiresAt = null,
         public readonly ?string $appliedAt = null,
     ) {}
 
@@ -41,6 +42,7 @@ class SubscriptionOfferApplication
             subtotal: $data["subtotal"] ?? null,
             discountAmount: $data["discount_amount"] ?? null,
             total: $data["total"] ?? null,
+            expiresAt: $data["expires_at"] ?? null,
             appliedAt: $data["applied_at"] ?? null,
         );
     }

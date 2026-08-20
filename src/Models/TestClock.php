@@ -12,6 +12,7 @@ class TestClock
         public readonly string $object,
         public readonly bool $livemode,
         public readonly ?string $simulatedTime = null,
+        public readonly ?TestClockLatestRun $latestRun = null,
     ) {}
 
     /**
@@ -25,6 +26,7 @@ class TestClock
             object: $data["object"],
             livemode: $data["livemode"],
             simulatedTime: $data["simulated_time"] ?? null,
+            latestRun: isset($data["latest_run"]) ? TestClockLatestRun::fromArray($data["latest_run"]) : null,
         );
     }
 }

@@ -13,6 +13,7 @@ final class PaymentRecoveredData
         public readonly float $invoiceTotal,
         public readonly string $customerId,
         public readonly ?string $subscriptionId,
+        public readonly ?string $provider,
     ) {}
 
     /**
@@ -26,6 +27,7 @@ final class PaymentRecoveredData
             invoiceTotal: $data["invoiceTotal"],
             customerId: $data["customerId"],
             subscriptionId: $data["subscriptionId"] ?? null,
+            provider: $data["provider"] ?? null,
         );
     }
 }

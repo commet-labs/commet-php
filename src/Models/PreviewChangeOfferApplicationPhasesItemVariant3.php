@@ -10,6 +10,7 @@ class PreviewChangeOfferApplicationPhasesItemVariant3 extends PreviewChangeOffer
         public readonly string $type,
         public readonly int $amount,
         public readonly ?int $durationCycles = null,
+        public readonly ?string $durationInterval = null,
         public readonly ?string $startsAt = null,
         public readonly ?string $endsAt = null,
     ) {}
@@ -23,6 +24,7 @@ class PreviewChangeOfferApplicationPhasesItemVariant3 extends PreviewChangeOffer
             type: $data["type"],
             amount: $data["amount"],
             durationCycles: $data["duration_cycles"] ?? null,
+            durationInterval: $data["duration_interval"] ?? null,
             startsAt: $data["starts_at"] ?? null,
             endsAt: $data["ends_at"] ?? null,
         );

@@ -6,7 +6,6 @@ namespace Commet\Tests;
 
 use Commet\HttpClient;
 use Commet\Models\TestClock;
-use Commet\Models\TestClockBilling;
 use Commet\Resources\TestClockResource;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -51,6 +50,7 @@ class TestClockTest extends TestCase
                 'object' => 'test_clock',
                 'livemode' => false,
                 'simulated_time' => '2026-07-01T00:00:00Z',
+                'latest_run' => null,
             ]),
         ]);
 
@@ -71,6 +71,7 @@ class TestClockTest extends TestCase
                 'object' => 'test_clock',
                 'livemode' => false,
                 'simulated_time' => null,
+                'latest_run' => null,
             ]),
         ]);
 
@@ -85,9 +86,16 @@ class TestClockTest extends TestCase
     {
         $clock = $this->testClockWithResponses([
             $this->response([
-                'is_active' => true,
-                'now' => '2026-06-15T00:00:00Z',
-                'object' => 'test_clock',
+                'id' => 'tcr_1',
+                'status' => 'pending',
+                'started_at_time' => '2026-06-08T12:00:00Z',
+                'target_time' => '2026-06-15T00:00:00Z',
+                'estimated_deadline_count' => 0,
+                'completed_deadline_count' => 0,
+                'failed_deadline_count' => 0,
+                'error' => null,
+                'items' => [],
+                'object' => 'test_clock_run',
                 'livemode' => false,
             ]),
         ]);
@@ -104,9 +112,16 @@ class TestClockTest extends TestCase
     {
         $clock = $this->testClockWithResponses([
             $this->response([
-                'is_active' => true,
-                'now' => '2026-07-01T00:00:00Z',
-                'object' => 'test_clock',
+                'id' => 'tcr_2',
+                'status' => 'pending',
+                'started_at_time' => '2026-06-08T12:00:00Z',
+                'target_time' => '2026-07-01T00:00:00Z',
+                'estimated_deadline_count' => 0,
+                'completed_deadline_count' => 0,
+                'failed_deadline_count' => 0,
+                'error' => null,
+                'items' => [],
+                'object' => 'test_clock_run',
                 'livemode' => false,
             ]),
         ]);
@@ -119,17 +134,12 @@ class TestClockTest extends TestCase
         $this->assertArrayNotHasKey('frozen_time', $body);
     }
 
-    public function testProcessBillingPostsWithNoBodyAndHydratesCounts(): void
+    public function testProcessBillingPostsWithNoBodyAndReturnsNoResult(): void
     {
         $clock = $this->testClockWithResponses([
             $this->response([
-                'customers_found' => 12,
-                'enqueued' => 11,
-                'failed' => 1,
-                'dunning_retried' => 2,
-                'dunning_failed' => 3,
-                'object' => 'test_clock_billing',
-                'livemode' => false,
+                'success' => true,
+                'data' => null,
             ]),
         ]);
 
@@ -137,14 +147,7 @@ class TestClockTest extends TestCase
 
         $request = $this->history[0]['request'];
         $this->assertSame('POST', $request->getMethod());
-        // No-param POST must not send a JSON body.
         $this->assertSame('', (string) $request->getBody());
-
-        $this->assertInstanceOf(TestClockBilling::class, $result);
-        $this->assertSame(12, $result->customersFound);
-        $this->assertSame(11, $result->enqueued);
-        $this->assertSame(1, $result->failed);
-        $this->assertSame(2, $result->dunningRetried);
-        $this->assertSame(3, $result->dunningFailed);
+        $this->assertNull($result);
     }
 }

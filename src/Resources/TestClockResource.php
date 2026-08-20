@@ -6,7 +6,7 @@ namespace Commet\Resources;
 
 use Commet\HttpClient;
 use Commet\Models\TestClock;
-use Commet\Models\TestClockBilling;
+use Commet\Models\TestClockRun;
 
 class TestClockResource
 {
@@ -15,26 +15,21 @@ class TestClockResource
     ) {}
 
     /**
-     * Discovers customers due for billing at the org's current (simulated) time and enqueues a billing cycle for each — renewals, expired trials, pending cancellations. Also fires any dunning retry whose scheduled time has passed. Enqueueing is asynchronous. Sandbox only.
-     * @return TestClockBilling
+     * Deprecated. POST /test-clock now advances time and processes every due billing deadline in one durable run.
+     * @return null
+     * @deprecated
      */
     public function processBilling(
         ?string $idempotencyKey = null,
-    ): TestClockBilling {
-        $response = $this->http->post(
+    ): mixed {
+        return $this->http->post(
             "/test-clock/process-billing",
             idempotencyKey: $idempotencyKey,
-        );
-
-        if (!is_array($response->data)) {
-            throw new \UnexpectedValueException("Invalid TestClockBilling response payload");
-        }
-
-        return TestClockBilling::fromArray($response->data);
+        )->data;
     }
 
     /**
-     * Returns the organization's current test clock state. Sandbox only.
+     * Returns the organization's current test clock state and latest durable run. Sandbox only.
      * @return TestClock
      */
     public function get(
@@ -52,14 +47,14 @@ class TestClockResource
     }
 
     /**
-     * Moves the test clock forward, by a number of days (advanceDays) or to an absolute instant (frozenTime). The clock can only move forward. Sandbox only.
-     * @return TestClock
+     * Starts a durable run that moves the test clock forward and processes every billing deadline due before the target time. Poll GET /test-clock for progress and terminal results. Sandbox only.
+     * @return TestClockRun
      */
     public function advance(
         ?int $advanceDays = null,
         ?string $frozenTime = null,
         ?string $idempotencyKey = null,
-    ): TestClock {
+    ): TestClockRun {
         $response = $this->http->post(
             "/test-clock",
             HttpClient::buildBody([
@@ -70,9 +65,9 @@ class TestClockResource
         );
 
         if (!is_array($response->data)) {
-            throw new \UnexpectedValueException("Invalid TestClock response payload");
+            throw new \UnexpectedValueException("Invalid TestClockRun response payload");
         }
 
-        return TestClock::fromArray($response->data);
+        return TestClockRun::fromArray($response->data);
     }
 }
