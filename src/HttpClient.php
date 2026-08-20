@@ -322,6 +322,7 @@ class HttpClient
                 }
             }
 
+            $requestId = self::normalizeRequestId($response->getHeaderLine('x-request-id'));
             $body = $response->getBody()->getContents();
 
             try {
@@ -331,14 +332,14 @@ class HttpClient
                     "Invalid JSON response: {$statusCode}",
                     statusCode: $statusCode,
                     code: 'INVALID_JSON',
-                    requestId: $response->getHeaderLine('x-request-id') ?: null,
+                    requestId: $requestId,
                 );
             }
 
             $this->handleError(
                 $statusCode,
                 $data,
-                $response->getHeaderLine('x-request-id') ?: null,
+                $requestId,
             );
         }
 
@@ -346,6 +347,7 @@ class HttpClient
             error_log("[Commet SDK] Response status: {$response->getStatusCode()}");
         }
 
+        $requestId = self::normalizeRequestId($response->getHeaderLine('x-request-id'));
         $body = $response->getBody()->getContents();
 
         try {
@@ -355,14 +357,13 @@ class HttpClient
                 "Invalid JSON response: {$response->getStatusCode()}",
                 statusCode: $response->getStatusCode(),
                 code: 'INVALID_JSON',
-                requestId: $response->getHeaderLine('x-request-id') ?: null,
+                requestId: $requestId,
             );
         }
 
         if ($this->telemetryEnabled) {
             $durationMs = (int) ((hrtime(true) - $requestStart) / 1_000_000);
-            $requestId = $response->getHeaderLine('x-request-id');
-            $this->lastRequestMetrics = $requestId !== ''
+            $this->lastRequestMetrics = $requestId !== null
                 ? ['request_id' => $requestId, 'duration_ms' => $durationMs]
                 : null;
         }
@@ -497,6 +498,11 @@ class HttpClient
         }
 
         return null;
+    }
+
+    private static function normalizeRequestId(string $requestId): ?string
+    {
+        return $requestId !== '' ? $requestId : null;
     }
 
     /**

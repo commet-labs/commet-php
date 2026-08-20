@@ -6,6 +6,7 @@ namespace Commet\Tests;
 
 use Commet\HttpClient;
 use PHPUnit\Framework\TestCase;
+use ReflectionMethod;
 
 class HttpClientTest extends TestCase
 {
@@ -108,5 +109,13 @@ class HttpClientTest extends TestCase
         ]);
 
         $this->assertSame(['name' => '', 'count' => 0, 'active' => false], $result);
+    }
+
+    public function testRequestIdNormalizationPreservesZero(): void
+    {
+        $normalizeRequestId = new ReflectionMethod(HttpClient::class, 'normalizeRequestId');
+
+        $this->assertSame('0', $normalizeRequestId->invoke(null, '0'));
+        $this->assertNull($normalizeRequestId->invoke(null, ''));
     }
 }
