@@ -15,7 +15,18 @@ class ApiException extends CommetException
         ?string $param = null,
         ?string $docUrl = null,
         ?\Throwable $previous = null,
+        ?string $requestId = null,
     ) {
-        parent::__construct($message, $code, $statusCode, $details, $type, $param, $docUrl, $previous);
+        parent::__construct(
+            $message,
+            $code,
+            $statusCode,
+            $details,
+            $type,
+            $param,
+            $docUrl,
+            $previous,
+            $requestId,
+        );
     }
 }

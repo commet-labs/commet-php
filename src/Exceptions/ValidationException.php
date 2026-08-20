@@ -12,7 +12,27 @@ class ValidationException extends CommetException
     public function __construct(
         string $message,
         public readonly array $validationErrors = [],
+        mixed $details = null,
+        ?string $type = null,
+        ?string $param = null,
+        ?string $docUrl = null,
+        ?string $requestId = null,
     ) {
-        parent::__construct($message);
+        parent::__construct(
+            $message,
+            'validation_error',
+            422,
+            $details,
+            $type,
+            $param,
+            $docUrl,
+            requestId: $requestId,
+        );
+    }
+
+    /** @return array<string, mixed> */
+    public function jsonSerialize(): array
+    {
+        return [...parent::jsonSerialize(), 'validationErrors' => $this->validationErrors];
     }
 }

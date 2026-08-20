@@ -17,12 +17,18 @@ class ErrorParsingTest extends TestCase
             statusCode: 404,
             code: 'not_found',
             details: ['resource' => 'customer'],
+            requestId: 'req_server_123',
         );
 
         $this->assertSame('Not found', $exception->getMessage());
         $this->assertSame(404, $exception->statusCode);
         $this->assertSame('not_found', $exception->errorCode);
         $this->assertSame(['resource' => 'customer'], $exception->details);
+        $this->assertSame('req_server_123', $exception->requestId);
+        $this->assertSame(
+            'req_server_123',
+            json_decode(json_encode($exception, JSON_THROW_ON_ERROR), true, 512, JSON_THROW_ON_ERROR)['requestId'],
+        );
     }
 
     public function testApiExceptionWithMinimalParams(): void

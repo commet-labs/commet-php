@@ -331,10 +331,15 @@ class HttpClient
                     "Invalid JSON response: {$statusCode}",
                     statusCode: $statusCode,
                     code: 'INVALID_JSON',
+                    requestId: $response->getHeaderLine('x-request-id') ?: null,
                 );
             }
 
-            $this->handleError($statusCode, $data);
+            $this->handleError(
+                $statusCode,
+                $data,
+                $response->getHeaderLine('x-request-id') ?: null,
+            );
         }
 
         if ($this->debug) {
@@ -350,16 +355,16 @@ class HttpClient
                 "Invalid JSON response: {$response->getStatusCode()}",
                 statusCode: $response->getStatusCode(),
                 code: 'INVALID_JSON',
+                requestId: $response->getHeaderLine('x-request-id') ?: null,
             );
         }
 
         if ($this->telemetryEnabled) {
             $durationMs = (int) ((hrtime(true) - $requestStart) / 1_000_000);
-            $requestId = $response->getHeaderLine('x-request-id') ?: ('req_' . time());
-            $this->lastRequestMetrics = [
-                'request_id' => $requestId,
-                'duration_ms' => $durationMs,
-            ];
+            $requestId = $response->getHeaderLine('x-request-id');
+            $this->lastRequestMetrics = $requestId !== ''
+                ? ['request_id' => $requestId, 'duration_ms' => $durationMs]
+                : null;
         }
 
         $converted = self::convertKeys($data, [self::class, 'toSnakeCase']);
@@ -382,12 +387,13 @@ class HttpClient
         );
     }
 
-    private function handleError(int $statusCode, mixed $data): never
+    private function handleError(int $statusCode, mixed $data, ?string $requestId): never
     {
         if (!is_array($data)) {
             throw new ApiException(
                 "Request failed with status {$statusCode}",
                 statusCode: $statusCode,
+                requestId: $requestId,
             );
         }
 
@@ -415,6 +421,11 @@ class HttpClient
             throw new ValidationException(
                 $message,
                 validationErrors: $errors,
+                details: $details,
+                type: $type,
+                param: $param,
+                docUrl: $docUrl,
+                requestId: $requestId,
             );
         }
 
@@ -426,6 +437,7 @@ class HttpClient
             type: $type,
             param: $param,
             docUrl: $docUrl,
+            requestId: $requestId,
         );
     }
 
