@@ -9,6 +9,7 @@ class SubscriptionOfferApplicationPhaseVariant1 extends SubscriptionOfferApplica
     public function __construct(
         public readonly string $type,
         public readonly int $durationDays,
+        public readonly ?string $durationInterval = null,
         public readonly ?string $startsAt = null,
         public readonly ?string $endsAt = null,
     ) {}
@@ -21,6 +22,7 @@ class SubscriptionOfferApplicationPhaseVariant1 extends SubscriptionOfferApplica
         return new self(
             type: $data["type"],
             durationDays: $data["duration_days"],
+            durationInterval: $data["duration_interval"] ?? null,
             startsAt: $data["starts_at"] ?? null,
             endsAt: $data["ends_at"] ?? null,
         );

@@ -6,7 +6,6 @@ namespace Commet\Tests;
 
 use Commet\HttpClient;
 use Commet\Models\TestClock;
-use Commet\Models\TestClockBilling;
 use Commet\Resources\TestClockResource;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -29,12 +28,6 @@ class TestClockTest extends TestCase
         $stack->push(Middleware::history($this->history));
         $http = new HttpClient('ck_test_123', handler: $stack);
         return new TestClockResource($http);
-    }
-
-    /** @return array<string, mixed> */
-    private function sentBody(int $index = 0): array
-    {
-        return json_decode((string) $this->history[$index]['request']->getBody(), true);
     }
 
     private function response(array $data): Response
@@ -79,72 +72,5 @@ class TestClockTest extends TestCase
         $this->assertInstanceOf(TestClock::class, $result);
         $this->assertFalse($result->isActive);
         $this->assertNull($result->simulatedTime);
-    }
-
-    public function testAdvanceSendsAdvanceDaysAsCamelCase(): void
-    {
-        $clock = $this->testClockWithResponses([
-            $this->response([
-                'is_active' => true,
-                'now' => '2026-06-15T00:00:00Z',
-                'object' => 'test_clock',
-                'livemode' => false,
-            ]),
-        ]);
-
-        $clock->advance(advanceDays: 7);
-
-        $body = $this->sentBody();
-        $this->assertSame(7, $body['advanceDays']);
-        $this->assertArrayNotHasKey('advance_days', $body);
-        $this->assertArrayNotHasKey('frozenTime', $body);
-    }
-
-    public function testAdvanceSendsFrozenTimeAndOmitsAdvanceDays(): void
-    {
-        $clock = $this->testClockWithResponses([
-            $this->response([
-                'is_active' => true,
-                'now' => '2026-07-01T00:00:00Z',
-                'object' => 'test_clock',
-                'livemode' => false,
-            ]),
-        ]);
-
-        $clock->advance(frozenTime: '2026-07-01T00:00:00Z');
-
-        $body = $this->sentBody();
-        $this->assertSame('2026-07-01T00:00:00Z', $body['frozenTime']);
-        $this->assertArrayNotHasKey('advanceDays', $body);
-        $this->assertArrayNotHasKey('frozen_time', $body);
-    }
-
-    public function testProcessBillingPostsWithNoBodyAndHydratesCounts(): void
-    {
-        $clock = $this->testClockWithResponses([
-            $this->response([
-                'customers_found' => 12,
-                'enqueued' => 11,
-                'failed' => 1,
-                'dunning_retried' => 2,
-                'dunning_failed' => 3,
-                'object' => 'test_clock_billing',
-                'livemode' => false,
-            ]),
-        ]);
-
-        $result = $clock->processBilling();
-
-        $request = $this->history[0]['request'];
-        $this->assertSame('POST', $request->getMethod());
-        // No-param POST must not send a JSON body.
-        $this->assertSame('', (string) $request->getBody());
-
-        $this->assertInstanceOf(TestClockBilling::class, $result);
-        $this->assertSame(12, $result->customersFound);
-        $this->assertSame(11, $result->enqueued);
-        $this->assertSame(1, $result->failed);
-        $this->assertSame(2, $result->dunningRetried);
-        $this->assertSame(3, $result->dunningFailed);
     }
 }

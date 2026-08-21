@@ -10,6 +10,7 @@ class UpdateOfferParamsPhasesItemVariant2 extends UpdateOfferParamsPhasesItem
         public readonly string $type,
         public readonly int $percentage,
         public readonly ?int $durationCycles = null,
+        public readonly ?string $durationInterval = null,
     ) {}
 
     /**
@@ -21,6 +22,7 @@ class UpdateOfferParamsPhasesItemVariant2 extends UpdateOfferParamsPhasesItem
             type: $data["type"],
             percentage: $data["percentage"],
             durationCycles: $data["duration_cycles"] ?? null,
+            durationInterval: $data["duration_interval"] ?? null,
         );
     }
 }

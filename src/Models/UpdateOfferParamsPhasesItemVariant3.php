@@ -11,6 +11,7 @@ class UpdateOfferParamsPhasesItemVariant3 extends UpdateOfferParamsPhasesItem
         /** @var UpdateOfferParamsPhasesItemVariant3AmountsItem[] */
         public readonly array $amounts,
         public readonly ?int $durationCycles = null,
+        public readonly ?string $durationInterval = null,
     ) {}
 
     /**
@@ -22,6 +23,7 @@ class UpdateOfferParamsPhasesItemVariant3 extends UpdateOfferParamsPhasesItem
             type: $data["type"],
             amounts: array_map(fn(array $item) => UpdateOfferParamsPhasesItemVariant3AmountsItem::fromArray($item), $data["amounts"]),
             durationCycles: $data["duration_cycles"] ?? null,
+            durationInterval: $data["duration_interval"] ?? null,
         );
     }
 }

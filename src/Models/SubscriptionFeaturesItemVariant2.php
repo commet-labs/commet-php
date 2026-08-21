@@ -11,6 +11,7 @@ class SubscriptionFeaturesItemVariant2 extends SubscriptionFeaturesItem
         public readonly string $name,
         public readonly string $type,
         public readonly ?SubscriptionFeaturesItemVariant2Usage $usage = null,
+        public readonly ?SubscriptionFeaturesItemVariant2BaseAccess $baseAccess = null,
     ) {}
 
     /**
@@ -23,6 +24,7 @@ class SubscriptionFeaturesItemVariant2 extends SubscriptionFeaturesItem
             name: $data["name"],
             type: $data["type"],
             usage: isset($data["usage"]) ? SubscriptionFeaturesItemVariant2Usage::fromArray($data["usage"]) : null,
+            baseAccess: isset($data["base_access"]) ? SubscriptionFeaturesItemVariant2BaseAccess::fromArray($data["base_access"]) : null,
         );
     }
 }

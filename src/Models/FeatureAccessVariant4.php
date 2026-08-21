@@ -15,6 +15,7 @@ class FeatureAccessVariant4 extends FeatureAccess
         public readonly string $object,
         public readonly bool $livemode,
         public readonly ?string $unitName = null,
+        public readonly ?FeatureAccessVariant4BaseAccess $baseAccess = null,
     ) {}
 
     /**
@@ -31,6 +32,7 @@ class FeatureAccessVariant4 extends FeatureAccess
             object: $data["object"],
             livemode: $data["livemode"],
             unitName: $data["unit_name"] ?? null,
+            baseAccess: isset($data["base_access"]) ? FeatureAccessVariant4BaseAccess::fromArray($data["base_access"]) : null,
         );
     }
 }

@@ -11,6 +11,7 @@ class CreateOfferParamsPhasesItemVariant4 extends CreateOfferParamsPhasesItem
         /** @var CreateOfferParamsPhasesItemVariant4PricesItem[] */
         public readonly array $prices,
         public readonly ?int $durationCycles = null,
+        public readonly ?string $durationInterval = null,
     ) {}
 
     /**
@@ -22,6 +23,7 @@ class CreateOfferParamsPhasesItemVariant4 extends CreateOfferParamsPhasesItem
             type: $data["type"],
             prices: array_map(fn(array $item) => CreateOfferParamsPhasesItemVariant4PricesItem::fromArray($item), $data["prices"]),
             durationCycles: $data["duration_cycles"] ?? null,
+            durationInterval: $data["duration_interval"] ?? null,
         );
     }
 }

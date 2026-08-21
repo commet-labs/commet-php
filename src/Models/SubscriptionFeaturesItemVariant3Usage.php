@@ -11,6 +11,7 @@ class SubscriptionFeaturesItemVariant3Usage
         public readonly float $included,
         public readonly float $overageQuantity,
         public readonly ?float $overageUnitPrice = null,
+        public readonly ?bool $unlimited = null,
     ) {}
 
     /**
@@ -23,6 +24,7 @@ class SubscriptionFeaturesItemVariant3Usage
             included: $data["included"],
             overageQuantity: $data["overage_quantity"],
             overageUnitPrice: $data["overage_unit_price"] ?? null,
+            unlimited: $data["unlimited"] ?? null,
         );
     }
 }

@@ -22,7 +22,7 @@ class HttpClient
 
     public const API_VERSION = '2026-07-31';
 
-    private const VERSION = '9.0.0';
+    private const VERSION = '9.2.0';
 
     private const BODY_METHODS = ['POST', 'PUT', 'PATCH'];
 
@@ -322,6 +322,7 @@ class HttpClient
                 }
             }
 
+            $requestId = self::normalizeRequestId($response->getHeaderLine('x-request-id'));
             $body = $response->getBody()->getContents();
 
             try {
@@ -331,16 +332,22 @@ class HttpClient
                     "Invalid JSON response: {$statusCode}",
                     statusCode: $statusCode,
                     code: 'INVALID_JSON',
+                    requestId: $requestId,
                 );
             }
 
-            $this->handleError($statusCode, $data);
+            $this->handleError(
+                $statusCode,
+                $data,
+                $requestId,
+            );
         }
 
         if ($this->debug) {
             error_log("[Commet SDK] Response status: {$response->getStatusCode()}");
         }
 
+        $requestId = self::normalizeRequestId($response->getHeaderLine('x-request-id'));
         $body = $response->getBody()->getContents();
 
         try {
@@ -350,16 +357,15 @@ class HttpClient
                 "Invalid JSON response: {$response->getStatusCode()}",
                 statusCode: $response->getStatusCode(),
                 code: 'INVALID_JSON',
+                requestId: $requestId,
             );
         }
 
         if ($this->telemetryEnabled) {
             $durationMs = (int) ((hrtime(true) - $requestStart) / 1_000_000);
-            $requestId = $response->getHeaderLine('x-request-id') ?: ('req_' . time());
-            $this->lastRequestMetrics = [
-                'request_id' => $requestId,
-                'duration_ms' => $durationMs,
-            ];
+            $this->lastRequestMetrics = $requestId !== null
+                ? ['request_id' => $requestId, 'duration_ms' => $durationMs]
+                : null;
         }
 
         $converted = self::convertKeys($data, [self::class, 'toSnakeCase']);
@@ -382,12 +388,13 @@ class HttpClient
         );
     }
 
-    private function handleError(int $statusCode, mixed $data): never
+    private function handleError(int $statusCode, mixed $data, ?string $requestId): never
     {
         if (!is_array($data)) {
             throw new ApiException(
                 "Request failed with status {$statusCode}",
                 statusCode: $statusCode,
+                requestId: $requestId,
             );
         }
 
@@ -414,7 +421,13 @@ class HttpClient
             }
             throw new ValidationException(
                 $message,
+                statusCode: $statusCode,
                 validationErrors: $errors,
+                details: $details,
+                type: $type,
+                param: $param,
+                docUrl: $docUrl,
+                requestId: $requestId,
             );
         }
 
@@ -426,6 +439,7 @@ class HttpClient
             type: $type,
             param: $param,
             docUrl: $docUrl,
+            requestId: $requestId,
         );
     }
 
@@ -484,6 +498,11 @@ class HttpClient
         }
 
         return null;
+    }
+
+    private static function normalizeRequestId(string $requestId): ?string
+    {
+        return $requestId !== '' ? $requestId : null;
     }
 
     /**

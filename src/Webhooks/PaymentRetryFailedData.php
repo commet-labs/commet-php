@@ -12,6 +12,7 @@ final class PaymentRetryFailedData
         public readonly string $invoiceNumber,
         public readonly string $customerId,
         public readonly string $subscriptionId,
+        public readonly string $provider,
         public readonly string $reason,
     ) {}
 
@@ -25,6 +26,7 @@ final class PaymentRetryFailedData
             invoiceNumber: $data["invoiceNumber"],
             customerId: $data["customerId"],
             subscriptionId: $data["subscriptionId"],
+            provider: $data["provider"],
             reason: $data["reason"],
         );
     }
