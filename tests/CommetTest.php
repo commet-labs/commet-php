@@ -16,6 +16,11 @@ class CommetTest extends TestCase
         $this->assertInstanceOf(Commet::class, $commet);
     }
 
+    public function testRestrictedKey(): void
+    {
+        $this->assertInstanceOf(Commet::class, new Commet('rk_live_abc123'));
+    }
+
     public function testRejectsEmptyApiKey(): void
     {
         $this->expectException(\InvalidArgumentException::class);
