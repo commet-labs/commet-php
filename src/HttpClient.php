@@ -517,7 +517,7 @@ class HttpClient
                 $result = [];
                 foreach ($data as $key => $value) {
                     $newKey = is_string($key) ? $converter($key) : $key;
-                    $result[$newKey] = self::convertKeys($value, $converter);
+                    $result[$newKey] = $key === 'permissions' ? $value : self::convertKeys($value, $converter);
                 }
                 return $result;
             }

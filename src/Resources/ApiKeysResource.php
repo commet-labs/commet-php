@@ -58,18 +58,21 @@ class ApiKeysResource
 
     /**
      * Create a new API key. The full key is only returned once in the response.
+     * @param array<string, list<'read'|'write'>>|null $permissions
      * @return CreatedApiKey
      */
     public function create(
         string $name,
         ?int $expiresInDays = null,
         ?string $idempotencyKey = null,
+        ?array $permissions = null,
     ): CreatedApiKey {
         $response = $this->http->post(
             "/api-keys",
             HttpClient::buildBody([
                 "name" => $name,
                 "expires_in_days" => $expiresInDays,
+                "permissions" => $permissions === null ? null : (object) $permissions,
             ]),
             idempotencyKey: $idempotencyKey,
         );
