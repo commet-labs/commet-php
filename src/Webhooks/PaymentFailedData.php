@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Commet\Webhooks;
 
 use Commet\Enums\PaymentMethod;
+use Commet\Enums\SubPaymentMethod;
 
 /** Fired when a recurring charge fails. This event is for recurring charge failures only — card declines during initial checkout do not trigger this event. */
 final class PaymentFailedData
@@ -16,6 +17,7 @@ final class PaymentFailedData
         public readonly ?string $subscriptionId,
         public readonly string $provider,
         public readonly ?PaymentMethod $paymentMethod,
+        public readonly ?SubPaymentMethod $subPaymentMethod,
         public readonly string $failureCode,
         public readonly string $failureMessage,
         public readonly ?string $recoveryUrl,
@@ -33,6 +35,7 @@ final class PaymentFailedData
             subscriptionId: $data["subscriptionId"] ?? null,
             provider: $data["provider"],
             paymentMethod: isset($data["paymentMethod"]) ? PaymentMethod::from($data["paymentMethod"]) : null,
+            subPaymentMethod: isset($data["subPaymentMethod"]) ? SubPaymentMethod::from($data["subPaymentMethod"]) : null,
             failureCode: $data["failureCode"],
             failureMessage: $data["failureMessage"],
             recoveryUrl: $data["recoveryUrl"] ?? null,

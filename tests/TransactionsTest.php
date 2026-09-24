@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Commet\Tests;
 
-use Commet\Enums\TransactionStatus;
 use Commet\Enums\PaymentMethod;
+use Commet\Enums\SubPaymentMethod;
+use Commet\Enums\TransactionStatus;
 use Commet\HttpClient;
 use Commet\Models\Refund;
 use Commet\Models\Transaction;
@@ -74,7 +75,8 @@ class TransactionsTest extends TestCase
                 'currency' => 'USD',
                 'status' => 'pending',
                 'provider' => 'dlocal',
-                'payment_method' => 'oxxo',
+                'payment_method' => 'mercado_pago',
+                'sub_payment_method' => 'account_money',
                 'created_at' => '2026-06-08T00:00:00Z',
                 'updated_at' => '2026-06-08T00:00:00Z',
                 'object' => 'transaction',
@@ -87,7 +89,8 @@ class TransactionsTest extends TestCase
 
         $this->assertInstanceOf(Transaction::class, $result);
         $this->assertSame(TransactionStatus::Pending, $result->status);
-        $this->assertSame(PaymentMethod::Oxxo, $result->paymentMethod);
+        $this->assertSame(PaymentMethod::MercadoPago, $result->paymentMethod);
+        $this->assertSame(SubPaymentMethod::AccountMoney, $result->subPaymentMethod);
         $this->assertSame('a@b.com', $result->customerEmail);
         // Omitted optional timestamps map to null, not empty string.
         $this->assertNull($result->paidAt);

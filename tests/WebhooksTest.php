@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Commet\Tests;
 
+use Commet\Enums\SubPaymentMethod;
 use Commet\Resources\WebhooksResource;
+use Commet\Webhooks\WebhookEvent;
 use PHPUnit\Framework\TestCase;
 
 class WebhooksTest extends TestCase
@@ -20,6 +22,27 @@ class WebhooksTest extends TestCase
         $this->secret = 'whsec_test_secret_key';
         $this->payload = '{"event":"subscription.created","data":{"id":"sub_123"}}';
         $this->validSignature = hash_hmac('sha256', $this->payload, $this->secret);
+    }
+
+    public function testPaymentReceivedHydratesSubPaymentMethod(): void
+    {
+        $event = WebhookEvent::fromArray([
+            'event' => 'payment.received',
+            'timestamp' => '2026-09-24T00:00:00Z',
+            'organizationId' => 'org_1',
+            'mode' => 'test',
+            'apiVersion' => '2026-07-31',
+            'data' => [
+                'invoiceId' => 'inv_1',
+                'invoiceNumber' => 'INV-1',
+                'invoiceTotal' => 1000,
+                'customerId' => 'cus_1',
+                'paidAt' => '2026-09-24T00:00:00Z',
+                'subPaymentMethod' => 'debit_card',
+            ],
+        ]);
+
+        $this->assertSame(SubPaymentMethod::DebitCard, $event->asPaymentReceived()->subPaymentMethod);
     }
 
     public function testValidSignaturePasses(): void
