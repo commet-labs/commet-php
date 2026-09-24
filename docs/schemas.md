@@ -37,6 +37,12 @@ Generated from Commet API version `2026-07-31`.
 - `"one_time_payment"`
 - `"reactivation"`
 
+### PaymentMethod
+
+- `"card"`
+- `"oxxo"`
+- `"mercado_pago"`
+
 ### PaymentProvider
 
 - `"stripe"`
@@ -2224,6 +2230,7 @@ Discriminator: `type`
 - `presentmentAmount` (`int | null`, required) — Amount in the charge currency's smallest unit, as presented to the customer. Set for non-USD charges; null when the charge was made in USD.
 - `currency` (`string`, required)
 - `provider` (`PaymentProvider`, required) — The payment provider the charge was routed to: stripe, commet, or dlocal.
+- `paymentMethod` (`?PaymentMethod`, required) — Method used for this charge: card, oxxo, or mercado_pago. Null when unknown; later changes to the saved method do not alter this transaction.
 - `status` (`TransactionStatus`, required)
 - `customerEmail` (`string | null`, required)
 - `customerName` (`string | null`, required)
@@ -2244,6 +2251,7 @@ Discriminator: `type`
 - `presentmentAmount` (`int | null`, required) — Amount in the charge currency's smallest unit, as presented to the customer. Set for non-USD charges; null when the charge was made in USD.
 - `currency` (`string`, required)
 - `provider` (`PaymentProvider`, required) — The payment provider the charge was routed to: stripe, commet, or dlocal.
+- `paymentMethod` (`?PaymentMethod`, required) — Method used for this charge: card, oxxo, or mercado_pago. Null when unknown; later changes to the saved method do not alter this transaction.
 - `status` (`TransactionStatus`, required)
 - `customerEmail` (`string | null`, required)
 - `customerName` (`string | null`, required)

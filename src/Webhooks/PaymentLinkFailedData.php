@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Commet\Webhooks;
 
+use Commet\Enums\PaymentMethod;
+
 /** Fired when a payment link charge attempt is declined. The link stays open and can be paid again — a failed link is retryable. */
 final class PaymentLinkFailedData
 {
@@ -16,6 +18,7 @@ final class PaymentLinkFailedData
         public readonly ?string $customerId,
         public readonly string $failureCode,
         public readonly string $failureMessage,
+        public readonly ?PaymentMethod $paymentMethod,
     ) {}
 
     /**
@@ -32,6 +35,7 @@ final class PaymentLinkFailedData
             customerId: $data["customerId"] ?? null,
             failureCode: $data["failureCode"],
             failureMessage: $data["failureMessage"],
+            paymentMethod: isset($data["paymentMethod"]) ? PaymentMethod::from($data["paymentMethod"]) : null,
         );
     }
 }

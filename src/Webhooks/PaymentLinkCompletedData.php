@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Commet\Webhooks;
 
+use Commet\Enums\PaymentMethod;
+
 /** Fired when a payment link is paid. The charge settled and a one-time invoice was generated. Fulfill the purchase on this event. */
 final class PaymentLinkCompletedData
 {
@@ -17,6 +19,7 @@ final class PaymentLinkCompletedData
         public readonly string $invoiceId,
         public readonly string $invoiceNumber,
         public readonly ?string $paymentTransactionId,
+        public readonly ?PaymentMethod $paymentMethod,
     ) {}
 
     /**
@@ -34,6 +37,7 @@ final class PaymentLinkCompletedData
             invoiceId: $data["invoiceId"],
             invoiceNumber: $data["invoiceNumber"],
             paymentTransactionId: $data["paymentTransactionId"] ?? null,
+            paymentMethod: isset($data["paymentMethod"]) ? PaymentMethod::from($data["paymentMethod"]) : null,
         );
     }
 }

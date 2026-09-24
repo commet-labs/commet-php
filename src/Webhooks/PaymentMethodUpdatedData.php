@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Webhooks;
 
+use Commet\Enums\PaymentMethod;
 use Commet\Models\WebhookCardInfo;
 
 /** Fired when a customer replaces their default payment method through the customer portal. The new method applies to all of the customer's subscriptions. A payment method update is also a strong recovery signal for past-due subscriptions. */
@@ -12,6 +13,7 @@ final class PaymentMethodUpdatedData
     public function __construct(
         public readonly string $customerId,
         public readonly ?WebhookCardInfo $card,
+        public readonly ?PaymentMethod $paymentMethod,
     ) {}
 
     /**
@@ -22,6 +24,7 @@ final class PaymentMethodUpdatedData
         return new self(
             customerId: $data["customerId"],
             card: isset($data["card"]) ? WebhookCardInfo::fromArray($data["card"]) : null,
+            paymentMethod: isset($data["paymentMethod"]) ? PaymentMethod::from($data["paymentMethod"]) : null,
         );
     }
 }

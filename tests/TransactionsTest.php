@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Commet\Tests;
 
 use Commet\Enums\TransactionStatus;
+use Commet\Enums\PaymentMethod;
 use Commet\HttpClient;
 use Commet\Models\Refund;
 use Commet\Models\Transaction;
@@ -72,7 +73,8 @@ class TransactionsTest extends TestCase
                 'tax_amount' => 1000,
                 'currency' => 'USD',
                 'status' => 'pending',
-                'provider' => 'stripe',
+                'provider' => 'dlocal',
+                'payment_method' => 'oxxo',
                 'created_at' => '2026-06-08T00:00:00Z',
                 'updated_at' => '2026-06-08T00:00:00Z',
                 'object' => 'transaction',
@@ -85,6 +87,7 @@ class TransactionsTest extends TestCase
 
         $this->assertInstanceOf(Transaction::class, $result);
         $this->assertSame(TransactionStatus::Pending, $result->status);
+        $this->assertSame(PaymentMethod::Oxxo, $result->paymentMethod);
         $this->assertSame('a@b.com', $result->customerEmail);
         // Omitted optional timestamps map to null, not empty string.
         $this->assertNull($result->paidAt);
