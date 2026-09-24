@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Commet\Webhooks;
 
 use Commet\Enums\PaymentMethod;
+use Commet\Enums\SubPaymentMethod;
 
 /** Fired every time a payment settles successfully — the first payment and every renewal alike. subscription.activated fires alongside it only on the first one. */
 final class PaymentReceivedData
@@ -18,6 +19,7 @@ final class PaymentReceivedData
         public readonly ?string $paymentTransactionId,
         public readonly ?string $provider,
         public readonly ?PaymentMethod $paymentMethod,
+        public readonly ?SubPaymentMethod $subPaymentMethod,
         public readonly ?float $grossAmount,
         public readonly ?string $currency,
         public readonly ?float $orgNetAmount,
@@ -39,6 +41,7 @@ final class PaymentReceivedData
             paymentTransactionId: $data["paymentTransactionId"] ?? null,
             provider: $data["provider"] ?? null,
             paymentMethod: isset($data["paymentMethod"]) ? PaymentMethod::from($data["paymentMethod"]) : null,
+            subPaymentMethod: isset($data["subPaymentMethod"]) ? SubPaymentMethod::from($data["subPaymentMethod"]) : null,
             grossAmount: $data["grossAmount"] ?? null,
             currency: $data["currency"] ?? null,
             orgNetAmount: $data["orgNetAmount"] ?? null,

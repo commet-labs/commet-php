@@ -6,6 +6,7 @@ namespace Commet\Models;
 
 use Commet\Enums\PaymentMethod;
 use Commet\Enums\PaymentProvider;
+use Commet\Enums\SubPaymentMethod;
 use Commet\Enums\TransactionStatus;
 
 class Transaction
@@ -25,6 +26,7 @@ class Transaction
         public readonly ?int $taxAmount = null,
         public readonly ?int $presentmentAmount = null,
         public readonly ?PaymentMethod $paymentMethod = null,
+        public readonly ?SubPaymentMethod $subPaymentMethod = null,
         public readonly ?string $customerEmail = null,
         public readonly ?string $customerName = null,
         public readonly ?string $paidAt = null,
@@ -51,6 +53,7 @@ class Transaction
             taxAmount: $data["tax_amount"] ?? null,
             presentmentAmount: $data["presentment_amount"] ?? null,
             paymentMethod: isset($data["payment_method"]) ? PaymentMethod::from($data["payment_method"]) : null,
+            subPaymentMethod: isset($data["sub_payment_method"]) ? SubPaymentMethod::from($data["sub_payment_method"]) : null,
             customerEmail: $data["customer_email"] ?? null,
             customerName: $data["customer_name"] ?? null,
             paidAt: $data["paid_at"] ?? null,
