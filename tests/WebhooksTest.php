@@ -30,7 +30,7 @@ class WebhooksTest extends TestCase
             'event' => 'payment.received',
             'timestamp' => '2026-09-24T00:00:00Z',
             'organizationId' => 'org_1',
-            'mode' => 'test',
+            'mode' => 'sandbox',
             'apiVersion' => '2026-07-31',
             'data' => [
                 'invoiceId' => 'inv_1',
