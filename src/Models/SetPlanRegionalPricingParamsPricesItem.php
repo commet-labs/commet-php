@@ -4,13 +4,24 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class SetPlanRegionalPricingParamsPricesItem
+class SetPlanRegionalPricingParamsPricesItem implements \JsonSerializable
 {
     public function __construct(
         public readonly string $priceId,
         public readonly int $price,
         public readonly ?int $includedBalance = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["priceId"] = $this->priceId;
+        $values["price"] = $this->price;
+        if ($this->includedBalance !== null) {
+            $values["includedBalance"] = $this->includedBalance;
+        }
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

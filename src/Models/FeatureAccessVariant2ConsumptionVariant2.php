@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class FeatureAccessVariant2ConsumptionVariant2 extends FeatureAccessVariant2Consumption
+class FeatureAccessVariant2ConsumptionVariant2 extends FeatureAccessVariant2Consumption implements \JsonSerializable
 {
     public function __construct(
         public readonly string $model,
@@ -14,6 +14,18 @@ class FeatureAccessVariant2ConsumptionVariant2 extends FeatureAccessVariant2Cons
         public readonly float $creditsConsumed,
         public readonly int $availableUnits,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["model"] = $this->model;
+        $values["period"] = $this->period;
+        $values["unitsUsed"] = $this->unitsUsed;
+        $values["creditsPerUnit"] = $this->creditsPerUnit;
+        $values["creditsConsumed"] = $this->creditsConsumed;
+        $values["availableUnits"] = $this->availableUnits;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

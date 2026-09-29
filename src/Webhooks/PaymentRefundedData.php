@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Webhooks;
 
-/** Fired when a payment is refunded, fully or partially. A full refund of a subscription invoice also cancels the subscription immediately (subscription.canceled fires with reason refund); partial refunds leave the subscription untouched. */
+/** Fired when a payment is refunded, fully or partially. A refund does not change the subscription. Cancel it separately if it should end. */
 final class PaymentRefundedData
 {
     public function __construct(

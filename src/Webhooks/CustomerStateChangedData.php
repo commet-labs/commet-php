@@ -9,7 +9,7 @@ use Commet\Models\WebhookCreditsBalance;
 use Commet\Models\WebhookPlanRef;
 use Commet\Models\WebhookSeatSummary;
 
-/** Aggregate entitlement event answering one question: what can this customer access right now? Fired on every entitlement transition (subscription lifecycle, plan changes, trials, past due, scheduled cancellations) with the customer's CURRENT subscription, plan, features, seats, and credits or balance. Handle this single event to keep access in sync instead of wiring every lifecycle event. */
+/** Aggregate entitlement event answering one question: what can this customer access right now? Fired on every entitlement transition (subscription lifecycle, pauses, plan changes, trials, past due, scheduled cancellations) with the customer's CURRENT subscription, plan, features, seats, and credits or balance. Handle this single event to keep access in sync instead of wiring every lifecycle event. */
 final class CustomerStateChangedData
 {
     public function __construct(

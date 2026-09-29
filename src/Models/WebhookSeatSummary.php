@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class WebhookSeatSummary
+class WebhookSeatSummary implements \JsonSerializable
 {
     public function __construct(
         public readonly string $code,
@@ -13,6 +13,17 @@ class WebhookSeatSummary
         public readonly ?float $remaining = null,
         public readonly ?bool $unlimited = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["code"] = $this->code;
+        $values["current"] = $this->current;
+        $values["included"] = $this->included;
+        $values["remaining"] = $this->remaining;
+        $values["unlimited"] = $this->unlimited;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

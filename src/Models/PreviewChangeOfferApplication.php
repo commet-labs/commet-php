@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class PreviewChangeOfferApplication
+class PreviewChangeOfferApplication implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
@@ -18,6 +18,21 @@ class PreviewChangeOfferApplication
         public readonly array $phases,
         public readonly PreviewChangeOfferApplicationAppliesTo $appliesTo,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["offerId"] = $this->offerId;
+        $values["name"] = $this->name;
+        $values["currency"] = $this->currency;
+        $values["subtotal"] = $this->subtotal;
+        $values["discountAmount"] = $this->discountAmount;
+        $values["total"] = $this->total;
+        $values["phases"] = $this->phases;
+        $values["appliesTo"] = $this->appliesTo;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

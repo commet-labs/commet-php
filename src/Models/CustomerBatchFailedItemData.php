@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class CustomerBatchFailedItemData
+class CustomerBatchFailedItemData implements \JsonSerializable
 {
     public function __construct(
         public readonly string $email,
@@ -17,6 +17,34 @@ class CustomerBatchFailedItemData
         public readonly ?array $metadata = null,
         public readonly ?CustomerBatchFailedItemDataAddress $address = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        if ($this->id !== null) {
+            $values["id"] = $this->id;
+        }
+        if ($this->externalId !== null) {
+            $values["externalId"] = $this->externalId;
+        }
+        $values["email"] = $this->email;
+        if ($this->fullName !== null) {
+            $values["fullName"] = $this->fullName;
+        }
+        if ($this->taxDocument !== null) {
+            $values["taxDocument"] = $this->taxDocument;
+        }
+        if ($this->timezone !== null) {
+            $values["timezone"] = $this->timezone;
+        }
+        if ($this->metadata !== null) {
+            $values["metadata"] = $this->metadata;
+        }
+        if ($this->address !== null) {
+            $values["address"] = $this->address;
+        }
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

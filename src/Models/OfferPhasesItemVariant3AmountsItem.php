@@ -4,12 +4,20 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class OfferPhasesItemVariant3AmountsItem
+class OfferPhasesItemVariant3AmountsItem implements \JsonSerializable
 {
     public function __construct(
         public readonly string $currency,
         public readonly int $amount,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["currency"] = $this->currency;
+        $values["amount"] = $this->amount;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

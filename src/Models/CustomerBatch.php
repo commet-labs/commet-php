@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class CustomerBatch
+class CustomerBatch implements \JsonSerializable
 {
     public function __construct(
         /** @var CustomerBatchSuccessfulItem[] */
@@ -14,6 +14,16 @@ class CustomerBatch
         public readonly string $object,
         public readonly bool $livemode,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["successful"] = $this->successful;
+        $values["failed"] = $this->failed;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

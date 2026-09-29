@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class WebhookCardInfo
+class WebhookCardInfo implements \JsonSerializable
 {
     public function __construct(
         public readonly string $brand,
@@ -12,6 +12,16 @@ class WebhookCardInfo
         public readonly float $expMonth,
         public readonly float $expYear,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["brand"] = $this->brand;
+        $values["last4"] = $this->last4;
+        $values["expMonth"] = $this->expMonth;
+        $values["expYear"] = $this->expYear;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

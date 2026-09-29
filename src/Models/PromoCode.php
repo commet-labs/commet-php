@@ -6,7 +6,7 @@ namespace Commet\Models;
 
 use Commet\Enums\BillingInterval;
 
-class PromoCode
+class PromoCode implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
@@ -22,6 +22,24 @@ class PromoCode
         public readonly ?int $maxRedemptions = null,
         public readonly ?string $expiresAt = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["code"] = $this->code;
+        $values["offerId"] = $this->offerId;
+        $values["billingInterval"] = $this->billingInterval;
+        $values["maxRedemptions"] = $this->maxRedemptions;
+        $values["expiresAt"] = $this->expiresAt;
+        $values["isActive"] = $this->isActive;
+        $values["redemptionCount"] = $this->redemptionCount;
+        $values["createdAt"] = $this->createdAt;
+        $values["updatedAt"] = $this->updatedAt;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

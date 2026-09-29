@@ -4,12 +4,20 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class WebhookAddonRef
+class WebhookAddonRef implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
         public readonly string $name,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["name"] = $this->name;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

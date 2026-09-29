@@ -4,13 +4,22 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class WebhookCreditsBalance
+class WebhookCreditsBalance implements \JsonSerializable
 {
     public function __construct(
         public readonly float $planCredits,
         public readonly float $purchasedCredits,
         public readonly float $totalCredits,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["planCredits"] = $this->planCredits;
+        $values["purchasedCredits"] = $this->purchasedCredits;
+        $values["totalCredits"] = $this->totalCredits;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

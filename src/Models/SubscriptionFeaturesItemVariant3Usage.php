@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class SubscriptionFeaturesItemVariant3Usage
+class SubscriptionFeaturesItemVariant3Usage implements \JsonSerializable
 {
     public function __construct(
         public readonly float $current,
@@ -13,6 +13,21 @@ class SubscriptionFeaturesItemVariant3Usage
         public readonly ?float $overageUnitPrice = null,
         public readonly ?bool $unlimited = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["current"] = $this->current;
+        $values["included"] = $this->included;
+        $values["overageQuantity"] = $this->overageQuantity;
+        if ($this->overageUnitPrice !== null) {
+            $values["overageUnitPrice"] = $this->overageUnitPrice;
+        }
+        if ($this->unlimited !== null) {
+            $values["unlimited"] = $this->unlimited;
+        }
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

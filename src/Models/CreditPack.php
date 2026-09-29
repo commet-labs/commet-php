@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class CreditPack
+class CreditPack implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
@@ -18,6 +18,22 @@ class CreditPack
         public readonly bool $livemode,
         public readonly ?string $description = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["name"] = $this->name;
+        $values["description"] = $this->description;
+        $values["credits"] = $this->credits;
+        $values["price"] = $this->price;
+        $values["isActive"] = $this->isActive;
+        $values["createdAt"] = $this->createdAt;
+        $values["updatedAt"] = $this->updatedAt;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

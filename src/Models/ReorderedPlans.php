@@ -4,13 +4,22 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class ReorderedPlans
+class ReorderedPlans implements \JsonSerializable
 {
     public function __construct(
         public readonly bool $reordered,
         public readonly string $object,
         public readonly bool $livemode,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["reordered"] = $this->reordered;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class PlanPricesItemRegionalPricesItem
+class PlanPricesItemRegionalPricesItem implements \JsonSerializable
 {
     public function __construct(
         public readonly string $currency,
@@ -12,6 +12,16 @@ class PlanPricesItemRegionalPricesItem
         public readonly bool $autoSynced,
         public readonly ?int $includedBalance = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["currency"] = $this->currency;
+        $values["price"] = $this->price;
+        $values["includedBalance"] = $this->includedBalance;
+        $values["autoSynced"] = $this->autoSynced;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

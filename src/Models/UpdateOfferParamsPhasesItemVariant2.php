@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class UpdateOfferParamsPhasesItemVariant2 extends UpdateOfferParamsPhasesItem
+class UpdateOfferParamsPhasesItemVariant2 extends UpdateOfferParamsPhasesItem implements \JsonSerializable
 {
     public function __construct(
         public readonly string $type,
@@ -12,6 +12,18 @@ class UpdateOfferParamsPhasesItemVariant2 extends UpdateOfferParamsPhasesItem
         public readonly ?int $durationCycles = null,
         public readonly ?string $durationInterval = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["type"] = $this->type;
+        $values["durationCycles"] = $this->durationCycles;
+        if ($this->durationInterval !== null) {
+            $values["durationInterval"] = $this->durationInterval;
+        }
+        $values["percentage"] = $this->percentage;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

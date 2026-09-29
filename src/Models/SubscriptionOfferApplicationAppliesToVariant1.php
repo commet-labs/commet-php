@@ -4,12 +4,20 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class SubscriptionOfferApplicationAppliesToVariant1 extends SubscriptionOfferApplicationAppliesTo
+class SubscriptionOfferApplicationAppliesToVariant1 extends SubscriptionOfferApplicationAppliesTo implements \JsonSerializable
 {
     public function __construct(
         public readonly string $type,
         public readonly string $id,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["type"] = $this->type;
+        $values["id"] = $this->id;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

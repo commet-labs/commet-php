@@ -6,7 +6,7 @@ namespace Commet\Models;
 
 use Commet\Enums\Timezone;
 
-class BatchCreateCustomersParamsCustomersItem
+class BatchCreateCustomersParamsCustomersItem implements \JsonSerializable
 {
     public function __construct(
         public readonly string $email,
@@ -19,6 +19,34 @@ class BatchCreateCustomersParamsCustomersItem
         public readonly ?array $metadata = null,
         public readonly ?BatchCreateCustomersParamsCustomersItemAddress $address = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["email"] = $this->email;
+        if ($this->id !== null) {
+            $values["id"] = $this->id;
+        }
+        if ($this->externalId !== null) {
+            $values["externalId"] = $this->externalId;
+        }
+        if ($this->fullName !== null) {
+            $values["fullName"] = $this->fullName;
+        }
+        if ($this->taxDocument !== null) {
+            $values["taxDocument"] = $this->taxDocument;
+        }
+        if ($this->timezone !== null) {
+            $values["timezone"] = $this->timezone;
+        }
+        if ($this->metadata !== null) {
+            $values["metadata"] = $this->metadata;
+        }
+        if ($this->address !== null) {
+            $values["address"] = $this->address;
+        }
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

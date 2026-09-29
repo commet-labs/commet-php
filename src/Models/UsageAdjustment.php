@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class UsageAdjustment
+class UsageAdjustment implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
@@ -19,6 +19,23 @@ class UsageAdjustment
         public readonly bool $livemode,
         public readonly ?string $reason = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["value"] = $this->value;
+        $values["previousValue"] = $this->previousValue;
+        $values["adjustment"] = $this->adjustment;
+        $values["customerId"] = $this->customerId;
+        $values["reason"] = $this->reason;
+        $values["ts"] = $this->ts;
+        $values["createdAt"] = $this->createdAt;
+        $values["featureCode"] = $this->featureCode;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

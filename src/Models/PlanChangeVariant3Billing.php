@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class PlanChangeVariant3Billing
+class PlanChangeVariant3Billing implements \JsonSerializable
 {
     public function __construct(
         public readonly int $credit,
@@ -15,6 +15,19 @@ class PlanChangeVariant3Billing
         public readonly int $totalCharged,
         public readonly int $remainingCreditBalance,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["credit"] = $this->credit;
+        $values["creditsApplied"] = $this->creditsApplied;
+        $values["charge"] = $this->charge;
+        $values["taxAmount"] = $this->taxAmount;
+        $values["netAmount"] = $this->netAmount;
+        $values["totalCharged"] = $this->totalCharged;
+        $values["remainingCreditBalance"] = $this->remainingCreditBalance;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

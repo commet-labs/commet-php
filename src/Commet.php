@@ -24,8 +24,8 @@ class Commet
             throw new \InvalidArgumentException('Commet SDK: API key is required');
         }
 
-        if (!str_starts_with($apiKey, 'ck_')) {
-            throw new \InvalidArgumentException('Commet SDK: Invalid API key format. Expected format: ck_xxx...');
+        if (!str_starts_with($apiKey, 'ck_') && !str_starts_with($apiKey, 'rk_')) {
+            throw new \InvalidArgumentException('Commet SDK: Invalid API key format. Expected prefix ck_ or rk_');
         }
 
         $http = new HttpClient($apiKey, $apiVersion, $timeout, $retries, $telemetry, $debug);

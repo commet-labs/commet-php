@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class SeatEvent
+class SeatEvent implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
@@ -17,6 +17,21 @@ class SeatEvent
         public readonly string $object,
         public readonly bool $livemode,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["customerId"] = $this->customerId;
+        $values["featureCode"] = $this->featureCode;
+        $values["previousBalance"] = $this->previousBalance;
+        $values["newBalance"] = $this->newBalance;
+        $values["ts"] = $this->ts;
+        $values["createdAt"] = $this->createdAt;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

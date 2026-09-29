@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class PlanFeature
+class PlanFeature implements \JsonSerializable
 {
     public function __construct(
         public readonly string $planId,
@@ -19,6 +19,23 @@ class PlanFeature
         public readonly ?int $creditsPerUnit = null,
         public readonly ?int $margin = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["planId"] = $this->planId;
+        $values["featureId"] = $this->featureId;
+        $values["enabled"] = $this->enabled;
+        $values["includedAmount"] = $this->includedAmount;
+        $values["unlimited"] = $this->unlimited;
+        $values["overage"] = $this->overage;
+        $values["creditsPerUnit"] = $this->creditsPerUnit;
+        $values["pricingMode"] = $this->pricingMode;
+        $values["margin"] = $this->margin;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

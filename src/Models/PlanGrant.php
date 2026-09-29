@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class PlanGrant
+class PlanGrant implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
@@ -28,6 +28,31 @@ class PlanGrant
         public readonly ?string $expiresAt = null,
         public readonly ?string $revokedAt = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["customerId"] = $this->customerId;
+        $values["subscriptionId"] = $this->subscriptionId;
+        $values["basePlanId"] = $this->basePlanId;
+        $values["planId"] = $this->planId;
+        $values["planReleaseId"] = $this->planReleaseId;
+        $values["status"] = $this->status;
+        $values["duration"] = $this->duration;
+        $values["durationCycles"] = $this->durationCycles;
+        $values["startsAt"] = $this->startsAt;
+        $values["expiresAt"] = $this->expiresAt;
+        $values["reason"] = $this->reason;
+        $values["source"] = $this->source;
+        $values["revokedAt"] = $this->revokedAt;
+        $values["createdAt"] = $this->createdAt;
+        $values["updatedAt"] = $this->updatedAt;
+        $values["events"] = $this->events;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

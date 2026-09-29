@@ -11,9 +11,10 @@ class CommetTest extends TestCase
 {
     public function testValidKey(): void
     {
-        $commet = new Commet('ck_test_abc123');
-
-        $this->assertInstanceOf(Commet::class, $commet);
+        foreach (['ck_', 'ck_live_', 'ck_sandbox_', 'rk_', 'rk_live_', 'rk_sandbox_'] as $prefix) {
+            $commet = new Commet($prefix . 'test_abc123');
+            $this->assertInstanceOf(Commet::class, $commet);
+        }
     }
 
     public function testRejectsEmptyApiKey(): void

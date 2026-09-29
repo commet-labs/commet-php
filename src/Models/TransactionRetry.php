@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class TransactionRetry
+class TransactionRetry implements \JsonSerializable
 {
     public function __construct(
         public readonly string $originalTransactionId,
@@ -13,6 +13,17 @@ class TransactionRetry
         public readonly string $object,
         public readonly bool $livemode,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["originalTransactionId"] = $this->originalTransactionId;
+        $values["invoiceId"] = $this->invoiceId;
+        $values["status"] = $this->status;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

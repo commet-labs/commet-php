@@ -4,13 +4,22 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class AddPlanPriceParamsMarketPricesItem
+class AddPlanPriceParamsMarketPricesItem implements \JsonSerializable
 {
     public function __construct(
         public readonly string $marketGroupId,
         public readonly string $currency,
         public readonly int $price,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["marketGroupId"] = $this->marketGroupId;
+        $values["currency"] = $this->currency;
+        $values["price"] = $this->price;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

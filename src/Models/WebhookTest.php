@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class WebhookTest
+class WebhookTest implements \JsonSerializable
 {
     public function __construct(
         public readonly bool $success,
@@ -13,6 +13,17 @@ class WebhookTest
         public readonly string $object,
         public readonly bool $livemode,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["success"] = $this->success;
+        $values["deliveryId"] = $this->deliveryId;
+        $values["deliveredAt"] = $this->deliveredAt;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

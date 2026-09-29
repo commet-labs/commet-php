@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class PreviewChange
+class PreviewChange implements \JsonSerializable
 {
     public function __construct(
         public readonly string $currency,
@@ -19,6 +19,25 @@ class PreviewChange
         public readonly bool $livemode,
         public readonly ?PreviewChangeOfferApplication $offerApplication = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["currency"] = $this->currency;
+        $values["currentPlanCredit"] = $this->currentPlanCredit;
+        $values["newPlanCharge"] = $this->newPlanCharge;
+        $values["estimatedTotal"] = $this->estimatedTotal;
+        $values["effectiveDate"] = $this->effectiveDate;
+        $values["daysRemaining"] = $this->daysRemaining;
+        $values["totalDays"] = $this->totalDays;
+        $values["isUpgrade"] = $this->isUpgrade;
+        if ($this->offerApplication !== null) {
+            $values["offerApplication"] = $this->offerApplication;
+        }
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

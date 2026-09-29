@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class PlanGrantEventsItem
+class PlanGrantEventsItem implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
@@ -18,6 +18,22 @@ class PlanGrantEventsItem
         public readonly ?int $durationCycles = null,
         public readonly ?string $requestedExpiresAt = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["type"] = $this->type;
+        $values["reason"] = $this->reason;
+        $values["source"] = $this->source;
+        $values["previousExpiresAt"] = $this->previousExpiresAt;
+        $values["expiresAt"] = $this->expiresAt;
+        $values["duration"] = $this->duration;
+        $values["durationCycles"] = $this->durationCycles;
+        $values["requestedExpiresAt"] = $this->requestedExpiresAt;
+        $values["createdAt"] = $this->createdAt;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

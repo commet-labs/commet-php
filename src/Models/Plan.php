@@ -6,7 +6,7 @@ namespace Commet\Models;
 
 use Commet\Enums\ConsumptionModel;
 
-class Plan
+class Plan implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
@@ -33,6 +33,31 @@ class Plan
         /** @var array<string, mixed>|null */
         public readonly ?array $metadata = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["name"] = $this->name;
+        $values["code"] = $this->code;
+        $values["description"] = $this->description;
+        $values["consumptionModel"] = $this->consumptionModel;
+        $values["isPublic"] = $this->isPublic;
+        $values["isDefault"] = $this->isDefault;
+        $values["isFree"] = $this->isFree;
+        $values["blockOnExhaustion"] = $this->blockOnExhaustion;
+        $values["sortOrder"] = $this->sortOrder;
+        $values["planGroupId"] = $this->planGroupId;
+        $values["metadata"] = $this->metadata;
+        $values["createdAt"] = $this->createdAt;
+        $values["updatedAt"] = $this->updatedAt;
+        $values["features"] = $this->features;
+        $values["prices"] = $this->prices;
+        $values["exchangeRates"] = $this->exchangeRates;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class PlanChangeVariant3OfferApplicationPhasesItemVariant4 extends PlanChangeVariant3OfferApplicationPhasesItem
+class PlanChangeVariant3OfferApplicationPhasesItemVariant4 extends PlanChangeVariant3OfferApplicationPhasesItem implements \JsonSerializable
 {
     public function __construct(
         public readonly string $type,
@@ -14,6 +14,18 @@ class PlanChangeVariant3OfferApplicationPhasesItemVariant4 extends PlanChangeVar
         public readonly ?string $startsAt = null,
         public readonly ?string $endsAt = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["type"] = $this->type;
+        $values["durationCycles"] = $this->durationCycles;
+        $values["durationInterval"] = $this->durationInterval;
+        $values["startsAt"] = $this->startsAt;
+        $values["endsAt"] = $this->endsAt;
+        $values["price"] = $this->price;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

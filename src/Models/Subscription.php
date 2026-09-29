@@ -8,7 +8,7 @@ use Commet\Enums\BillingInterval;
 use Commet\Enums\ConsumptionModel;
 use Commet\Enums\SubscriptionStatus;
 
-class Subscription
+class Subscription implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
@@ -36,12 +36,50 @@ class Subscription
         public readonly ?int $billingDayOfMonth = null,
         public readonly ?string $nextBillingDate = null,
         public readonly ?string $checkoutUrl = null,
+        public readonly ?SubscriptionPause $pause = null,
         public readonly ?SubscriptionPlanGrant $planGrant = null,
         public readonly ?ConsumptionModel $consumptionModel = null,
         public readonly ?SubscriptionCredits $credits = null,
         public readonly ?SubscriptionBalance $balance = null,
         public readonly ?string $priceId = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["customerId"] = $this->customerId;
+        $values["plan"] = $this->plan;
+        $values["name"] = $this->name;
+        $values["description"] = $this->description;
+        $values["status"] = $this->status;
+        $values["billingInterval"] = $this->billingInterval;
+        $values["trialEndsAt"] = $this->trialEndsAt;
+        $values["currentPeriod"] = $this->currentPeriod;
+        $values["cancellation"] = $this->cancellation;
+        $values["cancelAtPeriodEnd"] = $this->cancelAtPeriodEnd;
+        $values["scheduledPlanChange"] = $this->scheduledPlanChange;
+        $values["startDate"] = $this->startDate;
+        $values["endDate"] = $this->endDate;
+        $values["billingDayOfMonth"] = $this->billingDayOfMonth;
+        $values["nextBillingDate"] = $this->nextBillingDate;
+        $values["checkoutUrl"] = $this->checkoutUrl;
+        $values["createdAt"] = $this->createdAt;
+        $values["updatedAt"] = $this->updatedAt;
+        $values["offerApplications"] = $this->offerApplications;
+        $values["pause"] = $this->pause;
+        if ($this->planGrant !== null) {
+            $values["planGrant"] = $this->planGrant;
+        }
+        $values["consumptionModel"] = $this->consumptionModel;
+        $values["features"] = $this->features;
+        $values["credits"] = $this->credits;
+        $values["balance"] = $this->balance;
+        $values["priceId"] = $this->priceId;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data
@@ -72,6 +110,7 @@ class Subscription
             billingDayOfMonth: $data["billing_day_of_month"] ?? null,
             nextBillingDate: $data["next_billing_date"] ?? null,
             checkoutUrl: $data["checkout_url"] ?? null,
+            pause: isset($data["pause"]) ? SubscriptionPause::fromArray($data["pause"]) : null,
             planGrant: isset($data["plan_grant"]) ? SubscriptionPlanGrant::fromArray($data["plan_grant"]) : null,
             consumptionModel: isset($data["consumption_model"]) ? ConsumptionModel::from($data["consumption_model"]) : null,
             credits: isset($data["credits"]) ? SubscriptionCredits::fromArray($data["credits"]) : null,

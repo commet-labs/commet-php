@@ -4,11 +4,18 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class WebhookBalance
+class WebhookBalance implements \JsonSerializable
 {
     public function __construct(
         public readonly float $currentBalance,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["currentBalance"] = $this->currentBalance;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

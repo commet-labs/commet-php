@@ -3,7 +3,7 @@
 Install the SDK:
 
 ```bash
-composer require commet/commet-php:9.3.0
+composer require commet/commet-php:9.4.0
 ```
 
 Create one server-side client. Never expose an API key to browser code.

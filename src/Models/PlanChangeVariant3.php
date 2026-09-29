@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class PlanChangeVariant3 extends PlanChange
+class PlanChangeVariant3 extends PlanChange implements \JsonSerializable
 {
     public function __construct(
         public readonly string $outcome,
@@ -20,6 +20,28 @@ class PlanChangeVariant3 extends PlanChange
         public readonly ?string $invoiceId = null,
         public readonly ?PlanChangeVariant3OfferApplication $offerApplication = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["outcome"] = $this->outcome;
+        $values["id"] = $this->id;
+        $values["scheduled"] = $this->scheduled;
+        $values["customerId"] = $this->customerId;
+        $values["previousPlan"] = $this->previousPlan;
+        $values["currentPlan"] = $this->currentPlan;
+        $values["billingInterval"] = $this->billingInterval;
+        $values["billing"] = $this->billing;
+        if ($this->invoiceId !== null) {
+            $values["invoiceId"] = $this->invoiceId;
+        }
+        if ($this->offerApplication !== null) {
+            $values["offerApplication"] = $this->offerApplication;
+        }
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

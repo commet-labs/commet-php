@@ -6,7 +6,7 @@ namespace Commet\Models;
 
 use Commet\Enums\BillingInterval;
 
-class PlanPrice
+class PlanPrice implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
@@ -28,6 +28,28 @@ class PlanPrice
         public readonly ?string $offerId = null,
         public readonly ?string $inheritsFromPriceId = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["planId"] = $this->planId;
+        $values["billingInterval"] = $this->billingInterval;
+        $values["price"] = $this->price;
+        $values["isDefault"] = $this->isDefault;
+        $values["trialDays"] = $this->trialDays;
+        $values["includedBalance"] = $this->includedBalance;
+        $values["includedCredits"] = $this->includedCredits;
+        $values["offerId"] = $this->offerId;
+        $values["inheritsFromPriceId"] = $this->inheritsFromPriceId;
+        $values["metadata"] = $this->metadata;
+        $values["marketPrices"] = $this->marketPrices;
+        $values["createdAt"] = $this->createdAt;
+        $values["updatedAt"] = $this->updatedAt;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

@@ -48,6 +48,36 @@ final class WebhookEvent
         return SubscriptionReactivatedData::fromArray($this->data);
     }
 
+    public function asSubscriptionPauseScheduled(): SubscriptionPauseScheduledData
+    {
+        return SubscriptionPauseScheduledData::fromArray($this->data);
+    }
+
+    public function asSubscriptionPauseUpdated(): SubscriptionPauseUpdatedData
+    {
+        return SubscriptionPauseUpdatedData::fromArray($this->data);
+    }
+
+    public function asSubscriptionPauseRevoked(): SubscriptionPauseRevokedData
+    {
+        return SubscriptionPauseRevokedData::fromArray($this->data);
+    }
+
+    public function asSubscriptionPaused(): SubscriptionPausedData
+    {
+        return SubscriptionPausedData::fromArray($this->data);
+    }
+
+    public function asSubscriptionResumed(): SubscriptionResumedData
+    {
+        return SubscriptionResumedData::fromArray($this->data);
+    }
+
+    public function asSubscriptionResumeFailed(): SubscriptionResumeFailedData
+    {
+        return SubscriptionResumeFailedData::fromArray($this->data);
+    }
+
     public function asSubscriptionCanceled(): SubscriptionCanceledData
     {
         return SubscriptionCanceledData::fromArray($this->data);

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class CustomerCreditRevocation
+class CustomerCreditRevocation implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
@@ -14,6 +14,18 @@ class CustomerCreditRevocation
         public readonly string $object,
         public readonly bool $livemode,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["remainingAmount"] = $this->remainingAmount;
+        $values["revokedAmount"] = $this->revokedAmount;
+        $values["currency"] = $this->currency;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

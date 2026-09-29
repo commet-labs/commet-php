@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class TestClockRunItemsItem
+class TestClockRunItemsItem implements \JsonSerializable
 {
     public function __construct(
         public readonly string $kind,
@@ -18,6 +18,22 @@ class TestClockRunItemsItem
         public readonly ?string $detail = null,
         public readonly ?string $error = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["kind"] = $this->kind;
+        $values["status"] = $this->status;
+        $values["dueAt"] = $this->dueAt;
+        $values["subscriptionId"] = $this->subscriptionId;
+        $values["customerName"] = $this->customerName;
+        $values["invoiceNumber"] = $this->invoiceNumber;
+        $values["invoiceId"] = $this->invoiceId;
+        $values["outcome"] = $this->outcome;
+        $values["detail"] = $this->detail;
+        $values["error"] = $this->error;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data
