@@ -6,6 +6,9 @@ namespace Commet\Tests;
 
 use Commet\Exceptions\ApiException;
 use Commet\HttpClient;
+use Commet\Models\CreateApiKeyParamsPermissions;
+use Commet\Models\CreateCustomerParamsAddress;
+use Commet\Models\CreateOfferParamsPhasesItemVariant2;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Uri;
@@ -14,6 +17,35 @@ use Psr\Http\Message\RequestInterface;
 
 class HttpClientTest extends TestCase
 {
+    public function testRequestSerializationPreservesPermissionsAndRequiredNull(): void
+    {
+        $permissions = new CreateApiKeyParamsPermissions(
+            planGroup: ['read'], creditPack: ['write'], promoCode: ['read', 'write'],
+            marketGroup: ['read'], testClock: ['write'], apiKey: ['read'],
+        );
+        $body = HttpClient::buildBody(['expires_in_days' => 30, 'permissions' => $permissions]);
+        $body['duration_days'] = null;
+        $body['address'] = new CreateCustomerParamsAddress('Main', 'City', '123', 'US');
+        $body['phases'] = [new CreateOfferParamsPhasesItemVariant2(
+            type: 'percentage', durationCycles: null, durationInterval: 'month', percentage: 0,
+        )];
+        $encoded = json_encode(HttpClient::convertKeys($body, [HttpClient::class, 'toCamelCase']), JSON_THROW_ON_ERROR);
+        $actual = json_decode($encoded, true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame([
+            'plan_group' => ['read'], 'credit_pack' => ['write'], 'promo_code' => ['read', 'write'],
+            'market_group' => ['read'], 'test_clock' => ['write'], 'api_key' => ['read'],
+        ], $actual['permissions']);
+        $this->assertSame(30, $actual['expiresInDays']);
+        $this->assertArrayHasKey('durationDays', $actual);
+        $this->assertNull($actual['durationDays']);
+        $this->assertSame(['line1' => 'Main', 'city' => 'City', 'postalCode' => '123', 'country' => 'US'], $actual['address']);
+        $this->assertArrayHasKey('durationCycles', $actual['phases'][0]);
+        $this->assertNull($actual['phases'][0]['durationCycles']);
+        $this->assertSame(0, $actual['phases'][0]['percentage']);
+        $this->assertSame('{"permissions":{}}', json_encode(['permissions' => new CreateApiKeyParamsPermissions()], JSON_THROW_ON_ERROR));
+        $this->assertArrayNotHasKey('permissions', HttpClient::buildBody(['permissions' => null]));
+    }
+
     public function testToCamelCaseBasic(): void
     {
         $this->assertSame('customerName', HttpClient::toCamelCase('customer_name'));

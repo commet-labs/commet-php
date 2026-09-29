@@ -6,7 +6,7 @@ namespace Commet\Models;
 
 use Commet\Enums\FeatureType;
 
-class PlanFeaturesItem
+class PlanFeaturesItem implements \JsonSerializable
 {
     public function __construct(
         public readonly string $code,
@@ -20,6 +20,21 @@ class PlanFeaturesItem
         public readonly ?int $includedAmount = null,
         public readonly ?PlanFeaturesItemOverage $overage = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["code"] = $this->code;
+        $values["name"] = $this->name;
+        $values["type"] = $this->type;
+        $values["unitName"] = $this->unitName;
+        $values["enabled"] = $this->enabled;
+        $values["includedAmount"] = $this->includedAmount;
+        $values["unlimited"] = $this->unlimited;
+        $values["overage"] = $this->overage;
+        $values["regionalPrices"] = $this->regionalPrices;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

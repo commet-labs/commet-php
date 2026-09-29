@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class PlanRegionalPricing
+class PlanRegionalPricing implements \JsonSerializable
 {
     public function __construct(
         public readonly string $priceId,
@@ -13,6 +13,16 @@ class PlanRegionalPricing
         public readonly string $object,
         public readonly bool $livemode,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["priceId"] = $this->priceId;
+        $values["overrides"] = $this->overrides;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

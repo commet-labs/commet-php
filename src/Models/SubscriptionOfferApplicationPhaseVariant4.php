@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class SubscriptionOfferApplicationPhaseVariant4 extends SubscriptionOfferApplicationPhase
+class SubscriptionOfferApplicationPhaseVariant4 extends SubscriptionOfferApplicationPhase implements \JsonSerializable
 {
     public function __construct(
         public readonly string $type,
@@ -14,6 +14,18 @@ class SubscriptionOfferApplicationPhaseVariant4 extends SubscriptionOfferApplica
         public readonly ?string $startsAt = null,
         public readonly ?string $endsAt = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["type"] = $this->type;
+        $values["durationCycles"] = $this->durationCycles;
+        $values["durationInterval"] = $this->durationInterval;
+        $values["price"] = $this->price;
+        $values["startsAt"] = $this->startsAt;
+        $values["endsAt"] = $this->endsAt;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

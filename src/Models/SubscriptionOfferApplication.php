@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class SubscriptionOfferApplication
+class SubscriptionOfferApplication implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
@@ -23,6 +23,26 @@ class SubscriptionOfferApplication
         public readonly ?string $expiresAt = null,
         public readonly ?string $appliedAt = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["name"] = $this->name;
+        $values["appliesTo"] = $this->appliesTo;
+        $values["offerId"] = $this->offerId;
+        $values["source"] = $this->source;
+        $values["status"] = $this->status;
+        $values["currency"] = $this->currency;
+        $values["subtotal"] = $this->subtotal;
+        $values["discountAmount"] = $this->discountAmount;
+        $values["total"] = $this->total;
+        $values["phases"] = $this->phases;
+        $values["quotedAt"] = $this->quotedAt;
+        $values["expiresAt"] = $this->expiresAt;
+        $values["appliedAt"] = $this->appliedAt;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

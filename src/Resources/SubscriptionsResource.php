@@ -18,6 +18,7 @@ use Commet\Models\ReactivatedSubscription;
 use Commet\Models\RecoveryLink;
 use Commet\Models\Subscription;
 use Commet\Models\SubscriptionAddon;
+use Commet\Models\SubscriptionResume;
 use Commet\Models\SubscriptionsListResult;
 
 class SubscriptionsResource
@@ -246,6 +247,77 @@ class SubscriptionsResource
     }
 
     /**
+     * Pause immediately or schedule a pause for the end of the current billing or trial period. Set durationDays to null for an indefinite pause.
+     * @return Subscription
+     */
+    public function pause(
+        string $id,
+        string $mode,
+        ?int $durationDays,
+        ?string $idempotencyKey = null,
+    ): Subscription {
+        $response = $this->http->post(
+            "/subscriptions/{$id}/pause",
+            HttpClient::buildBody([
+                "mode" => $mode,
+            ]) + [
+                "duration_days" => $durationDays,
+            ],
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Subscription response payload");
+        }
+
+        return Subscription::fromArray($response->data);
+    }
+
+    /**
+     * Change the duration of a scheduled or active pause. Set durationDays to null to make it indefinite.
+     * @return Subscription
+     */
+    public function updatePause(
+        string $id,
+        ?int $durationDays,
+        ?string $idempotencyKey = null,
+    ): Subscription {
+        $response = $this->http->patch(
+            "/subscriptions/{$id}/pause",
+            HttpClient::buildBody([
+
+            ]) + [
+                "duration_days" => $durationDays,
+            ],
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Subscription response payload");
+        }
+
+        return Subscription::fromArray($response->data);
+    }
+
+    /**
+     * Revoke a pause before it becomes effective. Active pauses must be resumed instead.
+     * @return Subscription
+     */
+    public function revokePause(
+        string $id,
+    ): Subscription {
+        $response = $this->http->delete(
+            "/subscriptions/{$id}/pause",
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Subscription response payload");
+        }
+
+        return Subscription::fromArray($response->data);
+    }
+
+    /**
      * Creates a hosted checkout session for the customer to update the subscription's default payment method.
      * @return PaymentMethodUpdateCheckout
      */
@@ -339,6 +411,26 @@ class SubscriptionsResource
         }
 
         return RecoveryLink::fromArray($response->data);
+    }
+
+    /**
+     * Resume a paused subscription. Immediate pauses continue the preserved period without a charge. Period-end pauses charge a new period before access is restored.
+     * @return SubscriptionResume
+     */
+    public function resume(
+        string $id,
+        ?string $idempotencyKey = null,
+    ): SubscriptionResume {
+        $response = $this->http->post(
+            "/subscriptions/{$id}/resume",
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid SubscriptionResume response payload");
+        }
+
+        return SubscriptionResume::fromArray($response->data);
     }
 
     /**

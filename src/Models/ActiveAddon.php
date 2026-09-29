@@ -6,7 +6,7 @@ namespace Commet\Models;
 
 use Commet\Enums\FeatureType;
 
-class ActiveAddon
+class ActiveAddon implements \JsonSerializable
 {
     public function __construct(
         public readonly string $slug,
@@ -20,6 +20,22 @@ class ActiveAddon
         public readonly string $object,
         public readonly bool $livemode,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["slug"] = $this->slug;
+        $values["name"] = $this->name;
+        $values["basePrice"] = $this->basePrice;
+        $values["featureCode"] = $this->featureCode;
+        $values["featureName"] = $this->featureName;
+        $values["featureType"] = $this->featureType;
+        $values["consumptionModel"] = $this->consumptionModel;
+        $values["activatedAt"] = $this->activatedAt;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

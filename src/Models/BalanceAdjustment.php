@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class BalanceAdjustment
+class BalanceAdjustment implements \JsonSerializable
 {
     public function __construct(
         public readonly int $amount,
@@ -13,6 +13,17 @@ class BalanceAdjustment
         public readonly bool $livemode,
         public readonly ?string $reason = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["amount"] = $this->amount;
+        $values["newBalance"] = $this->newBalance;
+        $values["reason"] = $this->reason;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

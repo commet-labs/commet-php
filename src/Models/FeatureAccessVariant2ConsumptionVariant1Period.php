@@ -4,12 +4,20 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class FeatureAccessVariant2ConsumptionVariant1Period
+class FeatureAccessVariant2ConsumptionVariant1Period implements \JsonSerializable
 {
     public function __construct(
         public readonly string $start,
         public readonly string $end,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["start"] = $this->start;
+        $values["end"] = $this->end;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

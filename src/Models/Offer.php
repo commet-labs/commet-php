@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class Offer
+class Offer implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
@@ -21,6 +21,23 @@ class Offer
         public readonly ?string $startsAt = null,
         public readonly ?string $endsAt = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["name"] = $this->name;
+        $values["phases"] = $this->phases;
+        $values["metadata"] = $this->metadata;
+        $values["startsAt"] = $this->startsAt;
+        $values["endsAt"] = $this->endsAt;
+        $values["active"] = $this->active;
+        $values["createdAt"] = $this->createdAt;
+        $values["updatedAt"] = $this->updatedAt;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

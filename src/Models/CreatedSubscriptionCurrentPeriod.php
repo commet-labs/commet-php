@@ -4,13 +4,22 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class CreatedSubscriptionCurrentPeriod
+class CreatedSubscriptionCurrentPeriod implements \JsonSerializable
 {
     public function __construct(
         public readonly string $start,
         public readonly string $end,
         public readonly float $daysRemaining,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["start"] = $this->start;
+        $values["end"] = $this->end;
+        $values["daysRemaining"] = $this->daysRemaining;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

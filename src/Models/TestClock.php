@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class TestClock
+class TestClock implements \JsonSerializable
 {
     public function __construct(
         public readonly bool $isActive,
@@ -14,6 +14,18 @@ class TestClock
         public readonly ?string $simulatedTime = null,
         public readonly ?TestClockLatestRun $latestRun = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["simulatedTime"] = $this->simulatedTime;
+        $values["isActive"] = $this->isActive;
+        $values["now"] = $this->now;
+        $values["latestRun"] = $this->latestRun;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

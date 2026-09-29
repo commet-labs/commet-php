@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class Customer
+class Customer implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
@@ -21,6 +21,24 @@ class Customer
         /** @var array<string, mixed>|null */
         public readonly ?array $metadata = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["externalId"] = $this->externalId;
+        $values["fullName"] = $this->fullName;
+        $values["email"] = $this->email;
+        $values["taxDocument"] = $this->taxDocument;
+        $values["documentType"] = $this->documentType;
+        $values["timezone"] = $this->timezone;
+        $values["metadata"] = $this->metadata;
+        $values["createdAt"] = $this->createdAt;
+        $values["updatedAt"] = $this->updatedAt;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

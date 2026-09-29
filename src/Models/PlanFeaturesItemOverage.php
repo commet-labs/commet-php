@@ -4,13 +4,22 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class PlanFeaturesItemOverage
+class PlanFeaturesItemOverage implements \JsonSerializable
 {
     public function __construct(
         public readonly bool $enabled,
         public readonly ?string $model = null,
         public readonly ?int $unitPrice = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["enabled"] = $this->enabled;
+        $values["model"] = $this->model;
+        $values["unitPrice"] = $this->unitPrice;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

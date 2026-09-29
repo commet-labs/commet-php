@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class SeatBalanceCollection
+class SeatBalanceCollection implements \JsonSerializable
 {
     public function __construct(
         /** @var array<string, SeatBalanceCollectionBalancesValue> */
@@ -12,6 +12,15 @@ class SeatBalanceCollection
         public readonly string $object,
         public readonly bool $livemode,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["balances"] = $this->balances;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

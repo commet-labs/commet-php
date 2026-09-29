@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Webhooks;
 
+use Commet\Enums\PaymentMethod;
 use Commet\Models\WebhookCardInfo;
 
 /** Fired when Commet records a payment method for a subscription: after a paid checkout, when a trial starts with a card on file, or when a zero-total checkout completes. The card object carries display metadata only — full numbers never leave the payment provider. */
@@ -12,6 +13,7 @@ final class PaymentMethodAttachedData
     public function __construct(
         public readonly string $subscriptionId,
         public readonly string $customerId,
+        public readonly ?PaymentMethod $paymentMethod,
         public readonly ?WebhookCardInfo $card,
     ) {}
 
@@ -23,6 +25,7 @@ final class PaymentMethodAttachedData
         return new self(
             subscriptionId: $data["subscriptionId"],
             customerId: $data["customerId"],
+            paymentMethod: isset($data["paymentMethod"]) ? PaymentMethod::from($data["paymentMethod"]) : null,
             card: isset($data["card"]) ? WebhookCardInfo::fromArray($data["card"]) : null,
         );
     }

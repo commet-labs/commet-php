@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class DeletedSubscriptionAddon
+class DeletedSubscriptionAddon implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
@@ -13,6 +13,17 @@ class DeletedSubscriptionAddon
         public readonly bool $livemode,
         public readonly ?string $deactivatedAt = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["status"] = $this->status;
+        $values["deactivatedAt"] = $this->deactivatedAt;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

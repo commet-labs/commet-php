@@ -4,12 +4,20 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class TrackUsageParamsPropertiesItem
+class TrackUsageParamsPropertiesItem implements \JsonSerializable
 {
     public function __construct(
         public readonly string $property,
         public readonly string $value,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["property"] = $this->property;
+        $values["value"] = $this->value;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

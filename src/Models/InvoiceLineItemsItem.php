@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class InvoiceLineItemsItem
+class InvoiceLineItemsItem implements \JsonSerializable
 {
     public function __construct(
         public readonly string $lineType,
@@ -21,6 +21,25 @@ class InvoiceLineItemsItem
         public readonly ?int $discountValue = null,
         public readonly ?string $discountName = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["lineType"] = $this->lineType;
+        $values["featureName"] = $this->featureName;
+        $values["description"] = $this->description;
+        $values["quantity"] = $this->quantity;
+        $values["unitAmount"] = $this->unitAmount;
+        $values["amount"] = $this->amount;
+        $values["includedAmount"] = $this->includedAmount;
+        $values["usedAmount"] = $this->usedAmount;
+        $values["overageAmount"] = $this->overageAmount;
+        $values["discountType"] = $this->discountType;
+        $values["discountValue"] = $this->discountValue;
+        $values["discountName"] = $this->discountName;
+        $values["chargeType"] = $this->chargeType;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

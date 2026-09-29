@@ -4,13 +4,22 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class CreatedSubscriptionCancellation
+class CreatedSubscriptionCancellation implements \JsonSerializable
 {
     public function __construct(
         public readonly string $scheduledAt,
         public readonly string $effectiveAt,
         public readonly ?string $reason = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["scheduledAt"] = $this->scheduledAt;
+        $values["reason"] = $this->reason;
+        $values["effectiveAt"] = $this->effectiveAt;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

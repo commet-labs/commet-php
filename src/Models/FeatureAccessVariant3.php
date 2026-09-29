@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class FeatureAccessVariant3 extends FeatureAccess
+class FeatureAccessVariant3 extends FeatureAccess implements \JsonSerializable
 {
     public function __construct(
         public readonly string $code,
@@ -17,6 +17,23 @@ class FeatureAccessVariant3 extends FeatureAccess
         public readonly ?string $unitName = null,
         public readonly ?FeatureAccessVariant3BaseAccess $baseAccess = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["code"] = $this->code;
+        $values["name"] = $this->name;
+        $values["unitName"] = $this->unitName;
+        $values["allowed"] = $this->allowed;
+        $values["type"] = $this->type;
+        $values["usage"] = $this->usage;
+        if ($this->baseAccess !== null) {
+            $values["baseAccess"] = $this->baseAccess;
+        }
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

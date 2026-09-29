@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class FeatureAccessVariant3Usage
+class FeatureAccessVariant3Usage implements \JsonSerializable
 {
     public function __construct(
         public readonly FeatureAccessVariant3UsagePeriod $period,
@@ -14,6 +14,20 @@ class FeatureAccessVariant3Usage
         public readonly FeatureAccessVariant3UsageOverage $overage,
         public readonly ?float $remainingUnits = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["period"] = $this->period;
+        $values["unitsUsed"] = $this->unitsUsed;
+        $values["includedUnits"] = $this->includedUnits;
+        if ($this->remainingUnits !== null) {
+            $values["remainingUnits"] = $this->remainingUnits;
+        }
+        $values["unlimited"] = $this->unlimited;
+        $values["overage"] = $this->overage;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

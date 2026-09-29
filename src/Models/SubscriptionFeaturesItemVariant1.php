@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class SubscriptionFeaturesItemVariant1 extends SubscriptionFeaturesItem
+class SubscriptionFeaturesItemVariant1 extends SubscriptionFeaturesItem implements \JsonSerializable
 {
     public function __construct(
         public readonly string $code,
@@ -13,6 +13,19 @@ class SubscriptionFeaturesItemVariant1 extends SubscriptionFeaturesItem
         public readonly bool $enabled,
         public readonly ?SubscriptionFeaturesItemVariant1BaseAccess $baseAccess = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["code"] = $this->code;
+        $values["name"] = $this->name;
+        $values["type"] = $this->type;
+        $values["enabled"] = $this->enabled;
+        if ($this->baseAccess !== null) {
+            $values["baseAccess"] = $this->baseAccess;
+        }
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

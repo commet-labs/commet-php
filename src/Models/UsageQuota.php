@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class UsageQuota
+class UsageQuota implements \JsonSerializable
 {
     public function __construct(
         public readonly string $featureCode,
@@ -18,6 +18,22 @@ class UsageQuota
         public readonly ?float $remaining = null,
         public readonly ?string $asOf = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["featureCode"] = $this->featureCode;
+        $values["current"] = $this->current;
+        $values["included"] = $this->included;
+        $values["remaining"] = $this->remaining;
+        $values["billedQuantity"] = $this->billedQuantity;
+        $values["unlimited"] = $this->unlimited;
+        $values["overageEnabled"] = $this->overageEnabled;
+        $values["asOf"] = $this->asOf;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

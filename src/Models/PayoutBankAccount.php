@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class PayoutBankAccount
+class PayoutBankAccount implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
@@ -21,6 +21,25 @@ class PayoutBankAccount
         public readonly ?string $bankName = null,
         public readonly ?string $accountType = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["providerExternalAccountId"] = $this->providerExternalAccountId;
+        $values["holderName"] = $this->holderName;
+        $values["last4"] = $this->last4;
+        $values["bankName"] = $this->bankName;
+        $values["country"] = $this->country;
+        $values["currency"] = $this->currency;
+        $values["accountType"] = $this->accountType;
+        $values["isDefault"] = $this->isDefault;
+        $values["status"] = $this->status;
+        $values["createdAt"] = $this->createdAt;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

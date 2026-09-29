@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class Refund
+class Refund implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
@@ -17,6 +17,21 @@ class Refund
         public readonly ?string $chargeId = null,
         public readonly ?string $reason = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["transactionId"] = $this->transactionId;
+        $values["amount"] = $this->amount;
+        $values["currency"] = $this->currency;
+        $values["chargeId"] = $this->chargeId;
+        $values["status"] = $this->status;
+        $values["reason"] = $this->reason;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

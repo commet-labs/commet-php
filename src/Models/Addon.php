@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class Addon
+class Addon implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
@@ -23,6 +23,27 @@ class Addon
         public readonly ?int $overageRate = null,
         public readonly ?int $creditCost = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["name"] = $this->name;
+        $values["slug"] = $this->slug;
+        $values["description"] = $this->description;
+        $values["basePrice"] = $this->basePrice;
+        $values["featureCode"] = $this->featureCode;
+        $values["featureName"] = $this->featureName;
+        $values["createdAt"] = $this->createdAt;
+        $values["updatedAt"] = $this->updatedAt;
+        $values["consumptionModel"] = $this->consumptionModel;
+        $values["includedUnits"] = $this->includedUnits;
+        $values["overageRate"] = $this->overageRate;
+        $values["creditCost"] = $this->creditCost;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

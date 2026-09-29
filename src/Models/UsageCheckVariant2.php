@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class UsageCheckVariant2 extends UsageCheck
+class UsageCheckVariant2 extends UsageCheck implements \JsonSerializable
 {
     public function __construct(
         public readonly bool $allowed,
@@ -22,6 +22,30 @@ class UsageCheckVariant2 extends UsageCheck
         public readonly ?string $reason = null,
         public readonly ?string $message = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["allowed"] = $this->allowed;
+        $values["subscriptionStatus"] = $this->subscriptionStatus;
+        $values["featureCode"] = $this->featureCode;
+        $values["quantity"] = $this->quantity;
+        if ($this->reason !== null) {
+            $values["reason"] = $this->reason;
+        }
+        if ($this->message !== null) {
+            $values["message"] = $this->message;
+        }
+        $values["consumptionModel"] = $this->consumptionModel;
+        $values["creditsPerUnit"] = $this->creditsPerUnit;
+        $values["estimatedCredits"] = $this->estimatedCredits;
+        $values["planCredits"] = $this->planCredits;
+        $values["purchasedCredits"] = $this->purchasedCredits;
+        $values["totalCredits"] = $this->totalCredits;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

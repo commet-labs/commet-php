@@ -6,7 +6,7 @@ namespace Commet\Models;
 
 use Commet\Enums\FeatureType;
 
-class Feature
+class Feature implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
@@ -20,6 +20,22 @@ class Feature
         public readonly ?string $description = null,
         public readonly ?string $unitName = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["name"] = $this->name;
+        $values["code"] = $this->code;
+        $values["type"] = $this->type;
+        $values["description"] = $this->description;
+        $values["unitName"] = $this->unitName;
+        $values["createdAt"] = $this->createdAt;
+        $values["updatedAt"] = $this->updatedAt;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

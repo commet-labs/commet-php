@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class TestClockLatestRun
+class TestClockLatestRun implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
@@ -18,6 +18,21 @@ class TestClockLatestRun
         public readonly array $items,
         public readonly ?string $error = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["status"] = $this->status;
+        $values["startedAtTime"] = $this->startedAtTime;
+        $values["targetTime"] = $this->targetTime;
+        $values["estimatedDeadlineCount"] = $this->estimatedDeadlineCount;
+        $values["completedDeadlineCount"] = $this->completedDeadlineCount;
+        $values["failedDeadlineCount"] = $this->failedDeadlineCount;
+        $values["error"] = $this->error;
+        $values["items"] = $this->items;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

@@ -9,6 +9,12 @@ final class WebhookEventType
     public const SUBSCRIPTION_CREATED = "subscription.created";
     public const SUBSCRIPTION_ACTIVATED = "subscription.activated";
     public const SUBSCRIPTION_REACTIVATED = "subscription.reactivated";
+    public const SUBSCRIPTION_PAUSE_SCHEDULED = "subscription.pause_scheduled";
+    public const SUBSCRIPTION_PAUSE_UPDATED = "subscription.pause_updated";
+    public const SUBSCRIPTION_PAUSE_REVOKED = "subscription.pause_revoked";
+    public const SUBSCRIPTION_PAUSED = "subscription.paused";
+    public const SUBSCRIPTION_RESUMED = "subscription.resumed";
+    public const SUBSCRIPTION_RESUME_FAILED = "subscription.resume_failed";
     public const SUBSCRIPTION_CANCELED = "subscription.canceled";
     public const SUBSCRIPTION_UPDATED = "subscription.updated";
     public const SUBSCRIPTION_PLAN_CHANGED = "subscription.plan_changed";

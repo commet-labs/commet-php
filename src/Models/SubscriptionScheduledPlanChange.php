@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class SubscriptionScheduledPlanChange
+class SubscriptionScheduledPlanChange implements \JsonSerializable
 {
     public function __construct(
         public readonly string $changeType,
@@ -13,6 +13,17 @@ class SubscriptionScheduledPlanChange
         public readonly ?string $newPlanName = null,
         public readonly ?string $newBillingInterval = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["changeType"] = $this->changeType;
+        $values["newPlanId"] = $this->newPlanId;
+        $values["newPlanName"] = $this->newPlanName;
+        $values["newBillingInterval"] = $this->newBillingInterval;
+        $values["scheduledFor"] = $this->scheduledFor;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

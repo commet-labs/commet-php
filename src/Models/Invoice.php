@@ -6,7 +6,7 @@ namespace Commet\Models;
 
 use Commet\Enums\InvoiceType;
 
-class Invoice
+class Invoice implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
@@ -38,6 +38,38 @@ class Invoice
         public readonly ?string $poNumber = null,
         public readonly ?string $reference = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["id"] = $this->id;
+        $values["customerId"] = $this->customerId;
+        $values["subscriptionId"] = $this->subscriptionId;
+        $values["invoiceNumber"] = $this->invoiceNumber;
+        $values["status"] = $this->status;
+        $values["invoiceType"] = $this->invoiceType;
+        $values["currency"] = $this->currency;
+        $values["subtotal"] = $this->subtotal;
+        $values["discountAmount"] = $this->discountAmount;
+        $values["taxAmount"] = $this->taxAmount;
+        $values["total"] = $this->total;
+        $values["periodStart"] = $this->periodStart;
+        $values["periodEnd"] = $this->periodEnd;
+        $values["issueDate"] = $this->issueDate;
+        $values["dueDate"] = $this->dueDate;
+        $values["memo"] = $this->memo;
+        $values["metadata"] = $this->metadata;
+        $values["createdAt"] = $this->createdAt;
+        $values["updatedAt"] = $this->updatedAt;
+        $values["creditApplied"] = $this->creditApplied;
+        $values["planName"] = $this->planName;
+        $values["poNumber"] = $this->poNumber;
+        $values["reference"] = $this->reference;
+        $values["lineItems"] = $this->lineItems;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

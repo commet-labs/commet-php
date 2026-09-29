@@ -4,12 +4,20 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class WebhookBankRef
+class WebhookBankRef implements \JsonSerializable
 {
     public function __construct(
         public readonly string $last4,
         public readonly ?string $bankName = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["bankName"] = $this->bankName;
+        $values["last4"] = $this->last4;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

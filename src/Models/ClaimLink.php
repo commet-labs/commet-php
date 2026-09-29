@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class ClaimLink
+class ClaimLink implements \JsonSerializable
 {
     public function __construct(
         public readonly string $url,
@@ -12,6 +12,16 @@ class ClaimLink
         public readonly string $object,
         public readonly bool $livemode,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["url"] = $this->url;
+        $values["expiresAt"] = $this->expiresAt;
+        $values["object"] = $this->object;
+        $values["livemode"] = $this->livemode;
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data

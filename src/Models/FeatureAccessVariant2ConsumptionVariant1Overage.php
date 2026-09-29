@@ -4,13 +4,24 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class FeatureAccessVariant2ConsumptionVariant1Overage
+class FeatureAccessVariant2ConsumptionVariant1Overage implements \JsonSerializable
 {
     public function __construct(
         public readonly bool $enabled,
         public readonly float $units,
         public readonly ?FeatureAccessVariant2ConsumptionVariant1OverageUnitPrice $unitPrice = null,
     ) {}
+
+    public function jsonSerialize(): object
+    {
+        $values = [];
+        $values["enabled"] = $this->enabled;
+        $values["units"] = $this->units;
+        if ($this->unitPrice !== null) {
+            $values["unitPrice"] = $this->unitPrice;
+        }
+        return (object) $values;
+    }
 
     /**
      * @param array<string, mixed> $data
