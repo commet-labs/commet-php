@@ -64,8 +64,8 @@ class ApiKeysResource
     public function create(
         string $name,
         ?int $expiresInDays = null,
-        ?CreateApiKeyParamsPermissions $permissions = null,
         ?string $idempotencyKey = null,
+        ?CreateApiKeyParamsPermissions $permissions = null,
     ): CreatedApiKey {
         $response = $this->http->post(
             "/api-keys",
