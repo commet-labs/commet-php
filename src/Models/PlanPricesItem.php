@@ -10,7 +10,7 @@ class PlanPricesItem implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
-        public readonly BillingInterval $billingInterval,
+        public readonly BillingInterval|string $billingInterval,
         public readonly int $price,
         public readonly bool $isDefault,
         public readonly int $trialDays,
@@ -51,7 +51,7 @@ class PlanPricesItem implements \JsonSerializable
     {
         return new self(
             id: $data["id"],
-            billingInterval: BillingInterval::from($data["billing_interval"]),
+            billingInterval: BillingInterval::tryFrom($data["billing_interval"]) ?? $data["billing_interval"],
             price: $data["price"],
             isDefault: $data["is_default"],
             trialDays: $data["trial_days"],

@@ -17,8 +17,8 @@ final class PaymentRecoveredData
         public readonly string $customerId,
         public readonly ?string $subscriptionId,
         public readonly ?string $provider,
-        public readonly ?PaymentMethod $paymentMethod,
-        public readonly ?SubPaymentMethod $subPaymentMethod,
+        public readonly PaymentMethod|string|null $paymentMethod,
+        public readonly SubPaymentMethod|string|null $subPaymentMethod,
     ) {}
 
     /**
@@ -33,8 +33,8 @@ final class PaymentRecoveredData
             customerId: $data["customerId"],
             subscriptionId: $data["subscriptionId"] ?? null,
             provider: $data["provider"] ?? null,
-            paymentMethod: isset($data["paymentMethod"]) ? PaymentMethod::from($data["paymentMethod"]) : null,
-            subPaymentMethod: isset($data["subPaymentMethod"]) ? SubPaymentMethod::from($data["subPaymentMethod"]) : null,
+            paymentMethod: isset($data["paymentMethod"]) ? PaymentMethod::tryFrom($data["paymentMethod"]) ?? $data["paymentMethod"] : null,
+            subPaymentMethod: isset($data["subPaymentMethod"]) ? SubPaymentMethod::tryFrom($data["subPaymentMethod"]) ?? $data["subPaymentMethod"] : null,
         );
     }
 }

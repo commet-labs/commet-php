@@ -97,6 +97,31 @@ class ModelsTest extends TestCase
         $this->assertNull($subscription->trialEndsAt);
     }
 
+    public function testSubscriptionFromArrayKeepsEnumValuesAddedAfterThisSdkVersion(): void
+    {
+        $subscription = Subscription::fromArray([
+            'id' => 'sub_123',
+            'customer_id' => 'cus_456',
+            'plan' => ['id' => 'plan_pro', 'name' => 'Pro', 'base_price' => 9900],
+            'name' => 'Pro Subscription',
+            'status' => 'awaiting_approval',
+            'cancel_at_period_end' => false,
+            'start_date' => '2024-01-01T00:00:00Z',
+            'created_at' => '2024-01-01T00:00:00Z',
+            'updated_at' => '2024-01-02T00:00:00Z',
+            'offer_applications' => [],
+            'features' => [],
+            'object' => 'subscription',
+            'livemode' => false,
+            'billing_interval' => 'semiannual',
+            'consumption_model' => 'metered',
+        ]);
+
+        $this->assertSame('awaiting_approval', $subscription->status);
+        $this->assertSame('semiannual', $subscription->billingInterval);
+        $this->assertSame(ConsumptionModel::Metered, $subscription->consumptionModel);
+    }
+
     public function testPlanFromArrayHydratesInlineCollections(): void
     {
         $plan = Plan::fromArray([

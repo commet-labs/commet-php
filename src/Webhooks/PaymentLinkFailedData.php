@@ -21,8 +21,8 @@ final class PaymentLinkFailedData
         public readonly ?string $customerId,
         public readonly string $failureCode,
         public readonly string $failureMessage,
-        public readonly ?PaymentMethod $paymentMethod,
-        public readonly ?SubPaymentMethod $subPaymentMethod,
+        public readonly PaymentMethod|string|null $paymentMethod,
+        public readonly SubPaymentMethod|string|null $subPaymentMethod,
     ) {}
 
     /**
@@ -40,8 +40,8 @@ final class PaymentLinkFailedData
             customerId: $data["customerId"] ?? null,
             failureCode: $data["failureCode"],
             failureMessage: $data["failureMessage"],
-            paymentMethod: isset($data["paymentMethod"]) ? PaymentMethod::from($data["paymentMethod"]) : null,
-            subPaymentMethod: isset($data["subPaymentMethod"]) ? SubPaymentMethod::from($data["subPaymentMethod"]) : null,
+            paymentMethod: isset($data["paymentMethod"]) ? PaymentMethod::tryFrom($data["paymentMethod"]) ?? $data["paymentMethod"] : null,
+            subPaymentMethod: isset($data["subPaymentMethod"]) ? SubPaymentMethod::tryFrom($data["subPaymentMethod"]) ?? $data["subPaymentMethod"] : null,
         );
     }
 }

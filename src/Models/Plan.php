@@ -27,7 +27,7 @@ class Plan implements \JsonSerializable
         public readonly string $object,
         public readonly bool $livemode,
         public readonly ?string $description = null,
-        public readonly ?ConsumptionModel $consumptionModel = null,
+        public readonly ConsumptionModel|string|null $consumptionModel = null,
         public readonly ?bool $blockOnExhaustion = null,
         public readonly ?string $planGroupId = null,
         /** @var array<string, mixed>|null */
@@ -80,7 +80,7 @@ class Plan implements \JsonSerializable
             object: $data["object"],
             livemode: $data["livemode"],
             description: $data["description"] ?? null,
-            consumptionModel: isset($data["consumption_model"]) ? ConsumptionModel::from($data["consumption_model"]) : null,
+            consumptionModel: isset($data["consumption_model"]) ? ConsumptionModel::tryFrom($data["consumption_model"]) ?? $data["consumption_model"] : null,
             blockOnExhaustion: $data["block_on_exhaustion"] ?? null,
             planGroupId: $data["plan_group_id"] ?? null,
             metadata: $data["metadata"] ?? null,

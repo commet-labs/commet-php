@@ -15,7 +15,7 @@ class CreatedSubscription implements \JsonSerializable
         public readonly string $customerId,
         public readonly CreatedSubscriptionPlan $plan,
         public readonly string $name,
-        public readonly SubscriptionStatus $status,
+        public readonly SubscriptionStatus|string $status,
         public readonly bool $cancelAtPeriodEnd,
         public readonly string $startDate,
         public readonly string $createdAt,
@@ -25,7 +25,7 @@ class CreatedSubscription implements \JsonSerializable
         public readonly string $object,
         public readonly bool $livemode,
         public readonly ?string $description = null,
-        public readonly ?BillingInterval $billingInterval = null,
+        public readonly BillingInterval|string|null $billingInterval = null,
         public readonly ?string $trialEndsAt = null,
         public readonly ?CreatedSubscriptionCurrentPeriod $currentPeriod = null,
         public readonly ?CreatedSubscriptionCancellation $cancellation = null,
@@ -35,7 +35,7 @@ class CreatedSubscription implements \JsonSerializable
         public readonly ?string $nextBillingDate = null,
         public readonly ?string $checkoutUrl = null,
         public readonly ?CreatedSubscriptionPause $pause = null,
-        public readonly ?PaymentProvider $checkoutProvider = null,
+        public readonly PaymentProvider|string|null $checkoutProvider = null,
         public readonly ?string $priceId = null,
     ) {}
 
@@ -80,7 +80,7 @@ class CreatedSubscription implements \JsonSerializable
             customerId: $data["customer_id"],
             plan: CreatedSubscriptionPlan::fromArray($data["plan"]),
             name: $data["name"],
-            status: SubscriptionStatus::from($data["status"]),
+            status: SubscriptionStatus::tryFrom($data["status"]) ?? $data["status"],
             cancelAtPeriodEnd: $data["cancel_at_period_end"],
             startDate: $data["start_date"],
             createdAt: $data["created_at"],
@@ -89,7 +89,7 @@ class CreatedSubscription implements \JsonSerializable
             object: $data["object"],
             livemode: $data["livemode"],
             description: $data["description"] ?? null,
-            billingInterval: isset($data["billing_interval"]) ? BillingInterval::from($data["billing_interval"]) : null,
+            billingInterval: isset($data["billing_interval"]) ? BillingInterval::tryFrom($data["billing_interval"]) ?? $data["billing_interval"] : null,
             trialEndsAt: $data["trial_ends_at"] ?? null,
             currentPeriod: isset($data["current_period"]) ? CreatedSubscriptionCurrentPeriod::fromArray($data["current_period"]) : null,
             cancellation: isset($data["cancellation"]) ? CreatedSubscriptionCancellation::fromArray($data["cancellation"]) : null,
@@ -99,7 +99,7 @@ class CreatedSubscription implements \JsonSerializable
             nextBillingDate: $data["next_billing_date"] ?? null,
             checkoutUrl: $data["checkout_url"] ?? null,
             pause: isset($data["pause"]) ? CreatedSubscriptionPause::fromArray($data["pause"]) : null,
-            checkoutProvider: isset($data["checkout_provider"]) ? PaymentProvider::from($data["checkout_provider"]) : null,
+            checkoutProvider: isset($data["checkout_provider"]) ? PaymentProvider::tryFrom($data["checkout_provider"]) ?? $data["checkout_provider"] : null,
             priceId: $data["price_id"] ?? null,
         );
     }

@@ -12,7 +12,7 @@ final class PaymentMethodUpdatedData
 {
     public function __construct(
         public readonly string $customerId,
-        public readonly ?PaymentMethod $paymentMethod,
+        public readonly PaymentMethod|string|null $paymentMethod,
         public readonly ?WebhookCardInfo $card,
     ) {}
 
@@ -23,7 +23,7 @@ final class PaymentMethodUpdatedData
     {
         return new self(
             customerId: $data["customerId"],
-            paymentMethod: isset($data["paymentMethod"]) ? PaymentMethod::from($data["paymentMethod"]) : null,
+            paymentMethod: isset($data["paymentMethod"]) ? PaymentMethod::tryFrom($data["paymentMethod"]) ?? $data["paymentMethod"] : null,
             card: isset($data["card"]) ? WebhookCardInfo::fromArray($data["card"]) : null,
         );
     }
