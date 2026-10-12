@@ -11,7 +11,7 @@ class PlanFeaturesItem implements \JsonSerializable
     public function __construct(
         public readonly string $code,
         public readonly string $name,
-        public readonly FeatureType $type,
+        public readonly FeatureType|string $type,
         public readonly bool $enabled,
         public readonly bool $unlimited,
         /** @var PlanFeaturesItemRegionalPricesItem[] */
@@ -44,7 +44,7 @@ class PlanFeaturesItem implements \JsonSerializable
         return new self(
             code: $data["code"],
             name: $data["name"],
-            type: FeatureType::from($data["type"]),
+            type: FeatureType::tryFrom($data["type"]) ?? $data["type"],
             enabled: $data["enabled"],
             unlimited: $data["unlimited"],
             regionalPrices: array_map(fn(array $item) => PlanFeaturesItemRegionalPricesItem::fromArray($item), $data["regional_prices"]),

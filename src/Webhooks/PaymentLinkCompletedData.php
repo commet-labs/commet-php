@@ -22,8 +22,8 @@ final class PaymentLinkCompletedData
         public readonly string $invoiceId,
         public readonly string $invoiceNumber,
         public readonly ?string $paymentTransactionId,
-        public readonly ?PaymentMethod $paymentMethod,
-        public readonly ?SubPaymentMethod $subPaymentMethod,
+        public readonly PaymentMethod|string|null $paymentMethod,
+        public readonly SubPaymentMethod|string|null $subPaymentMethod,
     ) {}
 
     /**
@@ -42,8 +42,8 @@ final class PaymentLinkCompletedData
             invoiceId: $data["invoiceId"],
             invoiceNumber: $data["invoiceNumber"],
             paymentTransactionId: $data["paymentTransactionId"] ?? null,
-            paymentMethod: isset($data["paymentMethod"]) ? PaymentMethod::from($data["paymentMethod"]) : null,
-            subPaymentMethod: isset($data["subPaymentMethod"]) ? SubPaymentMethod::from($data["subPaymentMethod"]) : null,
+            paymentMethod: isset($data["paymentMethod"]) ? PaymentMethod::tryFrom($data["paymentMethod"]) ?? $data["paymentMethod"] : null,
+            subPaymentMethod: isset($data["subPaymentMethod"]) ? SubPaymentMethod::tryFrom($data["subPaymentMethod"]) ?? $data["subPaymentMethod"] : null,
         );
     }
 }

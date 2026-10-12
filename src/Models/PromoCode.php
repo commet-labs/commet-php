@@ -18,7 +18,7 @@ class PromoCode implements \JsonSerializable
         public readonly string $updatedAt,
         public readonly string $object,
         public readonly bool $livemode,
-        public readonly ?BillingInterval $billingInterval = null,
+        public readonly BillingInterval|string|null $billingInterval = null,
         public readonly ?int $maxRedemptions = null,
         public readonly ?string $expiresAt = null,
     ) {}
@@ -56,7 +56,7 @@ class PromoCode implements \JsonSerializable
             updatedAt: $data["updated_at"],
             object: $data["object"],
             livemode: $data["livemode"],
-            billingInterval: isset($data["billing_interval"]) ? BillingInterval::from($data["billing_interval"]) : null,
+            billingInterval: isset($data["billing_interval"]) ? BillingInterval::tryFrom($data["billing_interval"]) ?? $data["billing_interval"] : null,
             maxRedemptions: $data["max_redemptions"] ?? null,
             expiresAt: $data["expires_at"] ?? null,
         );

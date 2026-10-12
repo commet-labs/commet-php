@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Commet\Tests;
 
 use Commet\Resources\WebhooksResource;
+use Commet\Webhooks\WebhookEvent;
 use PHPUnit\Framework\TestCase;
 
 class WebhooksTest extends TestCase
@@ -87,6 +88,30 @@ class WebhooksTest extends TestCase
         $result = $this->webhooks->verifyAndParse($this->payload, 'bad_sig', $this->secret);
 
         $this->assertNull($result);
+    }
+
+    public function testPaymentReceivedKeepsPaymentMethodAddedAfterThisSdkVersion(): void
+    {
+        $event = WebhookEvent::fromArray([
+            'event' => 'payment.received',
+            'timestamp' => '2026-01-01T00:00:00Z',
+            'organizationId' => 'org_123',
+            'mode' => 'live',
+            'apiVersion' => '2026-08-27',
+            'data' => [
+                'invoiceId' => 'inv_123',
+                'invoiceNumber' => 'INV-0001',
+                'invoiceTotal' => 99.0,
+                'customerId' => 'cus_123',
+                'paymentMethod' => 'bank_transfer',
+                'subPaymentMethod' => null,
+                'paidAt' => '2026-01-01T00:00:00Z',
+            ],
+        ]);
+
+        $payment = $event->asPaymentReceived();
+
+        $this->assertSame('bank_transfer', $payment->paymentMethod);
     }
 
     public function testVerifyAndParseReturnsNullOnInvalidJson(): void
