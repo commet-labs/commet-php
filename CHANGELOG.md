@@ -1,5 +1,9 @@
 # Changelog
 
+## 9.6.0
+
+- Add the `semiannual` billing interval.
+
 ## 9.5.0
 
 - Read responses and webhooks that contain enum values added after this SDK version instead of failing. Known values are still enum cases; unknown values are kept as the raw string, so enum properties are typed `Enum|string`.

@@ -113,12 +113,12 @@ class ModelsTest extends TestCase
             'features' => [],
             'object' => 'subscription',
             'livemode' => false,
-            'billing_interval' => 'semiannual',
+            'billing_interval' => 'lunar',
             'consumption_model' => 'metered',
         ]);
 
         $this->assertSame('awaiting_approval', $subscription->status);
-        $this->assertSame('semiannual', $subscription->billingInterval);
+        $this->assertSame('lunar', $subscription->billingInterval);
         $this->assertSame(ConsumptionModel::Metered, $subscription->consumptionModel);
     }
 
