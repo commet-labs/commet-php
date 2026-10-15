@@ -9,4 +9,6 @@ enum PaymentMethod: string
     case Card = "card";
     case Oxxo = "oxxo";
     case MercadoPago = "mercado_pago";
+    case GooglePay = "google_pay";
+    case Smartpix = "smartpix";
 }

@@ -13,6 +13,7 @@ use Commet\Models\CreditGrant;
 use Commet\Models\DeletedSubscriptionAddon;
 use Commet\Models\PaymentMethodUpdateCheckout;
 use Commet\Models\PlanChange;
+use Commet\Models\PrepaidPeriodsCheckout;
 use Commet\Models\PreviewChange;
 use Commet\Models\ReactivatedSubscription;
 use Commet\Models\RecoveryLink;
@@ -318,7 +319,7 @@ class SubscriptionsResource
     }
 
     /**
-     * Creates a hosted checkout session for the customer to update the subscription's default payment method.
+     * Creates a hosted checkout to update the payment method of an active, trialing or past_due subscription. Pending-payment subscriptions must use their payment checkout.
      * @return PaymentMethodUpdateCheckout
      */
     public function updatePaymentMethod(
@@ -339,6 +340,34 @@ class SubscriptionsResource
         }
 
         return PaymentMethodUpdateCheckout::fromArray($response->data);
+    }
+
+    /**
+     * Creates a hosted checkout to pay billing periods of a recurring subscription in advance with any payment method. On an active subscription the paid periods start after the last paid period and replace any open prepaid-periods checkout. On a pending-payment subscription the first payment covers the requested periods and replaces its pending checkout. The billing interval does not change.
+     * @return PrepaidPeriodsCheckout
+     */
+    public function createPrepaidPeriodsCheckout(
+        string $id,
+        int $periods,
+        ?string $offerId = null,
+        ?string $successUrl = null,
+        ?string $idempotencyKey = null,
+    ): PrepaidPeriodsCheckout {
+        $response = $this->http->post(
+            "/subscriptions/{$id}/prepaid-periods",
+            HttpClient::buildBody([
+                "periods" => $periods,
+                "offer_id" => $offerId,
+                "success_url" => $successUrl,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid PrepaidPeriodsCheckout response payload");
+        }
+
+        return PrepaidPeriodsCheckout::fromArray($response->data);
     }
 
     /**
@@ -533,6 +562,8 @@ class SubscriptionsResource
         ?string $name = null,
         ?string $startDate = null,
         ?string $successUrl = null,
+        ?int $prepaidPeriods = null,
+        ?bool $cancelAtPeriodEnd = null,
         ?string $offerId = null,
         ?string $promoCode = null,
         ?int $customTrialDays = null,
@@ -553,6 +584,8 @@ class SubscriptionsResource
                 "name" => $name,
                 "start_date" => $startDate,
                 "success_url" => $successUrl,
+                "prepaid_periods" => $prepaidPeriods,
+                "cancel_at_period_end" => $cancelAtPeriodEnd,
                 "offer_id" => $offerId,
                 "promo_code" => $promoCode,
                 "custom_trial_days" => $customTrialDays,

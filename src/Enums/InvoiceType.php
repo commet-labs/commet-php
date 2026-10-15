@@ -16,4 +16,5 @@ enum InvoiceType: string
     case OneTimePayment = "one_time_payment";
     case Reactivation = "reactivation";
     case Resume = "resume";
+    case Prepayment = "prepayment";
 }
