@@ -14,6 +14,8 @@ class PromoCode implements \JsonSerializable
         public readonly string $offerId,
         public readonly bool $isActive,
         public readonly int $redemptionCount,
+        public readonly bool $firstPurchaseOnly,
+        public readonly ManagedBy $managedBy,
         public readonly string $createdAt,
         public readonly string $updatedAt,
         public readonly string $object,
@@ -34,6 +36,8 @@ class PromoCode implements \JsonSerializable
         $values["expiresAt"] = $this->expiresAt;
         $values["isActive"] = $this->isActive;
         $values["redemptionCount"] = $this->redemptionCount;
+        $values["firstPurchaseOnly"] = $this->firstPurchaseOnly;
+        $values["managedBy"] = $this->managedBy;
         $values["createdAt"] = $this->createdAt;
         $values["updatedAt"] = $this->updatedAt;
         $values["object"] = $this->object;
@@ -52,6 +56,8 @@ class PromoCode implements \JsonSerializable
             offerId: $data["offer_id"],
             isActive: $data["is_active"],
             redemptionCount: $data["redemption_count"],
+            firstPurchaseOnly: $data["first_purchase_only"],
+            managedBy: ManagedBy::fromArray($data["managed_by"]),
             createdAt: $data["created_at"],
             updatedAt: $data["updated_at"],
             object: $data["object"],

@@ -29,6 +29,8 @@ class Plan implements \JsonSerializable
         public readonly ?string $description = null,
         public readonly ConsumptionModel|string|null $consumptionModel = null,
         public readonly ?bool $blockOnExhaustion = null,
+        public readonly ?PlanUnusedPlanCredits $unusedPlanCredits = null,
+        public readonly ?PlanPlanCreditLimit $planCreditLimit = null,
         public readonly ?string $planGroupId = null,
         /** @var array<string, mixed>|null */
         public readonly ?array $metadata = null,
@@ -46,6 +48,8 @@ class Plan implements \JsonSerializable
         $values["isDefault"] = $this->isDefault;
         $values["isFree"] = $this->isFree;
         $values["blockOnExhaustion"] = $this->blockOnExhaustion;
+        $values["unusedPlanCredits"] = $this->unusedPlanCredits;
+        $values["planCreditLimit"] = $this->planCreditLimit;
         $values["sortOrder"] = $this->sortOrder;
         $values["planGroupId"] = $this->planGroupId;
         $values["metadata"] = $this->metadata;
@@ -82,6 +86,8 @@ class Plan implements \JsonSerializable
             description: $data["description"] ?? null,
             consumptionModel: isset($data["consumption_model"]) ? ConsumptionModel::tryFrom($data["consumption_model"]) ?? $data["consumption_model"] : null,
             blockOnExhaustion: $data["block_on_exhaustion"] ?? null,
+            unusedPlanCredits: isset($data["unused_plan_credits"]) ? PlanUnusedPlanCredits::fromArray($data["unused_plan_credits"]) : null,
+            planCreditLimit: isset($data["plan_credit_limit"]) ? PlanPlanCreditLimit::fromArray($data["plan_credit_limit"]) : null,
             planGroupId: $data["plan_group_id"] ?? null,
             metadata: $data["metadata"] ?? null,
         );

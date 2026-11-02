@@ -6,7 +6,7 @@ namespace Commet\Webhooks;
 
 use Commet\Models\WebhookPlanRef;
 
-/** Fired when a scheduled plan change is replaced by a different one before it executes. The replacement also fires subscription.plan_change_scheduled with the new target plan. */
+/** Fired when a scheduled plan change will no longer take effect: it was revoked through the API, the dashboard or the customer portal, an immediate plan change or an immediate cancellation voided it, or a different change replaced it. A replacement also fires subscription.plan_change_scheduled with the new target plan. */
 final class SubscriptionPlanChangeRevokedData
 {
     public function __construct(

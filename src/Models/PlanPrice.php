@@ -23,6 +23,7 @@ class PlanPrice implements \JsonSerializable
         public readonly string $updatedAt,
         public readonly string $object,
         public readonly bool $livemode,
+        public readonly ?bool $trialRequiresPaymentMethod = null,
         public readonly ?int $includedBalance = null,
         public readonly ?int $includedCredits = null,
         public readonly ?string $offerId = null,
@@ -38,6 +39,7 @@ class PlanPrice implements \JsonSerializable
         $values["price"] = $this->price;
         $values["isDefault"] = $this->isDefault;
         $values["trialDays"] = $this->trialDays;
+        $values["trialRequiresPaymentMethod"] = $this->trialRequiresPaymentMethod;
         $values["includedBalance"] = $this->includedBalance;
         $values["includedCredits"] = $this->includedCredits;
         $values["offerId"] = $this->offerId;
@@ -69,6 +71,7 @@ class PlanPrice implements \JsonSerializable
             updatedAt: $data["updated_at"],
             object: $data["object"],
             livemode: $data["livemode"],
+            trialRequiresPaymentMethod: $data["trial_requires_payment_method"] ?? null,
             includedBalance: $data["included_balance"] ?? null,
             includedCredits: $data["included_credits"] ?? null,
             offerId: $data["offer_id"] ?? null,

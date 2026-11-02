@@ -12,10 +12,9 @@ abstract class CreateOfferParamsPhasesItem
     public static function fromArray(array $data): self
     {
         return match ($data["type"] ?? null) {
-            "free_trial" => CreateOfferParamsPhasesItemVariant1::fromArray($data),
-            "percentage" => CreateOfferParamsPhasesItemVariant2::fromArray($data),
-            "amount_off" => CreateOfferParamsPhasesItemVariant3::fromArray($data),
-            "fixed_price" => CreateOfferParamsPhasesItemVariant4::fromArray($data),
+            "percentage" => CreateOfferParamsPhasesItemVariant1::fromArray($data),
+            "amount_off" => CreateOfferParamsPhasesItemVariant2::fromArray($data),
+            "fixed_price" => CreateOfferParamsPhasesItemVariant3::fromArray($data),
             default => CreateOfferParamsPhasesItemVariant1::fromArray($data),
         };
     }

@@ -8,8 +8,8 @@ class CreateOfferParamsPhasesItemVariant3 extends CreateOfferParamsPhasesItem im
 {
     public function __construct(
         public readonly string $type,
-        /** @var CreateOfferParamsPhasesItemVariant3AmountsItem[] */
-        public readonly array $amounts,
+        /** @var CreateOfferParamsPhasesItemVariant3PricesItem[] */
+        public readonly array $prices,
         public readonly ?int $durationCycles = null,
         public readonly ?string $durationInterval = null,
     ) {}
@@ -22,7 +22,7 @@ class CreateOfferParamsPhasesItemVariant3 extends CreateOfferParamsPhasesItem im
         if ($this->durationInterval !== null) {
             $values["durationInterval"] = $this->durationInterval;
         }
-        $values["amounts"] = $this->amounts;
+        $values["prices"] = $this->prices;
         return (object) $values;
     }
 
@@ -33,7 +33,7 @@ class CreateOfferParamsPhasesItemVariant3 extends CreateOfferParamsPhasesItem im
     {
         return new self(
             type: $data["type"],
-            amounts: array_map(fn(array $item) => CreateOfferParamsPhasesItemVariant3AmountsItem::fromArray($item), $data["amounts"]),
+            prices: array_map(fn(array $item) => CreateOfferParamsPhasesItemVariant3PricesItem::fromArray($item), $data["prices"]),
             durationCycles: $data["duration_cycles"] ?? null,
             durationInterval: $data["duration_interval"] ?? null,
         );

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Webhooks;
 
-/** Fired when a customer buys a credit pack through the customer portal and the payment succeeds. Purchased credits never expire — unlike plan credits, they survive period resets. Plan-included credit grants fire credits.granted instead. */
+/** Fired when a customer buys a credit pack or a chosen quantity of credits through the API, an automatic top-up, or the customer portal and the payment succeeds. Purchased credits never expire — unlike plan credits, they survive period resets. Plan-included credit grants fire credits.granted instead. */
 final class CreditsPurchasedData
 {
     public function __construct(

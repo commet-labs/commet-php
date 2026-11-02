@@ -4,18 +4,16 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class OfferPhasesItemVariant3AmountsItem implements \JsonSerializable
+class PlanUnusedPlanCreditsVariant1 extends PlanUnusedPlanCredits implements \JsonSerializable
 {
     public function __construct(
-        public readonly string $currency,
-        public readonly int $amount,
+        public readonly string $type,
     ) {}
 
     public function jsonSerialize(): object
     {
         $values = [];
-        $values["currency"] = $this->currency;
-        $values["amount"] = $this->amount;
+        $values["type"] = $this->type;
         return (object) $values;
     }
 
@@ -25,8 +23,7 @@ class OfferPhasesItemVariant3AmountsItem implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            currency: $data["currency"],
-            amount: $data["amount"],
+            type: $data["type"],
         );
     }
 }

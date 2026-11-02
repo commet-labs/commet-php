@@ -8,7 +8,8 @@ class UpdateOfferParamsPhasesItemVariant2 extends UpdateOfferParamsPhasesItem im
 {
     public function __construct(
         public readonly string $type,
-        public readonly int $percentage,
+        /** @var UpdateOfferParamsPhasesItemVariant2AmountsItem[] */
+        public readonly array $amounts,
         public readonly ?int $durationCycles = null,
         public readonly ?string $durationInterval = null,
     ) {}
@@ -21,7 +22,7 @@ class UpdateOfferParamsPhasesItemVariant2 extends UpdateOfferParamsPhasesItem im
         if ($this->durationInterval !== null) {
             $values["durationInterval"] = $this->durationInterval;
         }
-        $values["percentage"] = $this->percentage;
+        $values["amounts"] = $this->amounts;
         return (object) $values;
     }
 
@@ -32,7 +33,7 @@ class UpdateOfferParamsPhasesItemVariant2 extends UpdateOfferParamsPhasesItem im
     {
         return new self(
             type: $data["type"],
-            percentage: $data["percentage"],
+            amounts: array_map(fn(array $item) => UpdateOfferParamsPhasesItemVariant2AmountsItem::fromArray($item), $data["amounts"]),
             durationCycles: $data["duration_cycles"] ?? null,
             durationInterval: $data["duration_interval"] ?? null,
         );

@@ -8,7 +8,7 @@ use Commet\Exceptions\ApiException;
 use Commet\HttpClient;
 use Commet\Models\CreateApiKeyParamsPermissions;
 use Commet\Models\CreateCustomerParamsAddress;
-use Commet\Models\CreateOfferParamsPhasesItemVariant2;
+use Commet\Models\CreateOfferParamsPhasesItemVariant1;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Uri;
@@ -26,7 +26,7 @@ class HttpClientTest extends TestCase
         $body = HttpClient::buildBody(['expires_in_days' => 30, 'permissions' => $permissions]);
         $body['duration_days'] = null;
         $body['address'] = new CreateCustomerParamsAddress('Main', 'City', '123', 'US');
-        $body['phases'] = [new CreateOfferParamsPhasesItemVariant2(
+        $body['phases'] = [new CreateOfferParamsPhasesItemVariant1(
             type: 'percentage', durationCycles: null, durationInterval: 'month', percentage: 0,
         )];
         $encoded = json_encode(HttpClient::convertKeys($body, [HttpClient::class, 'toCamelCase']), JSON_THROW_ON_ERROR);

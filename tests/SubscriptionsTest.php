@@ -55,6 +55,7 @@ class SubscriptionsTest extends TestCase
             'name' => 'Pro',
             'status' => 'active',
             'cancelAtPeriodEnd' => false,
+            'hasPaymentMethod' => true,
             'startDate' => '2026-06-03',
             'createdAt' => '2026-06-03T00:00:00Z',
             'updatedAt' => '2026-06-03T00:00:00Z',
