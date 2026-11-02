@@ -16,10 +16,6 @@ Check if a customer can consume a feature before actual consumption. Returns ava
 - `featureCode` (`string`, required)
 - `quantity` (`int`, optional)
 
-### Request options
-
-- `idempotencyKey` (`string`, optional) — Unique key used to safely retry this write for 24 hours without applying it twice.
-
 ### Returns
 
 `UsageCheck`

@@ -14,6 +14,7 @@ class Offer implements \JsonSerializable
         /** @var array<string, mixed> */
         public readonly array $metadata,
         public readonly bool $active,
+        public readonly ManagedBy $managedBy,
         public readonly string $createdAt,
         public readonly string $updatedAt,
         public readonly string $object,
@@ -32,6 +33,7 @@ class Offer implements \JsonSerializable
         $values["startsAt"] = $this->startsAt;
         $values["endsAt"] = $this->endsAt;
         $values["active"] = $this->active;
+        $values["managedBy"] = $this->managedBy;
         $values["createdAt"] = $this->createdAt;
         $values["updatedAt"] = $this->updatedAt;
         $values["object"] = $this->object;
@@ -50,6 +52,7 @@ class Offer implements \JsonSerializable
             phases: array_map(fn(array $item) => OfferPhasesItem::fromArray($item), $data["phases"]),
             metadata: $data["metadata"],
             active: $data["active"],
+            managedBy: ManagedBy::fromArray($data["managed_by"]),
             createdAt: $data["created_at"],
             updatedAt: $data["updated_at"],
             object: $data["object"],

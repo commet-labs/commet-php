@@ -43,7 +43,7 @@ $commet->usage->track(
 SDK v9 exposes independent Offers, top-level Markets, and selectable `priceId` variants:
 
 ```php
-use Commet\Models\CreateOfferParamsPhasesItemVariant2;
+use Commet\Models\CreateOfferParamsPhasesItemVariant1;
 
 $market = $commet->markets->create(
     name: 'Argentina',
@@ -53,7 +53,7 @@ $market = $commet->markets->create(
 $offer = $commet->offers->create(
     name: 'First three months at 25% off',
     phases: [
-        new CreateOfferParamsPhasesItemVariant2(
+        new CreateOfferParamsPhasesItemVariant1(
             type: 'percentage',
             durationCycles: 3,
             percentage: 2500,

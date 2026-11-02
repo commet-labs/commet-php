@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Webhooks;
 
-/** Fired when a subscription enters its trial period after checkout. Grant access here — trialing subscriptions have full access until trialEndsAt. */
+/** Fired when a subscription enters its trial period: after checkout, or right away when the price's trial requires no payment method. Grant access here — trialing subscriptions have full access until trialEndsAt. */
 final class TrialStartedData
 {
     public function __construct(

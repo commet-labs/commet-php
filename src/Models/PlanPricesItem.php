@@ -20,6 +20,7 @@ class PlanPricesItem implements \JsonSerializable
         public readonly array $marketPrices,
         /** @var PlanPricesItemRegionalPricesItem[] */
         public readonly array $regionalPrices,
+        public readonly ?bool $trialRequiresPaymentMethod = null,
         public readonly ?int $includedBalance = null,
         public readonly ?int $includedCredits = null,
         public readonly ?string $offerId = null,
@@ -34,6 +35,7 @@ class PlanPricesItem implements \JsonSerializable
         $values["price"] = $this->price;
         $values["isDefault"] = $this->isDefault;
         $values["trialDays"] = $this->trialDays;
+        $values["trialRequiresPaymentMethod"] = $this->trialRequiresPaymentMethod;
         $values["includedBalance"] = $this->includedBalance;
         $values["includedCredits"] = $this->includedCredits;
         $values["offerId"] = $this->offerId;
@@ -58,6 +60,7 @@ class PlanPricesItem implements \JsonSerializable
             metadata: $data["metadata"],
             marketPrices: array_map(fn(array $item) => PlanPricesItemMarketPricesItem::fromArray($item), $data["market_prices"]),
             regionalPrices: array_map(fn(array $item) => PlanPricesItemRegionalPricesItem::fromArray($item), $data["regional_prices"]),
+            trialRequiresPaymentMethod: $data["trial_requires_payment_method"] ?? null,
             includedBalance: $data["included_balance"] ?? null,
             includedCredits: $data["included_credits"] ?? null,
             offerId: $data["offer_id"] ?? null,

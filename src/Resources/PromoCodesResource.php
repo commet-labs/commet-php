@@ -44,6 +44,7 @@ class PromoCodesResource
         ?string $expiresAt = null,
         ?bool $active = null,
         ?array $planIds = null,
+        ?bool $firstPurchaseOnly = null,
         ?string $idempotencyKey = null,
     ): PromoCode {
         $response = $this->http->patch(
@@ -54,6 +55,7 @@ class PromoCodesResource
                 "expires_at" => $expiresAt,
                 "active" => $active,
                 "plan_ids" => $planIds,
+                "first_purchase_only" => $firstPurchaseOnly,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -89,7 +91,7 @@ class PromoCodesResource
     }
 
     /**
-     * Create a distribution code for an existing Offer with one or more sequential discount phases and an optional leading trial. The code owns redemption restrictions.
+     * Create a distribution code for an existing Offer with one or more sequential discount phases. The code owns redemption restrictions.
      * @param string[]|null $planIds
      * @return PromoCode
      */
@@ -100,6 +102,7 @@ class PromoCodesResource
         ?int $maxRedemptions = null,
         ?string $expiresAt = null,
         ?array $planIds = null,
+        ?bool $firstPurchaseOnly = null,
         ?string $idempotencyKey = null,
     ): PromoCode {
         $response = $this->http->post(
@@ -111,6 +114,7 @@ class PromoCodesResource
                 "max_redemptions" => $maxRedemptions,
                 "expires_at" => $expiresAt,
                 "plan_ids" => $planIds,
+                "first_purchase_only" => $firstPurchaseOnly,
             ]),
             idempotencyKey: $idempotencyKey,
         );

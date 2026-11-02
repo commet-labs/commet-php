@@ -8,7 +8,8 @@ class OfferPhasesItemVariant2 extends OfferPhasesItem implements \JsonSerializab
 {
     public function __construct(
         public readonly string $type,
-        public readonly int $percentage,
+        /** @var OfferPhasesItemVariant2AmountsItem[] */
+        public readonly array $amounts,
         public readonly ?int $durationCycles = null,
         public readonly ?string $durationInterval = null,
     ) {}
@@ -19,7 +20,7 @@ class OfferPhasesItemVariant2 extends OfferPhasesItem implements \JsonSerializab
         $values["type"] = $this->type;
         $values["durationCycles"] = $this->durationCycles;
         $values["durationInterval"] = $this->durationInterval;
-        $values["percentage"] = $this->percentage;
+        $values["amounts"] = $this->amounts;
         return (object) $values;
     }
 
@@ -30,7 +31,7 @@ class OfferPhasesItemVariant2 extends OfferPhasesItem implements \JsonSerializab
     {
         return new self(
             type: $data["type"],
-            percentage: $data["percentage"],
+            amounts: array_map(fn(array $item) => OfferPhasesItemVariant2AmountsItem::fromArray($item), $data["amounts"]),
             durationCycles: $data["duration_cycles"] ?? null,
             durationInterval: $data["duration_interval"] ?? null,
         );

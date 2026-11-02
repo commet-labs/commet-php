@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Models;
 
-class UpdateOfferParamsPhasesItemVariant4PricesItem implements \JsonSerializable
+class CreateOfferParamsPhasesItemVariant3PricesItem implements \JsonSerializable
 {
     public function __construct(
         public readonly string $currency,

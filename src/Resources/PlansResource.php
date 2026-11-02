@@ -7,6 +7,8 @@ namespace Commet\Resources;
 use Commet\HttpClient;
 use Commet\Models\AddPlanFeatureParamsOverage;
 use Commet\Models\AddPlanPriceParamsMarketPricesItem;
+use Commet\Models\CreatePlanParamsPlanCreditLimit;
+use Commet\Models\CreatePlanParamsUnusedPlanCredits;
 use Commet\Models\DeletedObject;
 use Commet\Models\DeletedPlanRegionalPricing;
 use Commet\Models\Plan;
@@ -19,6 +21,8 @@ use Commet\Models\RemovedPlanFeature;
 use Commet\Models\SetPlanRegionalPricingParamsFeaturesItem;
 use Commet\Models\SetPlanRegionalPricingParamsPricesItem;
 use Commet\Models\UpdatePlanFeatureParamsOverage;
+use Commet\Models\UpdatePlanParamsPlanCreditLimit;
+use Commet\Models\UpdatePlanParamsUnusedPlanCredits;
 use Commet\Models\UpdatePlanPriceParamsMarketPricesItem;
 use Commet\Models\UpsertRegionalPricesParamsOverridesItem;
 
@@ -196,6 +200,7 @@ class PlansResource
         ?int $price = null,
         ?bool $isDefault = null,
         ?int $trialDays = null,
+        ?bool $trialRequiresPaymentMethod = null,
         ?int $includedBalance = null,
         ?int $includedCredits = null,
         ?array $metadata = null,
@@ -208,6 +213,7 @@ class PlansResource
                 "price" => $price,
                 "is_default" => $isDefault,
                 "trial_days" => $trialDays,
+                "trial_requires_payment_method" => $trialRequiresPaymentMethod,
                 "included_balance" => $includedBalance,
                 "included_credits" => $includedCredits,
                 "metadata" => $metadata,
@@ -254,6 +260,7 @@ class PlansResource
         ?array $metadata = null,
         ?int $price = null,
         ?int $trialDays = null,
+        ?bool $trialRequiresPaymentMethod = null,
         ?bool $isDefault = null,
         ?int $includedBalance = null,
         ?int $includedCredits = null,
@@ -268,6 +275,7 @@ class PlansResource
                 "metadata" => $metadata,
                 "price" => $price,
                 "trial_days" => $trialDays,
+                "trial_requires_payment_method" => $trialRequiresPaymentMethod,
                 "is_default" => $isDefault,
                 "included_balance" => $includedBalance,
                 "included_credits" => $includedCredits,
@@ -335,7 +343,7 @@ class PlansResource
     }
 
     /**
-     * Update a plan's name, description, visibility, or metadata.
+     * Update a plan's name, description, visibility, default status, metadata, what happens to its unused plan credits, or its plan credit limit.
      * @param array<string, mixed>|null $metadata
      * @return Plan
      */
@@ -345,6 +353,9 @@ class PlansResource
         ?string $description = null,
         ?array $metadata = null,
         ?bool $isPublic = null,
+        ?UpdatePlanParamsUnusedPlanCredits $unusedPlanCredits = null,
+        ?UpdatePlanParamsPlanCreditLimit $planCreditLimit = null,
+        ?bool $isDefault = null,
         ?string $idempotencyKey = null,
     ): Plan {
         $response = $this->http->patch(
@@ -354,6 +365,9 @@ class PlansResource
                 "description" => $description,
                 "metadata" => $metadata,
                 "is_public" => $isPublic,
+                "unused_plan_credits" => $unusedPlanCredits,
+                "plan_credit_limit" => $planCreditLimit,
+                "is_default" => $isDefault,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -441,7 +455,10 @@ class PlansResource
         ?bool $isPublic = null,
         ?bool $isFree = null,
         ?bool $blockOnExhaustion = null,
+        ?CreatePlanParamsUnusedPlanCredits $unusedPlanCredits = null,
+        ?CreatePlanParamsPlanCreditLimit $planCreditLimit = null,
         ?string $planGroupId = null,
+        ?bool $isDefault = null,
         ?array $metadata = null,
         ?string $idempotencyKey = null,
     ): Plan {
@@ -455,7 +472,10 @@ class PlansResource
                 "is_public" => $isPublic,
                 "is_free" => $isFree,
                 "block_on_exhaustion" => $blockOnExhaustion,
+                "unused_plan_credits" => $unusedPlanCredits,
+                "plan_credit_limit" => $planCreditLimit,
                 "plan_group_id" => $planGroupId,
+                "is_default" => $isDefault,
                 "metadata" => $metadata,
             ]),
             idempotencyKey: $idempotencyKey,

@@ -17,6 +17,7 @@ class SubscriptionSummary implements \JsonSerializable
         public readonly SubscriptionStatus|string $status,
         public readonly bool $cancelAtPeriodEnd,
         public readonly string $startDate,
+        public readonly bool $hasPaymentMethod,
         public readonly string $createdAt,
         public readonly string $updatedAt,
         /** @var SubscriptionOfferApplication[] */
@@ -57,6 +58,7 @@ class SubscriptionSummary implements \JsonSerializable
         $values["billingDayOfMonth"] = $this->billingDayOfMonth;
         $values["nextBillingDate"] = $this->nextBillingDate;
         $values["checkoutUrl"] = $this->checkoutUrl;
+        $values["hasPaymentMethod"] = $this->hasPaymentMethod;
         $values["createdAt"] = $this->createdAt;
         $values["updatedAt"] = $this->updatedAt;
         $values["offerApplications"] = $this->offerApplications;
@@ -80,6 +82,7 @@ class SubscriptionSummary implements \JsonSerializable
             status: SubscriptionStatus::tryFrom($data["status"]) ?? $data["status"],
             cancelAtPeriodEnd: $data["cancel_at_period_end"],
             startDate: $data["start_date"],
+            hasPaymentMethod: $data["has_payment_method"],
             createdAt: $data["created_at"],
             updatedAt: $data["updated_at"],
             offerApplications: array_map(fn(array $item) => SubscriptionOfferApplication::fromArray($item), $data["offer_applications"]),

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Webhooks;
 
-/** Fired when non-purchase credits are granted to a subscription: plan-included credits at the start of each billing period, or a manual adjustment from the dashboard. Credit pack purchases fire credits.purchased instead. */
+/** Fired when non-purchase credits are granted to a subscription: plan-included credits at the start of each billing period, or a manual adjustment from the dashboard. Credit purchases through the API, automatic top-ups, or the customer portal fire credits.purchased instead. */
 final class CreditsGrantedData
 {
     public function __construct(

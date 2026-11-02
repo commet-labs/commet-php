@@ -11,6 +11,7 @@ class UsageEventConsumption implements \JsonSerializable
         public readonly float $deducted,
         public readonly float $remaining,
         public readonly bool $blocked,
+        public readonly ?UsageEventConsumptionPlanCreditLimit $planCreditLimit = null,
     ) {}
 
     public function jsonSerialize(): object
@@ -20,6 +21,9 @@ class UsageEventConsumption implements \JsonSerializable
         $values["deducted"] = $this->deducted;
         $values["remaining"] = $this->remaining;
         $values["blocked"] = $this->blocked;
+        if ($this->planCreditLimit !== null) {
+            $values["planCreditLimit"] = $this->planCreditLimit;
+        }
         return (object) $values;
     }
 
@@ -33,6 +37,7 @@ class UsageEventConsumption implements \JsonSerializable
             deducted: $data["deducted"],
             remaining: $data["remaining"],
             blocked: $data["blocked"],
+            planCreditLimit: isset($data["plan_credit_limit"]) ? UsageEventConsumptionPlanCreditLimit::fromArray($data["plan_credit_limit"]) : null,
         );
     }
 }

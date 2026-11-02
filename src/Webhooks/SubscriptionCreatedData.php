@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Webhooks;
 
-/** Fired when a subscription record is created with status pending_payment. The first charge has not been confirmed yet — do NOT grant access here. Wait for subscription.activated. */
+/** Fired when a subscription record is created, usually with status pending_payment: the first charge has not been confirmed yet — do NOT grant access here; wait for subscription.activated. A trial whose price requires no payment method is created already trialing, together with trial.started. */
 final class SubscriptionCreatedData
 {
     public function __construct(

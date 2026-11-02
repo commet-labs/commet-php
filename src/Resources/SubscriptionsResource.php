@@ -19,6 +19,7 @@ use Commet\Models\ReactivatedSubscription;
 use Commet\Models\RecoveryLink;
 use Commet\Models\Subscription;
 use Commet\Models\SubscriptionAddon;
+use Commet\Models\SubscriptionAutoTopUp;
 use Commet\Models\SubscriptionResume;
 use Commet\Models\SubscriptionsListResult;
 
@@ -69,6 +70,54 @@ class SubscriptionsResource
         }
 
         return SubscriptionAddon::fromArray($response->data);
+    }
+
+    /**
+     * Read whether the subscription buys credits automatically with its saved payment method when credits reach a threshold, with the top-ups used this period and the last failure.
+     * @return SubscriptionAutoTopUp
+     */
+    public function getAutoTopUp(
+        string $id,
+    ): SubscriptionAutoTopUp {
+        $response = $this->http->get(
+            "/subscriptions/{$id}/auto-top-up",
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid SubscriptionAutoTopUp response payload");
+        }
+
+        return SubscriptionAutoTopUp::fromArray($response->data);
+    }
+
+    /**
+     * Turn automatic credit purchases on or off and set the threshold, the credits each top-up buys and the maximum top-ups per period. Send only the fields that change. Enabling requires a plan that sells credits. The quantity must be at least the plan's purchase minimum when auto top-up is enabled or when the quantity changes, so turning it off keeps working after the minimum rises. Saving it enabled resumes a paused auto top-up.
+     * @return SubscriptionAutoTopUp
+     */
+    public function updateAutoTopUp(
+        string $id,
+        ?bool $enabled = null,
+        ?int $threshold = null,
+        ?int $quantity = null,
+        ?int $maxPerPeriod = null,
+        ?string $idempotencyKey = null,
+    ): SubscriptionAutoTopUp {
+        $response = $this->http->patch(
+            "/subscriptions/{$id}/auto-top-up",
+            HttpClient::buildBody([
+                "enabled" => $enabled,
+                "threshold" => $threshold,
+                "quantity" => $quantity,
+                "max_per_period" => $maxPerPeriod,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid SubscriptionAutoTopUp response payload");
+        }
+
+        return SubscriptionAutoTopUp::fromArray($response->data);
     }
 
     /**
@@ -150,7 +199,7 @@ class SubscriptionsResource
     }
 
     /**
-     * Upgrade or change billing interval immediately, optionally applying an Offer. Scheduled changes do not accept offers.
+     * Upgrade or change billing interval immediately, optionally applying an Offer by offerId or the Offer of a promoCode. Scheduled changes accept neither offerId nor promoCode. From a free plan, a promoCode opens the checkout with the code applied and counts its use when the checkout is paid; without offerId or promoCode, a destination price whose free trial requires no payment method starts that trial right away without checkout. During a trial without a payment method, an immediate change returns 409 no_payment_method; scheduled changes still apply.
      * @return PlanChange
      */
     public function changePlan(
@@ -159,6 +208,7 @@ class SubscriptionsResource
         ?string $newBillingInterval = null,
         ?string $successUrl = null,
         ?string $offerId = null,
+        ?string $promoCode = null,
         ?string $idempotencyKey = null,
     ): PlanChange {
         $response = $this->http->post(
@@ -168,6 +218,7 @@ class SubscriptionsResource
                 "new_billing_interval" => $newBillingInterval,
                 "success_url" => $successUrl,
                 "offer_id" => $offerId,
+                "promo_code" => $promoCode,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -180,18 +231,20 @@ class SubscriptionsResource
     }
 
     /**
-     * Purchase a credit pack for a subscription. Charges the customer and adds credits to their balance.
+     * Purchase a fixed credit pack or choose a whole credit quantity at the subscription plan price and minimum. Charges the saved payment method and adds purchased credits.
      * @return CreditGrant
      */
     public function purchaseCredits(
         string $id,
-        string $creditPackId,
+        ?string $creditPackId = null,
+        ?int $quantity = null,
         ?string $idempotencyKey = null,
     ): CreditGrant {
         $response = $this->http->post(
             "/subscriptions/{$id}/credits",
             HttpClient::buildBody([
                 "credit_pack_id" => $creditPackId,
+                "quantity" => $quantity,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -204,7 +257,7 @@ class SubscriptionsResource
     }
 
     /**
-     * Apply a direct Offer to a subscription. On a pending payment checkout it quotes or replaces the checkout discount and the existing checkout URL remains unchanged. On an active subscription it applies the Offer immediately with its discount phases starting at the next billing cycle; the call is rejected while another applied Offer still has active or upcoming discount phases. Offers with a free trial phase cannot be applied after checkout creation.
+     * Apply a direct Offer to a subscription. On a pending checkout it quotes or replaces the checkout discount, which starts after the plan price trial when there is one, and the existing checkout URL remains unchanged. On an active subscription it applies the Offer immediately with its discount phases starting at the next billing cycle; the call is rejected while another applied Offer still has active or upcoming discount phases.
      * @return Subscription
      */
     public function applyOffer(
@@ -371,7 +424,7 @@ class SubscriptionsResource
     }
 
     /**
-     * Preview proration details for an immediate plan change without applying it. Free-to-paid changes are never scheduled and the change-plan endpoint always returns hosted checkout for them. For paid plans, interval direction takes precedence: a longer interval is immediate and a shorter interval is scheduled. When the interval is unchanged, a higher-sort-order plan is immediate and a lower-sort-order plan is scheduled. A paid-to-free change is always scheduled. Returns credit, charge, and net amount. The target plan must belong to the same plan group as the current plan, otherwise a 400 with code `plans_not_in_same_group` is returned. A change between two free plans has nothing to prorate and returns a zero-amount estimate. Scheduled changes return a 400 with code `plan_change_scheduled`; apply those via the change-plan endpoint. Pass offerId to quote the destination plan with an Offer.
+     * Preview proration details for an immediate plan change without applying it. Free-to-paid changes are never scheduled and the change-plan endpoint returns hosted checkout for them, except a change without offerId or promoCode to a price whose free trial needs no payment method, for a customer who never had that plan: it starts the trial at once, so the preview reports nothing due today. For paid plans, interval direction takes precedence: a longer interval is immediate and a shorter interval is scheduled. When the interval is unchanged, a higher-sort-order plan is immediate and a lower-sort-order plan is scheduled. A paid-to-free change is always scheduled. Returns credit, charge, and net amount. The target plan must belong to the same plan group as the current plan, otherwise a 400 with code `plans_not_in_same_group` is returned. A change between two free plans has nothing to prorate and returns a zero-amount estimate. Scheduled changes return a 400 with code `plan_change_scheduled`; apply those via the change-plan endpoint. Pass offerId to quote the destination plan with an Offer, or promoCode to quote it with the Offer of a promo code validated with the checkout's rules.
      * @return PreviewChange
      */
     public function previewChange(
@@ -379,6 +432,7 @@ class SubscriptionsResource
         string $planId,
         ?string $billingInterval = null,
         ?string $offerId = null,
+        ?string $promoCode = null,
         ?string $idempotencyKey = null,
     ): PreviewChange {
         $response = $this->http->post(
@@ -387,6 +441,7 @@ class SubscriptionsResource
                 "plan_id" => $planId,
                 "billing_interval" => $billingInterval,
                 "offer_id" => $offerId,
+                "promo_code" => $promoCode,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -481,6 +536,24 @@ class SubscriptionsResource
     }
 
     /**
+     * Revoke the plan or interval change scheduled for the end of the period, so the subscription stays on its current plan. Returns the updated subscription.
+     * @return Subscription
+     */
+    public function revokeScheduledPlanChange(
+        string $id,
+    ): Subscription {
+        $response = $this->http->delete(
+            "/subscriptions/{$id}/scheduled-plan-change",
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Subscription response payload");
+        }
+
+        return Subscription::fromArray($response->data);
+    }
+
+    /**
      * Revert a scheduled cancellation and return the updated subscription. Only works before cancellation takes effect.
      * @return Subscription
      */
@@ -549,7 +622,7 @@ class SubscriptionsResource
     }
 
     /**
-     * Create a subscription for a customer. Commet selects the default price when priceId is omitted. The subscription starts at the base USD price; market and currency are resolved from the buyer's request country when the checkout opens. Without an offer override, Commet applies the price's automatic introductory Offer. Pass offerId to apply an active compatible Offer directly, or cardPromotionId to preselect a card-eligible Promotional Offer for the initial checkout when card promotions are enabled for the organization. For the initial checkout, provider accepts either a processor name or an exact payment connection ID.
+     * Create a subscription for a customer. Commet selects the default price when priceId is omitted. The subscription starts at the base USD price; market and currency are resolved from the buyer's request country when the checkout opens. Without an offer override, Commet applies the price's automatic introductory Offer. Pass offerId to apply an active compatible Offer directly, or cardPromotionId to preselect a card-eligible Promotional Offer for the initial checkout when card promotions are enabled for the organization. For the initial checkout, provider accepts either a processor name or an exact payment connection ID. When the price's free trial requires no payment method, the subscription starts trialing right away with no checkout (checkoutUrl null, hasPaymentMethod false); it cannot be combined with offerId, promoCode, cardPromotionId or provider, and an organization that cannot charge yet receives 403.
      * @param array<string, int>|null $initialSeats
      * @return CreatedSubscription
      */

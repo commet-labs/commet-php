@@ -8,14 +8,20 @@ class UpdateOfferParamsPhasesItemVariant1 extends UpdateOfferParamsPhasesItem im
 {
     public function __construct(
         public readonly string $type,
-        public readonly int $durationDays,
+        public readonly int $percentage,
+        public readonly ?int $durationCycles = null,
+        public readonly ?string $durationInterval = null,
     ) {}
 
     public function jsonSerialize(): object
     {
         $values = [];
         $values["type"] = $this->type;
-        $values["durationDays"] = $this->durationDays;
+        $values["durationCycles"] = $this->durationCycles;
+        if ($this->durationInterval !== null) {
+            $values["durationInterval"] = $this->durationInterval;
+        }
+        $values["percentage"] = $this->percentage;
         return (object) $values;
     }
 
@@ -26,7 +32,9 @@ class UpdateOfferParamsPhasesItemVariant1 extends UpdateOfferParamsPhasesItem im
     {
         return new self(
             type: $data["type"],
-            durationDays: $data["duration_days"],
+            percentage: $data["percentage"],
+            durationCycles: $data["duration_cycles"] ?? null,
+            durationInterval: $data["duration_interval"] ?? null,
         );
     }
 }

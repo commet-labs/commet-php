@@ -21,6 +21,7 @@ class UsageCheckVariant2 extends UsageCheck implements \JsonSerializable
         public readonly bool $livemode,
         public readonly ?string $reason = null,
         public readonly ?string $message = null,
+        public readonly ?UsageCheckVariant2PlanCreditLimit $planCreditLimit = null,
     ) {}
 
     public function jsonSerialize(): object
@@ -42,6 +43,7 @@ class UsageCheckVariant2 extends UsageCheck implements \JsonSerializable
         $values["planCredits"] = $this->planCredits;
         $values["purchasedCredits"] = $this->purchasedCredits;
         $values["totalCredits"] = $this->totalCredits;
+        $values["planCreditLimit"] = $this->planCreditLimit;
         $values["object"] = $this->object;
         $values["livemode"] = $this->livemode;
         return (object) $values;
@@ -67,6 +69,7 @@ class UsageCheckVariant2 extends UsageCheck implements \JsonSerializable
             livemode: $data["livemode"],
             reason: $data["reason"] ?? null,
             message: $data["message"] ?? null,
+            planCreditLimit: isset($data["plan_credit_limit"]) ? UsageCheckVariant2PlanCreditLimit::fromArray($data["plan_credit_limit"]) : null,
         );
     }
 }

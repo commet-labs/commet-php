@@ -257,18 +257,20 @@ class CustomersResource
     }
 
     /**
-     * Create up to 100 customers in a single request.
+     * Create up to 100 customers in a single request. With planGroupId, each customer without an open subscription starts on that group's starting plan (see planGroupId), and the entry of a deleted customer fails with customer_deleted.
      * @param BatchCreateCustomersParamsCustomersItem[] $customers
      * @return CustomerBatch
      */
     public function createBatch(
         array $customers,
+        ?string $planGroupId = null,
         ?string $idempotencyKey = null,
     ): CustomerBatch {
         $response = $this->http->post(
             "/customers/batch",
             HttpClient::buildBody([
                 "customers" => $customers,
+                "plan_group_id" => $planGroupId,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -306,7 +308,7 @@ class CustomersResource
     }
 
     /**
-     * Create a new customer. Idempotent when customerId is provided.
+     * Create a new customer. Idempotent when customerId is provided. With planGroupId, a customer without an open subscription starts on that group's starting plan (see planGroupId), and the externalId of a deleted customer is rejected.
      * @param array<string, mixed>|null $metadata
      * @return Customer
      */
@@ -320,6 +322,7 @@ class CustomersResource
         ?string $addressId = null,
         ?Timezone $timezone = null,
         ?array $metadata = null,
+        ?string $planGroupId = null,
         ?string $idempotencyKey = null,
     ): Customer {
         $response = $this->http->post(
@@ -334,6 +337,7 @@ class CustomersResource
                 "email" => $email,
                 "timezone" => $timezone?->value,
                 "metadata" => $metadata,
+                "plan_group_id" => $planGroupId,
             ]),
             idempotencyKey: $idempotencyKey,
         );
