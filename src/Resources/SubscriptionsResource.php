@@ -73,7 +73,7 @@ class SubscriptionsResource
     }
 
     /**
-     * Read whether the subscription buys credits automatically with its saved payment method when credits reach a threshold, with the top-ups used this period and the last failure.
+     * Read whether the subscription tops up automatically with its saved payment method when its available credits or balance reach a threshold, with the top-ups used this period and the last failure.
      * @return SubscriptionAutoTopUp
      */
     public function getAutoTopUp(
@@ -91,7 +91,7 @@ class SubscriptionsResource
     }
 
     /**
-     * Turn automatic credit purchases on or off and set the threshold, the credits each top-up buys and the maximum top-ups per period. Send only the fields that change. Enabling requires a plan that sells credits. The quantity must be at least the plan's purchase minimum when auto top-up is enabled or when the quantity changes, so turning it off keeps working after the minimum rises. Saving it enabled resumes a paused auto top-up.
+     * Turn automatic top-ups on or off and set the threshold, the size of each top-up and the maximum top-ups per period. Send only the fields that change. On a credits plan each top-up buys `quantity` credits; on a balance plan it adds `amount` in minor units of the subscription currency, plus tax, and `threshold` is in the same minor units. Enabling requires a plan that sells credits or has balance top-ups on. The size must be at least the plan's minimum when auto top-up is enabled or when the size changes, so turning it off keeps working after the minimum rises. Saving it enabled resumes a paused auto top-up.
      * @return SubscriptionAutoTopUp
      */
     public function updateAutoTopUp(
@@ -99,6 +99,7 @@ class SubscriptionsResource
         ?bool $enabled = null,
         ?int $threshold = null,
         ?int $quantity = null,
+        ?int $amount = null,
         ?int $maxPerPeriod = null,
         ?string $idempotencyKey = null,
     ): SubscriptionAutoTopUp {
@@ -108,6 +109,7 @@ class SubscriptionsResource
                 "enabled" => $enabled,
                 "threshold" => $threshold,
                 "quantity" => $quantity,
+                "amount" => $amount,
                 "max_per_period" => $maxPerPeriod,
             ]),
             idempotencyKey: $idempotencyKey,
@@ -149,7 +151,7 @@ class SubscriptionsResource
     }
 
     /**
-     * Top up a subscription's balance. Charges the customer's payment method for the specified amount.
+     * Top up a balance subscription. Charges the customer's payment method for the amount plus tax, adds it to the subscription's purchased balance (after paying back any overage owed on the plan balance), creates its invoice and emits `balance.topped_up`. Purchased balance is spent after the plan balance and is kept until the subscription ends. Rejected with 400 when the subscription is not on a balance plan, its plan has top-ups turned off, or the amount is below the effective minimum: the plan's minimum top-up in the subscription currency, raised to the currency's minimum charge.
      * @return BalanceTopup
      */
     public function topupBalance(
@@ -624,6 +626,7 @@ class SubscriptionsResource
     /**
      * Create a subscription for a customer. Commet selects the default price when priceId is omitted. The subscription starts at the base USD price; market and currency are resolved from the buyer's request country when the checkout opens. Without an offer override, Commet applies the price's automatic introductory Offer. Pass offerId to apply an active compatible Offer directly, or cardPromotionId to preselect a card-eligible Promotional Offer for the initial checkout when card promotions are enabled for the organization. For the initial checkout, provider accepts either a processor name or an exact payment connection ID. When the price's free trial requires no payment method, the subscription starts trialing right away with no checkout (checkoutUrl null, hasPaymentMethod false); it cannot be combined with offerId, promoCode, cardPromotionId or provider, and an organization that cannot charge yet receives 403.
      * @param array<string, int>|null $initialSeats
+     * @param string[]|null $paymentMethodTypes
      * @return CreatedSubscription
      */
     public function create(
@@ -632,6 +635,7 @@ class SubscriptionsResource
         ?string $priceId = null,
         ?array $initialSeats = null,
         ?string $provider = null,
+        ?array $paymentMethodTypes = null,
         ?string $name = null,
         ?string $startDate = null,
         ?string $successUrl = null,
@@ -654,6 +658,7 @@ class SubscriptionsResource
                 "price_id" => $priceId,
                 "initial_seats" => $initialSeats,
                 "provider" => $provider,
+                "payment_method_types" => $paymentMethodTypes,
                 "name" => $name,
                 "start_date" => $startDate,
                 "success_url" => $successUrl,

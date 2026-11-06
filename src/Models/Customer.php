@@ -17,6 +17,7 @@ class Customer implements \JsonSerializable
         public readonly ?string $fullName = null,
         public readonly ?string $taxDocument = null,
         public readonly ?string $documentType = null,
+        public readonly ?BusinessTaxId $businessTaxId = null,
         public readonly ?string $timezone = null,
         /** @var array<string, mixed>|null */
         public readonly ?array $metadata = null,
@@ -31,6 +32,7 @@ class Customer implements \JsonSerializable
         $values["email"] = $this->email;
         $values["taxDocument"] = $this->taxDocument;
         $values["documentType"] = $this->documentType;
+        $values["businessTaxId"] = $this->businessTaxId;
         $values["timezone"] = $this->timezone;
         $values["metadata"] = $this->metadata;
         $values["createdAt"] = $this->createdAt;
@@ -56,6 +58,7 @@ class Customer implements \JsonSerializable
             fullName: $data["full_name"] ?? null,
             taxDocument: $data["tax_document"] ?? null,
             documentType: $data["document_type"] ?? null,
+            businessTaxId: isset($data["business_tax_id"]) ? BusinessTaxId::fromArray($data["business_tax_id"]) : null,
             timezone: $data["timezone"] ?? null,
             metadata: $data["metadata"] ?? null,
         );

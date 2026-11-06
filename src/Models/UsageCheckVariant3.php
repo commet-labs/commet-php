@@ -15,12 +15,16 @@ class UsageCheckVariant3 extends UsageCheck implements \JsonSerializable
         public readonly float $unitPrice,
         public readonly float $estimatedAmount,
         public readonly float $currentBalance,
+        public readonly float $planBalance,
+        public readonly float $purchasedBalance,
+        public readonly float $totalBalance,
         public readonly bool $blockOnExhaustion,
         public readonly string $currency,
         public readonly string $object,
         public readonly bool $livemode,
         public readonly ?string $reason = null,
         public readonly ?string $message = null,
+        public readonly ?UsageCheckVariant3PlanBalanceLimit $planBalanceLimit = null,
     ) {}
 
     public function jsonSerialize(): object
@@ -40,6 +44,10 @@ class UsageCheckVariant3 extends UsageCheck implements \JsonSerializable
         $values["unitPrice"] = $this->unitPrice;
         $values["estimatedAmount"] = $this->estimatedAmount;
         $values["currentBalance"] = $this->currentBalance;
+        $values["planBalance"] = $this->planBalance;
+        $values["purchasedBalance"] = $this->purchasedBalance;
+        $values["totalBalance"] = $this->totalBalance;
+        $values["planBalanceLimit"] = $this->planBalanceLimit;
         $values["blockOnExhaustion"] = $this->blockOnExhaustion;
         $values["currency"] = $this->currency;
         $values["object"] = $this->object;
@@ -61,12 +69,16 @@ class UsageCheckVariant3 extends UsageCheck implements \JsonSerializable
             unitPrice: $data["unit_price"],
             estimatedAmount: $data["estimated_amount"],
             currentBalance: $data["current_balance"],
+            planBalance: $data["plan_balance"],
+            purchasedBalance: $data["purchased_balance"],
+            totalBalance: $data["total_balance"],
             blockOnExhaustion: $data["block_on_exhaustion"],
             currency: $data["currency"],
             object: $data["object"],
             livemode: $data["livemode"],
             reason: $data["reason"] ?? null,
             message: $data["message"] ?? null,
+            planBalanceLimit: isset($data["plan_balance_limit"]) ? UsageCheckVariant3PlanBalanceLimit::fromArray($data["plan_balance_limit"]) : null,
         );
     }
 }

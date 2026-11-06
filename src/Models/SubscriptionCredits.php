@@ -10,6 +10,8 @@ class SubscriptionCredits implements \JsonSerializable
         public readonly float $remaining,
         public readonly float $included,
         public readonly float $purchased,
+        public readonly float $plan,
+        public readonly float $total,
     ) {}
 
     public function jsonSerialize(): object
@@ -18,6 +20,8 @@ class SubscriptionCredits implements \JsonSerializable
         $values["remaining"] = $this->remaining;
         $values["included"] = $this->included;
         $values["purchased"] = $this->purchased;
+        $values["plan"] = $this->plan;
+        $values["total"] = $this->total;
         return (object) $values;
     }
 
@@ -30,6 +34,8 @@ class SubscriptionCredits implements \JsonSerializable
             remaining: $data["remaining"],
             included: $data["included"],
             purchased: $data["purchased"],
+            plan: $data["plan"],
+            total: $data["total"],
         );
     }
 }
