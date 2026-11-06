@@ -14,6 +14,8 @@ final class CustomerUpdatedData
         public readonly string $email,
         public readonly ?string $taxDocument,
         public readonly ?string $documentType,
+        /** @var array<string, mixed> */
+        public readonly ?array $businessTaxId,
         public readonly ?string $timezone,
         /** @var array<string, mixed> */
         public readonly ?array $metadata,
@@ -33,6 +35,7 @@ final class CustomerUpdatedData
             email: $data["email"],
             taxDocument: $data["taxDocument"] ?? null,
             documentType: $data["documentType"] ?? null,
+            businessTaxId: $data["businessTaxId"] ?? null,
             timezone: $data["timezone"] ?? null,
             metadata: $data["metadata"] ?? null,
             createdAt: $data["createdAt"],

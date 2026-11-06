@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Webhooks;
 
-/** Fired when a customer on a balance plan tops up their prepaid balance through the customer portal and the payment succeeds. */
+/** Fired when a balance top-up succeeds: through the API, an automatic top-up or the customer portal. The amount goes to the purchased balance, which is spent after the plan balance and kept until the subscription ends. */
 final class BalanceToppedUpData
 {
     public function __construct(

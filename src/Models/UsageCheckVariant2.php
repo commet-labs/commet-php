@@ -17,6 +17,7 @@ class UsageCheckVariant2 extends UsageCheck implements \JsonSerializable
         public readonly int $planCredits,
         public readonly int $purchasedCredits,
         public readonly int $totalCredits,
+        public readonly bool $blockOnExhaustion,
         public readonly string $object,
         public readonly bool $livemode,
         public readonly ?string $reason = null,
@@ -44,6 +45,7 @@ class UsageCheckVariant2 extends UsageCheck implements \JsonSerializable
         $values["purchasedCredits"] = $this->purchasedCredits;
         $values["totalCredits"] = $this->totalCredits;
         $values["planCreditLimit"] = $this->planCreditLimit;
+        $values["blockOnExhaustion"] = $this->blockOnExhaustion;
         $values["object"] = $this->object;
         $values["livemode"] = $this->livemode;
         return (object) $values;
@@ -65,6 +67,7 @@ class UsageCheckVariant2 extends UsageCheck implements \JsonSerializable
             planCredits: $data["plan_credits"],
             purchasedCredits: $data["purchased_credits"],
             totalCredits: $data["total_credits"],
+            blockOnExhaustion: $data["block_on_exhaustion"],
             object: $data["object"],
             livemode: $data["livemode"],
             reason: $data["reason"] ?? null,

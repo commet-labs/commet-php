@@ -14,6 +14,7 @@ class SubscriptionAutoTopUp implements \JsonSerializable
         public readonly bool $livemode,
         public readonly ?int $threshold = null,
         public readonly ?int $quantity = null,
+        public readonly ?int $amount = null,
         public readonly ?int $maxPerPeriod = null,
         public readonly ?string $periodResetsAt = null,
         public readonly ?SubscriptionAutoTopUpLastFailure $lastFailure = null,
@@ -25,6 +26,7 @@ class SubscriptionAutoTopUp implements \JsonSerializable
         $values["enabled"] = $this->enabled;
         $values["threshold"] = $this->threshold;
         $values["quantity"] = $this->quantity;
+        $values["amount"] = $this->amount;
         $values["maxPerPeriod"] = $this->maxPerPeriod;
         $values["status"] = $this->status;
         $values["topUpsThisPeriod"] = $this->topUpsThisPeriod;
@@ -48,6 +50,7 @@ class SubscriptionAutoTopUp implements \JsonSerializable
             livemode: $data["livemode"],
             threshold: $data["threshold"] ?? null,
             quantity: $data["quantity"] ?? null,
+            amount: $data["amount"] ?? null,
             maxPerPeriod: $data["max_per_period"] ?? null,
             periodResetsAt: $data["period_resets_at"] ?? null,
             lastFailure: isset($data["last_failure"]) ? SubscriptionAutoTopUpLastFailure::fromArray($data["last_failure"]) : null,

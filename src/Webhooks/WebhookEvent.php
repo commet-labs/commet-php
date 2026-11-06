@@ -233,6 +233,11 @@ final class WebhookEvent
         return PaymentMethodUpdatedData::fromArray($this->data);
     }
 
+    public function asPaymentMethodDetached(): PaymentMethodDetachedData
+    {
+        return PaymentMethodDetachedData::fromArray($this->data);
+    }
+
     public function asCustomerCreated(): CustomerCreatedData
     {
         return CustomerCreatedData::fromArray($this->data);
@@ -293,6 +298,11 @@ final class WebhookEvent
         return CreditsExpiredData::fromArray($this->data);
     }
 
+    public function asBalanceGranted(): BalanceGrantedData
+    {
+        return BalanceGrantedData::fromArray($this->data);
+    }
+
     public function asBalanceToppedUp(): BalanceToppedUpData
     {
         return BalanceToppedUpData::fromArray($this->data);
@@ -306,6 +316,11 @@ final class WebhookEvent
     public function asBalanceDepleted(): BalanceDepletedData
     {
         return BalanceDepletedData::fromArray($this->data);
+    }
+
+    public function asBalanceExpired(): BalanceExpiredData
+    {
+        return BalanceExpiredData::fromArray($this->data);
     }
 
     public function asQuotaThresholdReached(): QuotaThresholdReachedData

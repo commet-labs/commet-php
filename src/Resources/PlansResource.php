@@ -7,7 +7,9 @@ namespace Commet\Resources;
 use Commet\HttpClient;
 use Commet\Models\AddPlanFeatureParamsOverage;
 use Commet\Models\AddPlanPriceParamsMarketPricesItem;
+use Commet\Models\CreatePlanParamsPlanBalanceLimit;
 use Commet\Models\CreatePlanParamsPlanCreditLimit;
+use Commet\Models\CreatePlanParamsUnusedPlanBalance;
 use Commet\Models\CreatePlanParamsUnusedPlanCredits;
 use Commet\Models\DeletedObject;
 use Commet\Models\DeletedPlanRegionalPricing;
@@ -21,7 +23,9 @@ use Commet\Models\RemovedPlanFeature;
 use Commet\Models\SetPlanRegionalPricingParamsFeaturesItem;
 use Commet\Models\SetPlanRegionalPricingParamsPricesItem;
 use Commet\Models\UpdatePlanFeatureParamsOverage;
+use Commet\Models\UpdatePlanParamsPlanBalanceLimit;
 use Commet\Models\UpdatePlanParamsPlanCreditLimit;
+use Commet\Models\UpdatePlanParamsUnusedPlanBalance;
 use Commet\Models\UpdatePlanParamsUnusedPlanCredits;
 use Commet\Models\UpdatePlanPriceParamsMarketPricesItem;
 use Commet\Models\UpsertRegionalPricesParamsOverridesItem;
@@ -343,7 +347,7 @@ class PlansResource
     }
 
     /**
-     * Update a plan's name, description, visibility, default status, metadata, what happens to its unused plan credits, or its plan credit limit.
+     * Update a plan's name, description, visibility, default status, metadata, overage behavior, what happens to its unused plan credits or plan balance, or its plan credit or plan balance limit.
      * @param array<string, mixed>|null $metadata
      * @return Plan
      */
@@ -355,6 +359,9 @@ class PlansResource
         ?bool $isPublic = null,
         ?UpdatePlanParamsUnusedPlanCredits $unusedPlanCredits = null,
         ?UpdatePlanParamsPlanCreditLimit $planCreditLimit = null,
+        ?UpdatePlanParamsUnusedPlanBalance $unusedPlanBalance = null,
+        ?UpdatePlanParamsPlanBalanceLimit $planBalanceLimit = null,
+        ?bool $blockOnExhaustion = null,
         ?bool $isDefault = null,
         ?string $idempotencyKey = null,
     ): Plan {
@@ -367,6 +374,9 @@ class PlansResource
                 "is_public" => $isPublic,
                 "unused_plan_credits" => $unusedPlanCredits,
                 "plan_credit_limit" => $planCreditLimit,
+                "unused_plan_balance" => $unusedPlanBalance,
+                "plan_balance_limit" => $planBalanceLimit,
+                "block_on_exhaustion" => $blockOnExhaustion,
                 "is_default" => $isDefault,
             ]),
             idempotencyKey: $idempotencyKey,
@@ -443,7 +453,7 @@ class PlansResource
     }
 
     /**
-     * Create a new plan with optional consumption model, visibility, and plan group assignment.
+     * Create a new plan with optional consumption model, visibility, plan group assignment, overage behavior, and the rollover and spend limit of its plan credits or plan balance.
      * @param array<string, mixed>|null $metadata
      * @return Plan
      */
@@ -457,6 +467,8 @@ class PlansResource
         ?bool $blockOnExhaustion = null,
         ?CreatePlanParamsUnusedPlanCredits $unusedPlanCredits = null,
         ?CreatePlanParamsPlanCreditLimit $planCreditLimit = null,
+        ?CreatePlanParamsUnusedPlanBalance $unusedPlanBalance = null,
+        ?CreatePlanParamsPlanBalanceLimit $planBalanceLimit = null,
         ?string $planGroupId = null,
         ?bool $isDefault = null,
         ?array $metadata = null,
@@ -474,6 +486,8 @@ class PlansResource
                 "block_on_exhaustion" => $blockOnExhaustion,
                 "unused_plan_credits" => $unusedPlanCredits,
                 "plan_credit_limit" => $planCreditLimit,
+                "unused_plan_balance" => $unusedPlanBalance,
+                "plan_balance_limit" => $planBalanceLimit,
                 "plan_group_id" => $planGroupId,
                 "is_default" => $isDefault,
                 "metadata" => $metadata,

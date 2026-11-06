@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Webhooks;
 
-/** Fired when a subscription's remaining credits cross below 10% of the credits granted for the current period. Emitted once per billing period, when the crossing happens. */
+/** Fired when a subscription's available credits (plan plus purchased) cross below 10% of their last refill: a period reset, a purchase or a manual adjustment. Emitted once per crossing, the same rule as balance.low. */
 final class CreditsLowData
 {
     public function __construct(

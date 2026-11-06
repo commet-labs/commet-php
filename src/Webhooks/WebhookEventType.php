@@ -46,6 +46,7 @@ final class WebhookEventType
     public const INVOICE_UPCOMING = "invoice.upcoming";
     public const PAYMENT_METHOD_ATTACHED = "payment_method.attached";
     public const PAYMENT_METHOD_UPDATED = "payment_method.updated";
+    public const PAYMENT_METHOD_DETACHED = "payment_method.detached";
     public const CUSTOMER_CREATED = "customer.created";
     public const CUSTOMER_UPDATED = "customer.updated";
     public const CUSTOMER_STATE_CHANGED = "customer.state_changed";
@@ -58,9 +59,11 @@ final class WebhookEventType
     public const CREDITS_LOW = "credits.low";
     public const CREDITS_DEPLETED = "credits.depleted";
     public const CREDITS_EXPIRED = "credits.expired";
+    public const BALANCE_GRANTED = "balance.granted";
     public const BALANCE_TOPPED_UP = "balance.topped_up";
     public const BALANCE_LOW = "balance.low";
     public const BALANCE_DEPLETED = "balance.depleted";
+    public const BALANCE_EXPIRED = "balance.expired";
     public const QUOTA_THRESHOLD_REACHED = "quota.threshold_reached";
     public const QUOTA_EXCEEDED = "quota.exceeded";
     public const SEATS_UPDATED = "seats.updated";

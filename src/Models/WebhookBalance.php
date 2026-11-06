@@ -8,12 +8,18 @@ class WebhookBalance implements \JsonSerializable
 {
     public function __construct(
         public readonly float $currentBalance,
+        public readonly float $planBalance,
+        public readonly float $purchasedBalance,
+        public readonly float $totalBalance,
     ) {}
 
     public function jsonSerialize(): object
     {
         $values = [];
         $values["currentBalance"] = $this->currentBalance;
+        $values["planBalance"] = $this->planBalance;
+        $values["purchasedBalance"] = $this->purchasedBalance;
+        $values["totalBalance"] = $this->totalBalance;
         return (object) $values;
     }
 
@@ -24,6 +30,9 @@ class WebhookBalance implements \JsonSerializable
     {
         return new self(
             currentBalance: $data["current_balance"],
+            planBalance: $data["plan_balance"],
+            purchasedBalance: $data["purchased_balance"],
+            totalBalance: $data["total_balance"],
         );
     }
 }
