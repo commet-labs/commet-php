@@ -140,6 +140,7 @@ Generated from Commet API version `2026-08-27`.
 - `includedUnits` (`int | null`, required)
 - `overageRate` (`int | null`, required)
 - `creditCost` (`int | null`, required)
+- `planIds` (`array`, required) — Plans that sell the add-on.
 - `object` (`string`, required)
 - `livemode` (`bool`, required)
 
@@ -185,6 +186,14 @@ Generated from Commet API version `2026-08-27`.
 - `data` (`array`, required)
 - `hasMore` (`bool`, required)
 - `nextCursor` (`string`, optional)
+
+### ArchivePlanExperimentParamsChangesItem
+
+- `subscriptionId` (`string`, required)
+- `keepOnVersion` (`mixed`, optional) — Leave this subscriber on its version.
+- `billingInterval` (`string`, optional)
+- `seatLimit` (`mixed`, optional) — Lower its seats to the version's limit at renewal.
+- `removeAddonIds` (`array`, optional) — Add-ons it stops paying at renewal.
 
 ### BalanceAdjustment
 
@@ -299,6 +308,7 @@ Generated from Commet API version `2026-08-27`.
 - `hasPaymentMethod` (`bool`, required) — Whether Commet can charge this subscription on its own at its next charge (the trial end or the renewal). A trial that started without a payment method reports false until the customer adds one for this subscription; a payment method saved for another subscription does not count. A subscription on a free plan reports false.
 - `createdAt` (`string`, required)
 - `updatedAt` (`string`, required)
+- `planVersion` (`CreatedSubscriptionPlanVersion | null`, required) — The plan version whose terms the subscription has now. It keeps paying and receiving everything from this version until it is moved.
 - `offerApplications` (`array`, required)
 - `pause` (`CreatedSubscriptionPause | null`, required)
 - `checkoutProvider` (`PaymentProvider | null`, required) — Payment provider resolved for this checkout when the subscription response was created. This is an informational snapshot and may differ when the checkout is loaded if its country or the organization's routing changes.
@@ -350,6 +360,11 @@ Discriminator: `status`
 
 - `id` (`string`, required)
 - `name` (`string`, required)
+
+### CreatedSubscriptionPlanVersion
+
+- `id` (`string`, required) — Public plan version ID.
+- `label` (`string`, required) — Main versions are 1, 2, 3; an experiment's versions carry its own code, like price-test 2.
 
 ### CreatedSubscriptionScheduledPlanChange
 
@@ -417,6 +432,52 @@ Discriminator: `type`
 - `currency` (`string`, required)
 - `amount` (`int`, required) — Amount in the currency's minor unit (for example, cents for USD).
 
+### CreatePlanExperimentParamsCurrenciesItem
+
+- `currency` (`string`, required)
+- `exchangeRate` (`float`, required)
+
+### CreatePlanExperimentParamsPricesItem
+
+- `billingInterval` (`string`, required) — An interval the plan already sells. Prices not listed are copied unchanged from the current version.
+- `price` (`int`, required) — USD price in the currency's minor unit (cents).
+- `includedCredits` (`int | null`, optional)
+- `includedBalance` (`int | null`, optional)
+- `regionalPrices` (`array`, optional) — Per-currency amounts. A currency the current version does not sell also needs its exchangeRate in currencies; its amounts not listed here are derived from the USD price.
+
+### CreatePlanExperimentParamsPricesItemRegionalPricesItem
+
+- `currency` (`string`, required)
+- `price` (`int`, required)
+- `includedBalance` (`int | null`, optional)
+
+### CreatePlanExperimentVersionParamsCurrenciesItem
+
+- `currency` (`string`, required)
+- `exchangeRate` (`float`, required)
+
+### CreatePlanExperimentVersionParamsPricesItem
+
+- `billingInterval` (`string`, required) — An interval the plan already sells. Prices not listed are copied unchanged from the current version.
+- `price` (`int`, required) — USD price in the currency's minor unit (cents).
+- `includedCredits` (`int | null`, optional)
+- `includedBalance` (`int | null`, optional)
+- `regionalPrices` (`array`, optional) — Per-currency amounts. A currency the current version does not sell also needs its exchangeRate in currencies; its amounts not listed here are derived from the USD price.
+
+### CreatePlanExperimentVersionParamsPricesItemRegionalPricesItem
+
+- `currency` (`string`, required)
+- `price` (`int`, required)
+- `includedBalance` (`int | null`, optional)
+
+### CreatePlanMoveParamsChangesItem
+
+- `subscriptionId` (`string`, required)
+- `keepOnVersion` (`mixed`, optional) — Leave this subscriber on its version.
+- `billingInterval` (`string`, optional)
+- `seatLimit` (`mixed`, optional) — Lower its seats to the version's limit at renewal.
+- `removeAddonIds` (`array`, optional) — Add-ons it stops paying at renewal.
+
 ### CreatePlanParamsPlanBalanceLimit
 
 - `amount` (`int`, required) — The most plan balance a subscription spends in one window, in USD cents. Other currencies convert it with the plan's exchange rate unless the dashboard sets a custom amount for that currency.
@@ -469,6 +530,25 @@ Discriminator: `type`
 - `type` (`string`, required)
 - `maxPlanCredits` (`int | null`, required) — The most plan credits a subscription holds after a reset, including the credits that reset grants; credits above it expire. At least the included credits of every price. null means no limit other than the largest storable balance, 2,147,483,647 plan credits.
 
+### CreatePlanVersionParamsCurrenciesItem
+
+- `currency` (`string`, required)
+- `exchangeRate` (`float`, required)
+
+### CreatePlanVersionParamsPricesItem
+
+- `billingInterval` (`string`, required) — An interval the plan already sells. Prices not listed are copied unchanged from the current version.
+- `price` (`int`, required) — USD price in the currency's minor unit (cents).
+- `includedCredits` (`int | null`, optional)
+- `includedBalance` (`int | null`, optional)
+- `regionalPrices` (`array`, optional) — Per-currency amounts. A currency the current version does not sell also needs its exchangeRate in currencies; its amounts not listed here are derived from the USD price.
+
+### CreatePlanVersionParamsPricesItemRegionalPricesItem
+
+- `currency` (`string`, required)
+- `price` (`int`, required)
+- `includedBalance` (`int | null`, optional)
+
 ### CreditGrant
 
 - `credits` (`int`, required)
@@ -482,6 +562,7 @@ Discriminator: `type`
 - `description` (`string | null`, required)
 - `credits` (`int`, required)
 - `price` (`int`, required)
+- `planIds` (`array`, required) — Plans that sell the credit pack.
 - `isActive` (`bool`, required)
 - `createdAt` (`string`, required)
 - `updatedAt` (`string`, required)
@@ -495,6 +576,7 @@ Discriminator: `type`
 - `description` (`string | null`, required)
 - `credits` (`int`, required)
 - `price` (`int`, required)
+- `planIds` (`array`, required) — Plans that sell the credit pack.
 - `currency` (`string`, required)
 - `object` (`string`, required)
 - `livemode` (`bool`, required)
@@ -961,6 +1043,13 @@ Discriminator: `model`
 - `hasMore` (`bool`, required)
 - `nextCursor` (`string`, optional)
 
+### KeptOnVersion
+
+- `subscriptionId` (`string`, required)
+- `keptOnVersion` (`mixed`, required)
+- `object` (`string`, required)
+- `livemode` (`bool`, required)
+
 ### ManagedBy
 
 Variants:
@@ -1168,6 +1257,7 @@ Discriminator: `type`
 - `features` (`array`, required)
 - `prices` (`array`, required)
 - `exchangeRates` (`array`, required)
+- `countries` (`array`, required) — Countries with their own currency or prices in the current version. Buyers from any other country pay the USD prices.
 - `object` (`string`, required)
 - `livemode` (`bool`, required)
 
@@ -1436,10 +1526,144 @@ Discriminator: `type`
 - `id` (`string`, required)
 - `name` (`string`, required)
 
+### PlanCountriesItem
+
+- `country` (`string`, required) — ISO country code.
+- `currency` (`string`, required) — The currency buyers from the country pay, USD included.
+- `prices` (`array`, required)
+- `addons` (`array`, required) — Every add-on the version sells, priced for the country.
+- `creditPacks` (`array`, required) — Every credit pack the version sells, priced for the country.
+
+### PlanCountriesItemAddonsItem
+
+- `addonId` (`string`, required)
+- `price` (`int`, required) — What buyers from the country pay for the add-on, in the currency's minor unit.
+- `manual` (`bool`, required) — True when set by hand; false when it follows the add-on's USD price at the exchange rate.
+
+### PlanCountriesItemCreditPacksItem
+
+- `creditPackId` (`string`, required)
+- `price` (`int`, required) — What buyers from the country pay for the pack, in the currency's minor unit.
+- `manual` (`bool`, required) — True when set by hand; false when it follows the pack's USD price at the exchange rate.
+
+### PlanCountriesItemPricesItem
+
+- `billingInterval` (`BillingInterval`, required)
+- `price` (`int`, required) — The country's price in the currency's minor unit.
+- `manual` (`bool`, required) — True when set by hand; false when it follows the USD base at the exchange rate.
+
+### PlanDraft
+
+- `id` (`string`, required) — Public plan draft ID.
+- `fromVersionId` (`string`, required) — The version the draft started from.
+- `changes` (`array`, required) — What the draft changes against the version it started from.
+- `createdAt` (`string`, required)
+- `updatedAt` (`string`, required)
+- `object` (`string`, required)
+- `livemode` (`bool`, required)
+
+### PlanDraftChangesItem
+
+- `key` (`string`, required) — Identifies the change; send it to undo just this change.
+- `section` (`string`, required) — Where the change is: Price, Trial, a rules section, Add-ons, or a country.
+- `country` (`string | null`, required) — ISO country code when the change belongs to one country.
+- `label` (`string`, required) — What changed, such as Monthly price.
+- `before` (`string | null`, required) — The value before, formatted.
+- `after` (`string | null`, required) — The value now, formatted.
+
+### PlanDraftPublication
+
+- `preview` (`bool`, required)
+- `version` (`PlanDraftPublicationVersion | null`, required) — The published version. Null for a preview.
+- `moveId` (`string | null`, required) — The move of subscribers, if any.
+- `subscribers` (`PlanDraftPublicationSubscribers | null`, required)
+- `object` (`string`, required)
+- `livemode` (`bool`, required)
+
+### PlanDraftPublicationSubscribers
+
+- `moving` (`int`, required)
+- `keptOnVersion` (`int`, required)
+- `needsAChange` (`int`, required) — Left on their version because no change makes them fit; they show among the subscribers that need a change.
+- `leftOut` (`array`, required)
+
+### PlanDraftPublicationSubscribersLeftOutItem
+
+- `subscriptionId` (`string`, required)
+- `code` (`string`, required)
+- `message` (`string`, required)
+
+### PlanDraftPublicationVersion
+
+- `id` (`string`, required) — Public plan version ID.
+- `label` (`string`, required) — The plan's versions are numbered 1, 2, 3; an experiment's own versions read with its code, such as price-test 2.
+- `number` (`int | null`, required) — The plan's version number. Null for a version that only belongs to an experiment; an experiment version made current takes the next number.
+- `experiment` (`PlanDraftPublicationVersionExperiment | null`, required) — The experiment this version belongs to, if any.
+- `isCurrent` (`bool`, required) — Whether new buyers get this version.
+- `parentVersionId` (`string | null`, required) — The version this one was created from.
+- `subscriptionCount` (`int`, required) — Active, trialing, past due and paused subscriptions on it.
+- `maxPlanCredits` (`int | null`, required)
+- `maxPlanBalance` (`int | null`, required)
+- `prices` (`array`, required)
+- `createdAt` (`string`, required)
+
+### PlanDraftPublicationVersionExperiment
+
+- `code` (`string`, required) — The experiment's code, as sold with planCode.
+- `version` (`int`, required) — Its number within the experiment.
+
+### PlanDraftPublicationVersionPricesItem
+
+- `id` (`string`, required) — Public plan price ID.
+- `billingInterval` (`string`, required)
+- `price` (`int`, required)
+- `includedCredits` (`int | null`, required)
+- `includedBalance` (`int | null`, required)
+- `regionalPrices` (`array`, required)
+
+### PlanDraftPublicationVersionPricesItemRegionalPricesItem
+
+- `currency` (`string`, required)
+- `price` (`int`, required)
+- `includedBalance` (`int | null`, required)
+
 ### PlanExchangeRatesItem
 
 - `currency` (`string`, required)
 - `exchangeRate` (`float`, required)
+
+### PlanExperiment
+
+- `id` (`string`, required) — Public plan experiment ID.
+- `code` (`string`, required) — The code to sell it with as planCode, such as pro:price-test. It always sells the experiment's latest version while running, and the plan's current version once closed.
+- `status` (`string`, required) — running sells its latest version; won became the plan's current version; archived stopped selling.
+- `startedFromVersionId` (`string`, required) — The plan's version that was current when it started.
+- `latestVersionId` (`string`, required) — Its latest version.
+- `sellsVersionId` (`string`, required) — The version its code sells to new buyers today.
+- `subscriptionCount` (`int`, required) — Active, trialing, past due and paused subscriptions on its versions.
+- `createdAt` (`string`, required)
+- `closedAt` (`string | null`, required)
+- `object` (`string`, required)
+- `livemode` (`bool`, required)
+
+### PlanExperimentArchive
+
+- `experiment` (`PlanExperimentArchiveExperiment`, required)
+- `moveId` (`string | null`, required) — The move of its subscribers, or null when they stay.
+- `object` (`string`, required)
+- `livemode` (`bool`, required)
+
+### PlanExperimentArchiveExperiment
+
+- `id` (`string`, required) — Public plan experiment ID.
+- `code` (`string`, required) — The code to sell it with as planCode, such as pro:price-test. It always sells the experiment's latest version while running, and the plan's current version once closed.
+- `status` (`string`, required) — running sells its latest version; won became the plan's current version; archived stopped selling.
+- `startedFromVersionId` (`string`, required) — The plan's version that was current when it started.
+- `latestVersionId` (`string`, required) — Its latest version.
+- `sellsVersionId` (`string`, required) — The version its code sells to new buyers today.
+- `subscriptionCount` (`int`, required) — Active, trialing, past due and paused subscriptions on its versions.
+- `createdAt` (`string`, required)
+- `closedAt` (`string | null`, required)
 
 ### PlanFeature
 
@@ -1555,6 +1779,38 @@ Discriminator: `type`
 - `hasMore` (`bool`, required)
 - `nextCursor` (`string`, optional)
 
+### PlanMove
+
+- `id` (`string | null`, required) — Public move ID. Null for a preview, which records nothing.
+- `toVersionId` (`string`, required)
+- `fromVersionIds` (`array`, required) — The versions its subscribers are moving from.
+- `effective` (`string`, required)
+- `preview` (`bool`, required)
+- `status` (`string`, required) — checked is a preview where everyone fits; moving while subscribers wait for their move; completed once every move ran; canceled after it was canceled.
+- `counts` (`PlanMoveCounts`, required)
+- `subscriptions` (`array`, required)
+- `createdAt` (`string | null`, required)
+- `completedAt` (`string | null`, required)
+- `canceledAt` (`string | null`, required)
+- `object` (`string`, required)
+- `livemode` (`bool`, required)
+
+### PlanMoveCounts
+
+- `moving` (`int`, required)
+- `moved` (`int`, required)
+- `needsAChange` (`int`, required)
+- `leftOut` (`int`, required)
+- `canceled` (`int`, required)
+- `keptOnVersion` (`int`, required)
+
+### PlanMoveSubscriptionsItem
+
+- `subscriptionId` (`string`, required)
+- `status` (`string`, required) — moving waits for its renewal or is being moved; moved is on the destination; needs_a_change could not move and keeps its version until it is resolved or kept; left_out was not moved because it was not active, trialing or past due, such as a paused subscription (invalid_subscription_status), or because a listed subscription was already on the destination (no_change_requested); canceled was canceled before it moved; kept_on_version was left on its version by the merchant.
+- `code` (`string | null`, required)
+- `message` (`string | null`, required)
+
 ### PlanPlanBalanceLimit
 
 - `amount` (`int`, required) — The most plan balance a subscription spends in one window, in USD cents. Other currencies convert it with the plan's exchange rate unless the dashboard sets a custom amount for that currency.
@@ -1643,7 +1899,42 @@ Discriminator: `type`
 - `object` (`string`, required)
 - `livemode` (`bool`, required)
 
+### PlansListDraftsResult
+
+- `object` (`string`, required)
+- `data` (`array`, required)
+- `hasMore` (`bool`, required)
+- `nextCursor` (`string`, optional)
+
+### PlansListExperimentsResult
+
+- `object` (`string`, required)
+- `data` (`array`, required)
+- `hasMore` (`bool`, required)
+- `nextCursor` (`string`, optional)
+
+### PlansListMovesResult
+
+- `object` (`string`, required)
+- `data` (`array`, required)
+- `hasMore` (`bool`, required)
+- `nextCursor` (`string`, optional)
+
 ### PlansListResult
+
+- `object` (`string`, required)
+- `data` (`array`, required)
+- `hasMore` (`bool`, required)
+- `nextCursor` (`string`, optional)
+
+### PlansListSubscribersNeedingAChangeResult
+
+- `object` (`string`, required)
+- `data` (`array`, required)
+- `hasMore` (`bool`, required)
+- `nextCursor` (`string`, optional)
+
+### PlansListVersionsResult
 
 - `object` (`string`, required)
 - `data` (`array`, required)
@@ -1692,6 +1983,59 @@ Discriminator: `type`
 - `type` (`string`, required)
 - `maxPlanCredits` (`int | null`, required) — The most plan credits a subscription holds after a reset, including the credits that reset grants; credits above it expire. At least the included credits of every price. null means no limit other than the largest storable balance, 2,147,483,647 plan credits.
 
+### PlanVersion
+
+- `id` (`string`, required) — Public plan version ID.
+- `label` (`string`, required) — The plan's versions are numbered 1, 2, 3; an experiment's own versions read with its code, such as price-test 2.
+- `number` (`int | null`, required) — The plan's version number. Null for a version that only belongs to an experiment; an experiment version made current takes the next number.
+- `experiment` (`PlanVersionExperiment | null`, required) — The experiment this version belongs to, if any.
+- `isCurrent` (`bool`, required) — Whether new buyers get this version.
+- `parentVersionId` (`string | null`, required) — The version this one was created from.
+- `subscriptionCount` (`int`, required) — Active, trialing, past due and paused subscriptions on it.
+- `maxPlanCredits` (`int | null`, required)
+- `maxPlanBalance` (`int | null`, required)
+- `prices` (`array`, required)
+- `createdAt` (`string`, required)
+- `object` (`string`, required)
+- `livemode` (`bool`, required)
+
+### PlanVersionComparison
+
+- `versionId` (`string`, required) — The version the changes start from.
+- `againstVersionId` (`string`, required) — The version they end at.
+- `changes` (`array`, required) — Every term that differs, the plan's first and then each country.
+- `object` (`string`, required)
+- `livemode` (`bool`, required)
+
+### PlanVersionComparisonChangesItem
+
+- `key` (`string`, required) — Identifies the change; send it to undo just this change.
+- `section` (`string`, required) — Where the change is: Price, Trial, a rules section, Add-ons, or a country.
+- `country` (`string | null`, required) — ISO country code when the change belongs to one country.
+- `label` (`string`, required) — What changed, such as Monthly price.
+- `before` (`string | null`, required) — The value before, formatted.
+- `after` (`string | null`, required) — The value now, formatted.
+
+### PlanVersionExperiment
+
+- `code` (`string`, required) — The experiment's code, as sold with planCode.
+- `version` (`int`, required) — Its number within the experiment.
+
+### PlanVersionPricesItem
+
+- `id` (`string`, required) — Public plan price ID.
+- `billingInterval` (`string`, required)
+- `price` (`int`, required)
+- `includedCredits` (`int | null`, required)
+- `includedBalance` (`int | null`, required)
+- `regionalPrices` (`array`, required)
+
+### PlanVersionPricesItemRegionalPricesItem
+
+- `currency` (`string`, required)
+- `price` (`int`, required)
+- `includedBalance` (`int | null`, required)
+
 ### PortalAccess
 
 - `portalUrl` (`string`, required)
@@ -1714,9 +2058,15 @@ Discriminator: `type`
 - `daysRemaining` (`int`, required)
 - `totalDays` (`int`, required)
 - `isUpgrade` (`bool`, required)
+- `deactivatedAddons` (`array`, required) — Active add-ons that the version the change moves the subscription to does not sell. The change deactivates them when it applies.
 - `offerApplication` (`PreviewChangeOfferApplication`, optional)
 - `object` (`string`, required)
 - `livemode` (`bool`, required)
+
+### PreviewChangeDeactivatedAddonsItem
+
+- `addonId` (`string`, required)
+- `name` (`string`, required)
 
 ### PreviewChangeOfferApplication
 
@@ -1832,6 +2182,14 @@ Discriminator: `type`
 - `data` (`array`, required)
 - `hasMore` (`bool`, required)
 - `nextCursor` (`string`, optional)
+
+### PublishPlanDraftParamsChangesItem
+
+- `subscriptionId` (`string`, required)
+- `keepOnVersion` (`mixed`, optional) — Leave this subscriber on its version.
+- `billingInterval` (`string`, optional)
+- `seatLimit` (`mixed`, optional) — Lower its seats to the version's limit at renewal.
+- `removeAddonIds` (`array`, optional) — Add-ons it stops paying at renewal.
 
 ### QuotaGetAllResult
 
@@ -2034,6 +2392,17 @@ Discriminator: `type`
 - `price` (`int`, required)
 - `includedBalance` (`int`, optional)
 
+### SubscriberNeedingAChange
+
+- `subscriptionId` (`string`, required)
+- `moveId` (`string | null`, required) — The move it could not complete, or null for a single change.
+- `fromVersionId` (`string`, required) — The version it stays on.
+- `toVersionId` (`string`, required) — The version it could not move to.
+- `code` (`string`, required) — Why it could not move.
+- `message` (`string`, required)
+- `object` (`string`, required)
+- `livemode` (`bool`, required)
+
 ### Subscription
 
 - `id` (`string`, required)
@@ -2056,8 +2425,10 @@ Discriminator: `type`
 - `hasPaymentMethod` (`bool`, required) — Whether Commet can charge this subscription on its own at its next charge (the trial end or the renewal). A trial that started without a payment method reports false until the customer adds one for this subscription; a payment method saved for another subscription does not count. A subscription on a free plan reports false.
 - `createdAt` (`string`, required)
 - `updatedAt` (`string`, required)
+- `planVersion` (`SubscriptionPlanVersion | null`, required) — The plan version whose terms the subscription has now. It keeps paying and receiving everything from this version until it is moved.
 - `offerApplications` (`array`, required)
 - `pause` (`SubscriptionPause | null`, required)
+- `scheduledVersionChange` (`SubscriptionScheduledVersionChange | null`, required) — A move to another version of the plan pending for the next renewal.
 - `planGrant` (`SubscriptionPlanGrant`, optional)
 - `consumptionModel` (`ConsumptionModel | null`, required)
 - `features` (`array`, required)
@@ -2356,6 +2727,11 @@ Discriminator: `status`
 - `id` (`string`, required)
 - `name` (`string`, required)
 
+### SubscriptionPlanVersion
+
+- `id` (`string`, required) — Public plan version ID.
+- `label` (`string`, required) — Main versions are 1, 2, 3; an experiment's versions carry its own code, like price-test 2.
+
 ### SubscriptionResume
 
 - `subscriptionId` (`string`, required)
@@ -2371,6 +2747,12 @@ Discriminator: `status`
 - `newPlanName` (`string | null`, required)
 - `newBillingInterval` (`string | null`, required)
 - `scheduledFor` (`string`, required)
+
+### SubscriptionScheduledVersionChange
+
+- `planVersionId` (`string`, required)
+- `label` (`string`, required)
+- `effectiveAt` (`string`, required)
 
 ### SubscriptionsListResult
 
@@ -2401,6 +2783,7 @@ Discriminator: `status`
 - `hasPaymentMethod` (`bool`, required) — Whether Commet can charge this subscription on its own at its next charge (the trial end or the renewal). A trial that started without a payment method reports false until the customer adds one for this subscription; a payment method saved for another subscription does not count. A subscription on a free plan reports false.
 - `createdAt` (`string`, required)
 - `updatedAt` (`string`, required)
+- `planVersion` (`SubscriptionSummaryPlanVersion | null`, required) — The plan version whose terms the subscription has now. It keeps paying and receiving everything from this version until it is moved.
 - `offerApplications` (`array`, required)
 - `pause` (`SubscriptionSummaryPause | null`, required)
 - `priceId` (`string | null`, required)
@@ -2451,6 +2834,11 @@ Discriminator: `status`
 
 - `id` (`string`, required)
 - `name` (`string`, required)
+
+### SubscriptionSummaryPlanVersion
+
+- `id` (`string`, required) — Public plan version ID.
+- `label` (`string`, required) — Main versions are 1, 2, 3; an experiment's versions carry its own code, like price-test 2.
 
 ### SubscriptionSummaryScheduledPlanChange
 
@@ -2696,6 +3084,98 @@ Discriminator: `type`
 
 - `currency` (`string`, required)
 - `amount` (`int`, required) — Amount in the currency's minor unit (for example, cents for USD).
+
+### UpdatePlanDraftParamsCountriesItem
+
+- `country` (`string`, required) — ISO country code.
+- `currency` (`string`, required) — The currency the country pays in, USD included.
+- `exchangeRate` (`float | null`, optional) — Local units per USD for prices that follow the USD base. USD defaults to 1.
+- `prices` (`array`, required)
+- `topUpMinimum` (`int | null`, optional) — Smallest balance top-up in this country, in the currency's minor unit. Null follows the USD minimum at the exchange rate; left out keeps it.
+- `maxPlanBalance` (`int | null`, optional) — Most unused plan balance that rolls over in this country. Null follows the USD cap at the exchange rate; left out keeps it.
+- `planBalanceLimit` (`int | null`, optional) — Most plan balance spent per limit interval in this country. Null follows the USD limit at the exchange rate; left out keeps it.
+- `addonPrices` (`array`, optional) — What the country pays for each add-on the draft sells. Left out keeps the country's add-on prices; sent, it replaces them, and add-ons not listed follow the USD price.
+- `creditPackPrices` (`array`, optional) — What the country pays for each credit pack the draft sells. Left out keeps the country's pack prices; sent, it replaces them, and packs not listed follow the USD price.
+
+### UpdatePlanDraftParamsCountriesItemAddonPricesItem
+
+Variants:
+
+- `UpdatePlanDraftParamsCountriesItemAddonPricesItemVariant1`
+- `UpdatePlanDraftParamsCountriesItemAddonPricesItemVariant2`
+
+### UpdatePlanDraftParamsCountriesItemAddonPricesItemVariant1
+
+- `addonId` (`string`, required)
+- `price` (`int`, required) — The add-on's price set by hand, in the currency's minor unit.
+
+### UpdatePlanDraftParamsCountriesItemAddonPricesItemVariant2
+
+- `addonId` (`string`, required)
+- `followBase` (`mixed`, required) — Follow the add-on's USD price at the exchange rate.
+
+### UpdatePlanDraftParamsCountriesItemCreditPackPricesItem
+
+Variants:
+
+- `UpdatePlanDraftParamsCountriesItemCreditPackPricesItemVariant1`
+- `UpdatePlanDraftParamsCountriesItemCreditPackPricesItemVariant2`
+
+### UpdatePlanDraftParamsCountriesItemCreditPackPricesItemVariant1
+
+- `creditPackId` (`string`, required)
+- `price` (`int`, required) — The pack's price set by hand, in the currency's minor unit.
+
+### UpdatePlanDraftParamsCountriesItemCreditPackPricesItemVariant2
+
+- `creditPackId` (`string`, required)
+- `followBase` (`mixed`, required) — Follow the pack's USD price at the exchange rate.
+
+### UpdatePlanDraftParamsCountriesItemPricesItem
+
+Variants:
+
+- `UpdatePlanDraftParamsCountriesItemPricesItemVariant1`
+- `UpdatePlanDraftParamsCountriesItemPricesItemVariant2`
+
+### UpdatePlanDraftParamsCountriesItemPricesItemVariant1
+
+- `billingInterval` (`string`, required)
+- `price` (`int`, required) — The price set by hand, in the currency's minor unit.
+- `includedBalance` (`int`, optional) — The balance included each period in this country, in the currency's minor unit. Required when the plan's price includes a balance.
+
+### UpdatePlanDraftParamsCountriesItemPricesItemVariant2
+
+- `billingInterval` (`string`, required)
+- `followBase` (`mixed`, required) — Follow the USD base at the exchange rate.
+
+### UpdatePlanDraftParamsPricesItem
+
+- `billingInterval` (`string`, required)
+- `price` (`int`, required) — USD price in cents.
+- `includedCredits` (`int | null`, optional)
+- `includedBalance` (`int | null`, optional)
+- `trialDays` (`int | null`, optional) — Days of trial on this price. Null removes the trial.
+- `trialRequiresPaymentMethod` (`bool`, optional)
+- `isDefault` (`bool`, optional) — Show this interval first at checkout and in pricing tables.
+
+### UpdatePlanDraftParamsRules
+
+- `freeIncludedCredits` (`int | null`, optional) — Credits a free plan includes each month.
+- `freeIncludedBalance` (`int | null`, optional) — Balance a free plan includes each month, in cents.
+- `unusedPlanCredits` (`string`, optional)
+- `maxPlanCredits` (`int | null`, optional)
+- `planCreditLimit` (`int | null`, optional)
+- `planCreditLimitInterval` (`string | null`, optional)
+- `unusedPlanBalance` (`string`, optional)
+- `maxPlanBalance` (`int | null`, optional)
+- `planBalanceLimit` (`int | null`, optional)
+- `planBalanceLimitInterval` (`string | null`, optional)
+- `blockOnExhaustion` (`bool`, optional)
+- `purchasesEnabled` (`bool`, optional)
+- `creditPurchaseUnitPrice` (`int | null`, optional)
+- `creditPurchaseMinimum` (`int | null`, optional)
+- `topUpMinimum` (`int | null`, optional)
 
 ### UpdatePlanFeatureParamsOverage
 

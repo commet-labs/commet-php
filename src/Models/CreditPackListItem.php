@@ -11,6 +11,8 @@ class CreditPackListItem implements \JsonSerializable
         public readonly string $name,
         public readonly int $credits,
         public readonly int $price,
+        /** @var string[] */
+        public readonly array $planIds,
         public readonly string $currency,
         public readonly string $object,
         public readonly bool $livemode,
@@ -25,6 +27,7 @@ class CreditPackListItem implements \JsonSerializable
         $values["description"] = $this->description;
         $values["credits"] = $this->credits;
         $values["price"] = $this->price;
+        $values["planIds"] = $this->planIds;
         $values["currency"] = $this->currency;
         $values["object"] = $this->object;
         $values["livemode"] = $this->livemode;
@@ -41,6 +44,7 @@ class CreditPackListItem implements \JsonSerializable
             name: $data["name"],
             credits: $data["credits"],
             price: $data["price"],
+            planIds: $data["plan_ids"],
             currency: $data["currency"],
             object: $data["object"],
             livemode: $data["livemode"],

@@ -56,7 +56,8 @@ class AddonsResource
     }
 
     /**
-     * Update an add-on's name, description, or pricing.
+     * Update an add-on's name, description, pricing, or the plans that sell it.
+     * @param string[]|null $planIds
      * @return Addon
      */
     public function update(
@@ -66,6 +67,7 @@ class AddonsResource
         ?int $basePrice = null,
         ?int $includedUnits = null,
         ?int $overageRate = null,
+        ?array $planIds = null,
         ?string $idempotencyKey = null,
     ): Addon {
         $response = $this->http->patch(
@@ -76,6 +78,7 @@ class AddonsResource
                 "base_price" => $basePrice,
                 "included_units" => $includedUnits,
                 "overage_rate" => $overageRate,
+                "plan_ids" => $planIds,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -130,6 +133,7 @@ class AddonsResource
 
     /**
      * Create a new add-on linked to a feature. Each feature can only be assigned to one add-on.
+     * @param string[]|null $planIds
      * @return Addon
      */
     public function create(
@@ -138,6 +142,7 @@ class AddonsResource
         string $featureId,
         string $consumptionModel,
         ?string $description = null,
+        ?array $planIds = null,
         ?int $includedUnits = null,
         ?int $overageRate = null,
         ?int $creditCost = null,
@@ -150,6 +155,7 @@ class AddonsResource
                 "description" => $description,
                 "base_price" => $basePrice,
                 "feature_id" => $featureId,
+                "plan_ids" => $planIds,
                 "consumption_model" => $consumptionModel,
                 "included_units" => $includedUnits,
                 "overage_rate" => $overageRate,

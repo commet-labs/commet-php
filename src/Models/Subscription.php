@@ -37,7 +37,9 @@ class Subscription implements \JsonSerializable
         public readonly ?int $billingDayOfMonth = null,
         public readonly ?string $nextBillingDate = null,
         public readonly ?string $checkoutUrl = null,
+        public readonly ?SubscriptionPlanVersion $planVersion = null,
         public readonly ?SubscriptionPause $pause = null,
+        public readonly ?SubscriptionScheduledVersionChange $scheduledVersionChange = null,
         public readonly ?SubscriptionPlanGrant $planGrant = null,
         public readonly ConsumptionModel|string|null $consumptionModel = null,
         public readonly ?SubscriptionCredits $credits = null,
@@ -68,8 +70,10 @@ class Subscription implements \JsonSerializable
         $values["hasPaymentMethod"] = $this->hasPaymentMethod;
         $values["createdAt"] = $this->createdAt;
         $values["updatedAt"] = $this->updatedAt;
+        $values["planVersion"] = $this->planVersion;
         $values["offerApplications"] = $this->offerApplications;
         $values["pause"] = $this->pause;
+        $values["scheduledVersionChange"] = $this->scheduledVersionChange;
         if ($this->planGrant !== null) {
             $values["planGrant"] = $this->planGrant;
         }
@@ -113,7 +117,9 @@ class Subscription implements \JsonSerializable
             billingDayOfMonth: $data["billing_day_of_month"] ?? null,
             nextBillingDate: $data["next_billing_date"] ?? null,
             checkoutUrl: $data["checkout_url"] ?? null,
+            planVersion: isset($data["plan_version"]) ? SubscriptionPlanVersion::fromArray($data["plan_version"]) : null,
             pause: isset($data["pause"]) ? SubscriptionPause::fromArray($data["pause"]) : null,
+            scheduledVersionChange: isset($data["scheduled_version_change"]) ? SubscriptionScheduledVersionChange::fromArray($data["scheduled_version_change"]) : null,
             planGrant: isset($data["plan_grant"]) ? SubscriptionPlanGrant::fromArray($data["plan_grant"]) : null,
             consumptionModel: isset($data["consumption_model"]) ? ConsumptionModel::tryFrom($data["consumption_model"]) ?? $data["consumption_model"] : null,
             credits: isset($data["credits"]) ? SubscriptionCredits::fromArray($data["credits"]) : null,
