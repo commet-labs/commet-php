@@ -22,6 +22,8 @@ final class WebhookEventType
     public const SUBSCRIPTION_CANCELLATION_REVOKED = "subscription.cancellation_revoked";
     public const SUBSCRIPTION_PLAN_CHANGE_SCHEDULED = "subscription.plan_change_scheduled";
     public const SUBSCRIPTION_PLAN_CHANGE_REVOKED = "subscription.plan_change_revoked";
+    public const SUBSCRIPTION_VERSION_CHANGED = "subscription.version_changed";
+    public const SUBSCRIPTION_VERSION_CHANGE_CANCELED = "subscription.version_change_canceled";
     public const SUBSCRIPTION_PAST_DUE = "subscription.past_due";
     public const TRIAL_STARTED = "trial.started";
     public const TRIAL_CONVERTED = "trial.converted";

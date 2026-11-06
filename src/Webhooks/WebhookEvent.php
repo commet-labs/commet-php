@@ -113,6 +113,16 @@ final class WebhookEvent
         return SubscriptionPlanChangeRevokedData::fromArray($this->data);
     }
 
+    public function asSubscriptionVersionChanged(): SubscriptionVersionChangedData
+    {
+        return SubscriptionVersionChangedData::fromArray($this->data);
+    }
+
+    public function asSubscriptionVersionChangeCanceled(): SubscriptionVersionChangeCanceledData
+    {
+        return SubscriptionVersionChangeCanceledData::fromArray($this->data);
+    }
+
     public function asSubscriptionPastDue(): SubscriptionPastDueData
     {
         return SubscriptionPastDueData::fromArray($this->data);

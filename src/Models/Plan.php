@@ -24,6 +24,8 @@ class Plan implements \JsonSerializable
         public readonly array $prices,
         /** @var PlanExchangeRatesItem[] */
         public readonly array $exchangeRates,
+        /** @var PlanCountriesItem[] */
+        public readonly array $countries,
         public readonly string $object,
         public readonly bool $livemode,
         public readonly ?string $description = null,
@@ -62,6 +64,7 @@ class Plan implements \JsonSerializable
         $values["features"] = $this->features;
         $values["prices"] = $this->prices;
         $values["exchangeRates"] = $this->exchangeRates;
+        $values["countries"] = $this->countries;
         $values["object"] = $this->object;
         $values["livemode"] = $this->livemode;
         return (object) $values;
@@ -85,6 +88,7 @@ class Plan implements \JsonSerializable
             features: array_map(fn(array $item) => PlanFeaturesItem::fromArray($item), $data["features"]),
             prices: array_map(fn(array $item) => PlanPricesItem::fromArray($item), $data["prices"]),
             exchangeRates: array_map(fn(array $item) => PlanExchangeRatesItem::fromArray($item), $data["exchange_rates"]),
+            countries: array_map(fn(array $item) => PlanCountriesItem::fromArray($item), $data["countries"]),
             object: $data["object"],
             livemode: $data["livemode"],
             description: $data["description"] ?? null,

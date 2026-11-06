@@ -51,6 +51,7 @@ class AddonsTest extends TestCase
                 'name' => 'Extra Seats',
                 'slug' => 'extra-seats',
                 'base_price' => 5000,
+                'plan_ids' => [],
                 'consumption_model' => 'metered',
                 'feature_code' => 'seats',
                 'feature_name' => 'Seats',

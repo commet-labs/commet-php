@@ -34,6 +34,7 @@ class SubscriptionSummary implements \JsonSerializable
         public readonly ?int $billingDayOfMonth = null,
         public readonly ?string $nextBillingDate = null,
         public readonly ?string $checkoutUrl = null,
+        public readonly ?SubscriptionSummaryPlanVersion $planVersion = null,
         public readonly ?SubscriptionSummaryPause $pause = null,
         public readonly ?string $priceId = null,
     ) {}
@@ -61,6 +62,7 @@ class SubscriptionSummary implements \JsonSerializable
         $values["hasPaymentMethod"] = $this->hasPaymentMethod;
         $values["createdAt"] = $this->createdAt;
         $values["updatedAt"] = $this->updatedAt;
+        $values["planVersion"] = $this->planVersion;
         $values["offerApplications"] = $this->offerApplications;
         $values["pause"] = $this->pause;
         $values["priceId"] = $this->priceId;
@@ -98,6 +100,7 @@ class SubscriptionSummary implements \JsonSerializable
             billingDayOfMonth: $data["billing_day_of_month"] ?? null,
             nextBillingDate: $data["next_billing_date"] ?? null,
             checkoutUrl: $data["checkout_url"] ?? null,
+            planVersion: isset($data["plan_version"]) ? SubscriptionSummaryPlanVersion::fromArray($data["plan_version"]) : null,
             pause: isset($data["pause"]) ? SubscriptionSummaryPause::fromArray($data["pause"]) : null,
             priceId: $data["price_id"] ?? null,
         );

@@ -16,7 +16,8 @@ class CreditPacksResource
     ) {}
 
     /**
-     * Update a credit pack's name, description, credits, price, or active status.
+     * Update a credit pack's name, description, credits, price, active status, or the plans that sell it.
+     * @param string[]|null $planIds
      * @return CreditPack
      */
     public function update(
@@ -26,6 +27,7 @@ class CreditPacksResource
         ?int $credits = null,
         ?int $price = null,
         ?bool $isActive = null,
+        ?array $planIds = null,
         ?string $idempotencyKey = null,
     ): CreditPack {
         $response = $this->http->patch(
@@ -36,6 +38,7 @@ class CreditPacksResource
                 "credits" => $credits,
                 "price" => $price,
                 "is_active" => $isActive,
+                "plan_ids" => $planIds,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -85,6 +88,7 @@ class CreditPacksResource
 
     /**
      * Create a new credit pack.
+     * @param string[]|null $planIds
      * @return CreditPack
      */
     public function create(
@@ -93,6 +97,7 @@ class CreditPacksResource
         int $price,
         ?string $description = null,
         ?bool $isActive = null,
+        ?array $planIds = null,
         ?string $idempotencyKey = null,
     ): CreditPack {
         $response = $this->http->post(
@@ -103,6 +108,7 @@ class CreditPacksResource
                 "credits" => $credits,
                 "price" => $price,
                 "is_active" => $isActive,
+                "plan_ids" => $planIds,
             ]),
             idempotencyKey: $idempotencyKey,
         );

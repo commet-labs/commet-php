@@ -15,6 +15,8 @@ class PreviewChange implements \JsonSerializable
         public readonly int $daysRemaining,
         public readonly int $totalDays,
         public readonly bool $isUpgrade,
+        /** @var PreviewChangeDeactivatedAddonsItem[] */
+        public readonly array $deactivatedAddons,
         public readonly string $object,
         public readonly bool $livemode,
         public readonly ?PreviewChangeOfferApplication $offerApplication = null,
@@ -31,6 +33,7 @@ class PreviewChange implements \JsonSerializable
         $values["daysRemaining"] = $this->daysRemaining;
         $values["totalDays"] = $this->totalDays;
         $values["isUpgrade"] = $this->isUpgrade;
+        $values["deactivatedAddons"] = $this->deactivatedAddons;
         if ($this->offerApplication !== null) {
             $values["offerApplication"] = $this->offerApplication;
         }
@@ -53,6 +56,7 @@ class PreviewChange implements \JsonSerializable
             daysRemaining: $data["days_remaining"],
             totalDays: $data["total_days"],
             isUpgrade: $data["is_upgrade"],
+            deactivatedAddons: array_map(fn(array $item) => PreviewChangeDeactivatedAddonsItem::fromArray($item), $data["deactivated_addons"]),
             object: $data["object"],
             livemode: $data["livemode"],
             offerApplication: isset($data["offer_application"]) ? PreviewChangeOfferApplication::fromArray($data["offer_application"]) : null,
