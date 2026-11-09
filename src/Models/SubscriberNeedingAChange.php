@@ -8,13 +8,13 @@ class SubscriberNeedingAChange implements \JsonSerializable
 {
     public function __construct(
         public readonly string $subscriptionId,
+        public readonly string $moveId,
         public readonly string $fromVersionId,
         public readonly string $toVersionId,
         public readonly string $code,
         public readonly string $message,
         public readonly string $object,
         public readonly bool $livemode,
-        public readonly ?string $moveId = null,
     ) {}
 
     public function jsonSerialize(): object
@@ -38,13 +38,13 @@ class SubscriberNeedingAChange implements \JsonSerializable
     {
         return new self(
             subscriptionId: $data["subscription_id"],
+            moveId: $data["move_id"],
             fromVersionId: $data["from_version_id"],
             toVersionId: $data["to_version_id"],
             code: $data["code"],
             message: $data["message"],
             object: $data["object"],
             livemode: $data["livemode"],
-            moveId: $data["move_id"] ?? null,
         );
     }
 }
