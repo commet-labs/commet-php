@@ -226,7 +226,7 @@ class HttpClient
             $headers['Idempotency-Key'] = $idempotencyKey;
         }
 
-        $jsonBody = $body !== null ? self::convertKeys($body, [self::class, 'toCamelCase']) : null;
+        $jsonBody = $body !== null && $body !== [] ? self::convertKeys($body, [self::class, 'toCamelCase']) : null;
 
         return $this->execute($method, $endpoint, $jsonBody, $params, $headers, $timeout);
     }
