@@ -70,6 +70,7 @@ class TransactionsTest extends TestCase
                 'gross_amount' => 10000,
                 'subtotal' => 9000,
                 'tax_amount' => 1000,
+                'amount_refunded' => 0,
                 'currency' => 'USD',
                 'status' => 'pending',
                 'provider' => 'stripe',

@@ -13,6 +13,7 @@ class Transaction implements \JsonSerializable
 {
     public function __construct(
         public readonly string $id,
+        public readonly int $amountRefunded,
         public readonly string $currency,
         public readonly PaymentProvider|string $provider,
         public readonly TransactionStatus|string $status,
@@ -44,6 +45,7 @@ class Transaction implements \JsonSerializable
         $values["subtotal"] = $this->subtotal;
         $values["taxAmount"] = $this->taxAmount;
         $values["presentmentAmount"] = $this->presentmentAmount;
+        $values["amountRefunded"] = $this->amountRefunded;
         $values["currency"] = $this->currency;
         $values["provider"] = $this->provider;
         $values["paymentMethod"] = $this->paymentMethod;
@@ -67,6 +69,7 @@ class Transaction implements \JsonSerializable
     {
         return new self(
             id: $data["id"],
+            amountRefunded: $data["amount_refunded"],
             currency: $data["currency"],
             provider: PaymentProvider::tryFrom($data["provider"]) ?? $data["provider"],
             status: TransactionStatus::tryFrom($data["status"]) ?? $data["status"],

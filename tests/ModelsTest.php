@@ -291,6 +291,7 @@ class ModelsTest extends TestCase
             'gross_amount' => 10000,
             'subtotal' => 9000,
             'tax_amount' => 1000,
+            'amount_refunded' => 2500,
             'currency' => 'USD',
             'status' => 'succeeded',
             'provider' => 'stripe',
@@ -304,6 +305,7 @@ class ModelsTest extends TestCase
         $this->assertSame('txn_123', $transaction->id);
         $this->assertSame(TransactionStatus::Succeeded, $transaction->status);
         $this->assertSame(10000, $transaction->grossAmount);
+        $this->assertSame(2500, $transaction->amountRefunded);
         $this->assertSame('inv_1', $transaction->invoiceId);
     }
 
