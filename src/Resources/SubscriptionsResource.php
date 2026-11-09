@@ -49,7 +49,7 @@ class SubscriptionsResource
     }
 
     /**
-     * Activate an add-on on a subscription. Charges a prorated amount for the current billing period.
+     * Activate an add-on on a subscription. Charges a prorated amount for the current billing period. An add-on that the subscription's plan version does not sell is rejected with addon_unavailable.
      * @return SubscriptionAddon
      */
     public function activateAddon(
@@ -233,7 +233,33 @@ class SubscriptionsResource
     }
 
     /**
-     * Purchase a fixed credit pack or choose a whole credit quantity at the subscription plan price and minimum. Charges the saved payment method and adds purchased credits.
+     * Move a subscription to a newer published version of its plan, now or at the end of the period, without proration; an older version is rejected with version_not_newer, and a subscription on a running experiment moves only to a later version of that experiment. The subscription keeps its currency and its price: a destination that does not sell its currency is rejected with missing_regional_price, and one that does not sell the price it pays with price_not_found. A free version moves only to a free version and a paid one only to a paid one (validation_error). A subscription whose usage does not fit the destination, or with an active add-on the destination does not sell, is not moved either, and the error says why. Each change is recorded as a move of this one subscription in the plan's moves. Repeating the same request changes nothing; a new one replaces the pending move.
+     * @return Subscription
+     */
+    public function changeVersion(
+        string $id,
+        string $planVersionId,
+        string $effective,
+        ?string $idempotencyKey = null,
+    ): Subscription {
+        $response = $this->http->post(
+            "/subscriptions/{$id}/change-version",
+            HttpClient::buildBody([
+                "plan_version_id" => $planVersionId,
+                "effective" => $effective,
+            ]),
+            idempotencyKey: $idempotencyKey,
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Subscription response payload");
+        }
+
+        return Subscription::fromArray($response->data);
+    }
+
+    /**
+     * Purchase a fixed credit pack or choose a whole credit quantity at the subscription plan price and minimum. Charges the saved payment method and adds purchased credits. A credit pack that the subscription's plan version does not sell is rejected with credit_pack_unavailable.
      * @return CreditGrant
      */
     public function purchaseCredits(
@@ -556,6 +582,24 @@ class SubscriptionsResource
     }
 
     /**
+     * Cancel the move to another plan version pending for the next renewal, so the subscription stays on its version, and send subscription.version_change_canceled with reason canceled_by_merchant. A move made now has nothing pending to revoke. With nothing pending it changes nothing. Returns the subscription.
+     * @return Subscription
+     */
+    public function revokeScheduledVersionChange(
+        string $id,
+    ): Subscription {
+        $response = $this->http->delete(
+            "/subscriptions/{$id}/scheduled-version-change",
+        );
+
+        if (!is_array($response->data)) {
+            throw new \UnexpectedValueException("Invalid Subscription response payload");
+        }
+
+        return Subscription::fromArray($response->data);
+    }
+
+    /**
      * Revert a scheduled cancellation and return the updated subscription. Only works before cancellation takes effect.
      * @return Subscription
      */
@@ -607,12 +651,14 @@ class SubscriptionsResource
     public function list(
         ?string $customerId = null,
         ?SubscriptionStatus $status = null,
+        ?string $planVersionId = null,
     ): SubscriptionsListResult {
         $response = $this->http->get(
             "/subscriptions",
             HttpClient::buildBody([
                 "customer_id" => $customerId,
                 "status" => $status?->value,
+                "plan_version_id" => $planVersionId,
             ]),
         );
 
@@ -641,6 +687,7 @@ class SubscriptionsResource
         ?string $successUrl = null,
         ?int $prepaidPeriods = null,
         ?bool $cancelAtPeriodEnd = null,
+        ?string $planVersionId = null,
         ?string $offerId = null,
         ?string $promoCode = null,
         ?int $customTrialDays = null,
@@ -664,6 +711,7 @@ class SubscriptionsResource
                 "success_url" => $successUrl,
                 "prepaid_periods" => $prepaidPeriods,
                 "cancel_at_period_end" => $cancelAtPeriodEnd,
+                "plan_version_id" => $planVersionId,
                 "offer_id" => $offerId,
                 "promo_code" => $promoCode,
                 "custom_trial_days" => $customTrialDays,

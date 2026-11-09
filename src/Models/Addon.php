@@ -16,6 +16,8 @@ class Addon implements \JsonSerializable
         public readonly string $createdAt,
         public readonly string $updatedAt,
         public readonly string $consumptionModel,
+        /** @var string[] */
+        public readonly array $planIds,
         public readonly string $object,
         public readonly bool $livemode,
         public readonly ?string $description = null,
@@ -40,6 +42,7 @@ class Addon implements \JsonSerializable
         $values["includedUnits"] = $this->includedUnits;
         $values["overageRate"] = $this->overageRate;
         $values["creditCost"] = $this->creditCost;
+        $values["planIds"] = $this->planIds;
         $values["object"] = $this->object;
         $values["livemode"] = $this->livemode;
         return (object) $values;
@@ -60,6 +63,7 @@ class Addon implements \JsonSerializable
             createdAt: $data["created_at"],
             updatedAt: $data["updated_at"],
             consumptionModel: $data["consumption_model"],
+            planIds: $data["plan_ids"],
             object: $data["object"],
             livemode: $data["livemode"],
             description: $data["description"] ?? null,

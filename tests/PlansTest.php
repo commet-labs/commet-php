@@ -65,6 +65,7 @@ class PlansTest extends TestCase
                 'features' => [],
                 'prices' => [],
                 'exchange_rates' => [],
+                'countries' => [],
             ]),
         ]);
 
@@ -232,6 +233,7 @@ class PlansTest extends TestCase
                         ],
                     ],
                     'exchange_rates' => [],
+                    'countries' => [],
                 ]],
                 'has_more' => false,
             ]),

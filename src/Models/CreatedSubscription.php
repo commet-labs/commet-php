@@ -35,6 +35,7 @@ class CreatedSubscription implements \JsonSerializable
         public readonly ?int $billingDayOfMonth = null,
         public readonly ?string $nextBillingDate = null,
         public readonly ?string $checkoutUrl = null,
+        public readonly ?CreatedSubscriptionPlanVersion $planVersion = null,
         public readonly ?CreatedSubscriptionPause $pause = null,
         public readonly PaymentProvider|string|null $checkoutProvider = null,
         public readonly ?string $priceId = null,
@@ -63,6 +64,7 @@ class CreatedSubscription implements \JsonSerializable
         $values["hasPaymentMethod"] = $this->hasPaymentMethod;
         $values["createdAt"] = $this->createdAt;
         $values["updatedAt"] = $this->updatedAt;
+        $values["planVersion"] = $this->planVersion;
         $values["offerApplications"] = $this->offerApplications;
         $values["pause"] = $this->pause;
         $values["checkoutProvider"] = $this->checkoutProvider;
@@ -101,6 +103,7 @@ class CreatedSubscription implements \JsonSerializable
             billingDayOfMonth: $data["billing_day_of_month"] ?? null,
             nextBillingDate: $data["next_billing_date"] ?? null,
             checkoutUrl: $data["checkout_url"] ?? null,
+            planVersion: isset($data["plan_version"]) ? CreatedSubscriptionPlanVersion::fromArray($data["plan_version"]) : null,
             pause: isset($data["pause"]) ? CreatedSubscriptionPause::fromArray($data["pause"]) : null,
             checkoutProvider: isset($data["checkout_provider"]) ? PaymentProvider::tryFrom($data["checkout_provider"]) ?? $data["checkout_provider"] : null,
             priceId: $data["price_id"] ?? null,

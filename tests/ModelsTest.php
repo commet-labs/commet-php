@@ -157,6 +157,7 @@ class ModelsTest extends TestCase
                 'regional_prices' => [],
             ]],
             'exchange_rates' => [],
+            'countries' => [],
         ]);
 
         $this->assertSame('plan_pro', $plan->id);
@@ -266,6 +267,7 @@ class ModelsTest extends TestCase
             'id' => 'cp_100',
             'name' => '100 Credits',
             'credits' => 100,
+            'plan_ids' => [],
             'price' => 999,
             'object' => 'credit_pack',
             'livemode' => false,

@@ -11,6 +11,8 @@ class CreditPack implements \JsonSerializable
         public readonly string $name,
         public readonly int $credits,
         public readonly int $price,
+        /** @var string[] */
+        public readonly array $planIds,
         public readonly bool $isActive,
         public readonly string $createdAt,
         public readonly string $updatedAt,
@@ -27,6 +29,7 @@ class CreditPack implements \JsonSerializable
         $values["description"] = $this->description;
         $values["credits"] = $this->credits;
         $values["price"] = $this->price;
+        $values["planIds"] = $this->planIds;
         $values["isActive"] = $this->isActive;
         $values["createdAt"] = $this->createdAt;
         $values["updatedAt"] = $this->updatedAt;
@@ -45,6 +48,7 @@ class CreditPack implements \JsonSerializable
             name: $data["name"],
             credits: $data["credits"],
             price: $data["price"],
+            planIds: $data["plan_ids"],
             isActive: $data["is_active"],
             createdAt: $data["created_at"],
             updatedAt: $data["updated_at"],
