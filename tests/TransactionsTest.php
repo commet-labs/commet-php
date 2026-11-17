@@ -68,6 +68,7 @@ class TransactionsTest extends TestCase
             $this->response([
                 'id' => 'txn_1',
                 'gross_amount' => 10000,
+                'amount_refunded' => 0,
                 'subtotal' => 9000,
                 'tax_amount' => 1000,
                 'currency' => 'USD',
@@ -92,7 +93,7 @@ class TransactionsTest extends TestCase
         $this->assertNull($result->invoiceId);
     }
 
-    public function testRefundPostsNoBodyAndHydratesRefund(): void
+    public function testRefundWithoutAmountPostsAnEmptyObjectAndHydratesRefund(): void
     {
         $transactions = $this->transactionsWithResponses([
             $this->response([
@@ -110,7 +111,7 @@ class TransactionsTest extends TestCase
 
         $request = $this->history[0]['request'];
         $this->assertSame('POST', $request->getMethod());
-        $this->assertSame('', (string) $request->getBody());
+        $this->assertSame('{}', (string) $request->getBody());
 
         $this->assertInstanceOf(Refund::class, $result);
         $this->assertSame('re_1', $result->id);

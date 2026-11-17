@@ -32,8 +32,10 @@ class Plan implements \JsonSerializable
         public readonly ConsumptionModel|string|null $consumptionModel = null,
         public readonly ?bool $blockOnExhaustion = null,
         public readonly ?PlanUnusedPlanCredits $unusedPlanCredits = null,
+        public readonly ?bool $unlimitedPlanCredits = null,
         public readonly ?PlanPlanCreditLimit $planCreditLimit = null,
         public readonly ?PlanUnusedPlanBalance $unusedPlanBalance = null,
+        public readonly ?bool $unlimitedPlanBalance = null,
         public readonly ?PlanPlanBalanceLimit $planBalanceLimit = null,
         public readonly ?string $planGroupId = null,
         /** @var array<string, mixed>|null */
@@ -53,8 +55,10 @@ class Plan implements \JsonSerializable
         $values["isFree"] = $this->isFree;
         $values["blockOnExhaustion"] = $this->blockOnExhaustion;
         $values["unusedPlanCredits"] = $this->unusedPlanCredits;
+        $values["unlimitedPlanCredits"] = $this->unlimitedPlanCredits;
         $values["planCreditLimit"] = $this->planCreditLimit;
         $values["unusedPlanBalance"] = $this->unusedPlanBalance;
+        $values["unlimitedPlanBalance"] = $this->unlimitedPlanBalance;
         $values["planBalanceLimit"] = $this->planBalanceLimit;
         $values["sortOrder"] = $this->sortOrder;
         $values["planGroupId"] = $this->planGroupId;
@@ -95,8 +99,10 @@ class Plan implements \JsonSerializable
             consumptionModel: isset($data["consumption_model"]) ? ConsumptionModel::tryFrom($data["consumption_model"]) ?? $data["consumption_model"] : null,
             blockOnExhaustion: $data["block_on_exhaustion"] ?? null,
             unusedPlanCredits: isset($data["unused_plan_credits"]) ? PlanUnusedPlanCredits::fromArray($data["unused_plan_credits"]) : null,
+            unlimitedPlanCredits: $data["unlimited_plan_credits"] ?? null,
             planCreditLimit: isset($data["plan_credit_limit"]) ? PlanPlanCreditLimit::fromArray($data["plan_credit_limit"]) : null,
             unusedPlanBalance: isset($data["unused_plan_balance"]) ? PlanUnusedPlanBalance::fromArray($data["unused_plan_balance"]) : null,
+            unlimitedPlanBalance: $data["unlimited_plan_balance"] ?? null,
             planBalanceLimit: isset($data["plan_balance_limit"]) ? PlanPlanBalanceLimit::fromArray($data["plan_balance_limit"]) : null,
             planGroupId: $data["plan_group_id"] ?? null,
             metadata: $data["metadata"] ?? null,

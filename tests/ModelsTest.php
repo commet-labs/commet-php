@@ -289,6 +289,7 @@ class ModelsTest extends TestCase
         $transaction = Transaction::fromArray([
             'id' => 'txn_123',
             'gross_amount' => 10000,
+            'amount_refunded' => 0,
             'subtotal' => 9000,
             'tax_amount' => 1000,
             'currency' => 'USD',

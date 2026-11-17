@@ -14,14 +14,15 @@ class UsageCheckVariant2 extends UsageCheck implements \JsonSerializable
         public readonly string $consumptionModel,
         public readonly int $creditsPerUnit,
         public readonly int $estimatedCredits,
-        public readonly int $planCredits,
+        public readonly bool $unlimited,
         public readonly int $purchasedCredits,
-        public readonly int $totalCredits,
         public readonly bool $blockOnExhaustion,
         public readonly string $object,
         public readonly bool $livemode,
         public readonly ?string $reason = null,
         public readonly ?string $message = null,
+        public readonly ?int $planCredits = null,
+        public readonly ?int $totalCredits = null,
         public readonly ?UsageCheckVariant2PlanCreditLimit $planCreditLimit = null,
     ) {}
 
@@ -41,9 +42,14 @@ class UsageCheckVariant2 extends UsageCheck implements \JsonSerializable
         $values["consumptionModel"] = $this->consumptionModel;
         $values["creditsPerUnit"] = $this->creditsPerUnit;
         $values["estimatedCredits"] = $this->estimatedCredits;
-        $values["planCredits"] = $this->planCredits;
+        $values["unlimited"] = $this->unlimited;
+        if ($this->planCredits !== null) {
+            $values["planCredits"] = $this->planCredits;
+        }
         $values["purchasedCredits"] = $this->purchasedCredits;
-        $values["totalCredits"] = $this->totalCredits;
+        if ($this->totalCredits !== null) {
+            $values["totalCredits"] = $this->totalCredits;
+        }
         $values["planCreditLimit"] = $this->planCreditLimit;
         $values["blockOnExhaustion"] = $this->blockOnExhaustion;
         $values["object"] = $this->object;
@@ -64,14 +70,15 @@ class UsageCheckVariant2 extends UsageCheck implements \JsonSerializable
             consumptionModel: $data["consumption_model"],
             creditsPerUnit: $data["credits_per_unit"],
             estimatedCredits: $data["estimated_credits"],
-            planCredits: $data["plan_credits"],
+            unlimited: $data["unlimited"],
             purchasedCredits: $data["purchased_credits"],
-            totalCredits: $data["total_credits"],
             blockOnExhaustion: $data["block_on_exhaustion"],
             object: $data["object"],
             livemode: $data["livemode"],
             reason: $data["reason"] ?? null,
             message: $data["message"] ?? null,
+            planCredits: $data["plan_credits"] ?? null,
+            totalCredits: $data["total_credits"] ?? null,
             planCreditLimit: isset($data["plan_credit_limit"]) ? UsageCheckVariant2PlanCreditLimit::fromArray($data["plan_credit_limit"]) : null,
         );
     }

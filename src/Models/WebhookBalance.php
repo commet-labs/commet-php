@@ -7,19 +7,27 @@ namespace Commet\Models;
 class WebhookBalance implements \JsonSerializable
 {
     public function __construct(
-        public readonly float $currentBalance,
-        public readonly float $planBalance,
+        public readonly bool $unlimited,
         public readonly float $purchasedBalance,
-        public readonly float $totalBalance,
+        public readonly ?float $currentBalance = null,
+        public readonly ?float $planBalance = null,
+        public readonly ?float $totalBalance = null,
     ) {}
 
     public function jsonSerialize(): object
     {
         $values = [];
-        $values["currentBalance"] = $this->currentBalance;
-        $values["planBalance"] = $this->planBalance;
+        $values["unlimited"] = $this->unlimited;
+        if ($this->currentBalance !== null) {
+            $values["currentBalance"] = $this->currentBalance;
+        }
+        if ($this->planBalance !== null) {
+            $values["planBalance"] = $this->planBalance;
+        }
         $values["purchasedBalance"] = $this->purchasedBalance;
-        $values["totalBalance"] = $this->totalBalance;
+        if ($this->totalBalance !== null) {
+            $values["totalBalance"] = $this->totalBalance;
+        }
         return (object) $values;
     }
 
@@ -29,10 +37,11 @@ class WebhookBalance implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            currentBalance: $data["current_balance"],
-            planBalance: $data["plan_balance"],
+            unlimited: $data["unlimited"],
             purchasedBalance: $data["purchased_balance"],
-            totalBalance: $data["total_balance"],
+            currentBalance: $data["current_balance"] ?? null,
+            planBalance: $data["plan_balance"] ?? null,
+            totalBalance: $data["total_balance"] ?? null,
         );
     }
 }

@@ -10,6 +10,7 @@ class SubscriptionScheduledVersionChange implements \JsonSerializable
         public readonly string $planVersionId,
         public readonly string $label,
         public readonly string $effectiveAt,
+        public readonly string $currency,
     ) {}
 
     public function jsonSerialize(): object
@@ -18,6 +19,7 @@ class SubscriptionScheduledVersionChange implements \JsonSerializable
         $values["planVersionId"] = $this->planVersionId;
         $values["label"] = $this->label;
         $values["effectiveAt"] = $this->effectiveAt;
+        $values["currency"] = $this->currency;
         return (object) $values;
     }
 
@@ -30,6 +32,7 @@ class SubscriptionScheduledVersionChange implements \JsonSerializable
             planVersionId: $data["plan_version_id"],
             label: $data["label"],
             effectiveAt: $data["effective_at"],
+            currency: $data["currency"],
         );
     }
 }

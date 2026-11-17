@@ -194,7 +194,7 @@ Update a customer's name, external ID, or metadata.
 - `email` (`string`, optional)
 - `fullName` (`string`, optional)
 - `taxDocument` (`string`, optional)
-- `businessTaxId` (`string | null`, optional) — Business tax ID, such as an EU VAT number or a Peruvian RUC, for the country of the customer's address. Accepted only where Commet collects tax; a valid ID replaces consumer tax with the business treatment. Send null to remove it.
+- `businessTaxId` (`string | null`, optional) — Business tax ID, such as an EU VAT number, a Peruvian RUC or an Argentine CUIT, for the country of the customer's address; its type comes from that country. Where Commet collects tax and that ID exempts business buyers, a valid ID replaces consumer tax with the business treatment; elsewhere it is stored as sent and does not change any charge. Send null to remove it.
 - `externalId` (`string`, optional)
 - `timezone` (`Timezone`, optional)
 - `metadata` (`array`, optional)
@@ -261,7 +261,7 @@ Create a new customer. Idempotent when customerId is provided. With planGroupId,
 - `externalId` (`string`, optional)
 - `fullName` (`string`, optional)
 - `taxDocument` (`string`, optional)
-- `businessTaxId` (`string`, optional) — Business tax ID, such as an EU VAT number or a Peruvian RUC, for the country of the customer's address. Accepted only where Commet collects tax; a valid ID replaces consumer tax with the business treatment.
+- `businessTaxId` (`string`, optional) — Business tax ID, such as an EU VAT number, a Peruvian RUC or an Argentine CUIT, for the country of the customer's address; its type comes from that country. Where Commet collects tax and that ID exempts business buyers, a valid ID replaces consumer tax with the business treatment; elsewhere it is stored as sent and does not change any charge.
 - `address` (`CreateCustomerParamsAddress`, optional)
 - `addressId` (`string`, optional)
 - `email` (`string`, required)

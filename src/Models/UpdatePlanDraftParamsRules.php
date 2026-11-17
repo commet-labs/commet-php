@@ -11,10 +11,12 @@ class UpdatePlanDraftParamsRules implements \JsonSerializable
         public readonly ?int $freeIncludedBalance = null,
         public readonly ?string $unusedPlanCredits = null,
         public readonly ?int $maxPlanCredits = null,
+        public readonly ?bool $unlimitedPlanCredits = null,
         public readonly ?int $planCreditLimit = null,
         public readonly ?string $planCreditLimitInterval = null,
         public readonly ?string $unusedPlanBalance = null,
         public readonly ?int $maxPlanBalance = null,
+        public readonly ?bool $unlimitedPlanBalance = null,
         public readonly ?int $planBalanceLimit = null,
         public readonly ?string $planBalanceLimitInterval = null,
         public readonly ?bool $blockOnExhaustion = null,
@@ -39,6 +41,9 @@ class UpdatePlanDraftParamsRules implements \JsonSerializable
         if ($this->maxPlanCredits !== null) {
             $values["maxPlanCredits"] = $this->maxPlanCredits;
         }
+        if ($this->unlimitedPlanCredits !== null) {
+            $values["unlimitedPlanCredits"] = $this->unlimitedPlanCredits;
+        }
         if ($this->planCreditLimit !== null) {
             $values["planCreditLimit"] = $this->planCreditLimit;
         }
@@ -50,6 +55,9 @@ class UpdatePlanDraftParamsRules implements \JsonSerializable
         }
         if ($this->maxPlanBalance !== null) {
             $values["maxPlanBalance"] = $this->maxPlanBalance;
+        }
+        if ($this->unlimitedPlanBalance !== null) {
+            $values["unlimitedPlanBalance"] = $this->unlimitedPlanBalance;
         }
         if ($this->planBalanceLimit !== null) {
             $values["planBalanceLimit"] = $this->planBalanceLimit;
@@ -85,10 +93,12 @@ class UpdatePlanDraftParamsRules implements \JsonSerializable
             freeIncludedBalance: $data["free_included_balance"] ?? null,
             unusedPlanCredits: $data["unused_plan_credits"] ?? null,
             maxPlanCredits: $data["max_plan_credits"] ?? null,
+            unlimitedPlanCredits: $data["unlimited_plan_credits"] ?? null,
             planCreditLimit: $data["plan_credit_limit"] ?? null,
             planCreditLimitInterval: $data["plan_credit_limit_interval"] ?? null,
             unusedPlanBalance: $data["unused_plan_balance"] ?? null,
             maxPlanBalance: $data["max_plan_balance"] ?? null,
+            unlimitedPlanBalance: $data["unlimited_plan_balance"] ?? null,
             planBalanceLimit: $data["plan_balance_limit"] ?? null,
             planBalanceLimitInterval: $data["plan_balance_limit_interval"] ?? null,
             blockOnExhaustion: $data["block_on_exhaustion"] ?? null,

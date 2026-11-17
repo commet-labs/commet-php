@@ -12,6 +12,7 @@ class CustomerBatchFailedItemData implements \JsonSerializable
         public readonly ?string $externalId = null,
         public readonly ?string $fullName = null,
         public readonly ?string $taxDocument = null,
+        public readonly ?string $businessTaxId = null,
         public readonly ?string $timezone = null,
         /** @var array<string, mixed>|null */
         public readonly ?array $metadata = null,
@@ -33,6 +34,9 @@ class CustomerBatchFailedItemData implements \JsonSerializable
         }
         if ($this->taxDocument !== null) {
             $values["taxDocument"] = $this->taxDocument;
+        }
+        if ($this->businessTaxId !== null) {
+            $values["businessTaxId"] = $this->businessTaxId;
         }
         if ($this->timezone !== null) {
             $values["timezone"] = $this->timezone;
@@ -57,6 +61,7 @@ class CustomerBatchFailedItemData implements \JsonSerializable
             externalId: $data["external_id"] ?? null,
             fullName: $data["full_name"] ?? null,
             taxDocument: $data["tax_document"] ?? null,
+            businessTaxId: $data["business_tax_id"] ?? null,
             timezone: $data["timezone"] ?? null,
             metadata: $data["metadata"] ?? null,
             address: isset($data["address"]) ? CustomerBatchFailedItemDataAddress::fromArray($data["address"]) : null,

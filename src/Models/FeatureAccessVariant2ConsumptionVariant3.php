@@ -11,6 +11,7 @@ class FeatureAccessVariant2ConsumptionVariant3 extends FeatureAccessVariant2Cons
         public readonly FeatureAccessVariant2ConsumptionVariant3Period $period,
         public readonly float $unitsUsed,
         public readonly FeatureAccessVariant2ConsumptionVariant3Spent $spent,
+        public readonly bool $unlimited,
         public readonly ?int $availableUnits = null,
         public readonly ?FeatureAccessVariant2ConsumptionVariant3UnitPrice $unitPrice = null,
     ) {}
@@ -22,6 +23,7 @@ class FeatureAccessVariant2ConsumptionVariant3 extends FeatureAccessVariant2Cons
         $values["period"] = $this->period;
         $values["unitsUsed"] = $this->unitsUsed;
         $values["spent"] = $this->spent;
+        $values["unlimited"] = $this->unlimited;
         if ($this->availableUnits !== null) {
             $values["availableUnits"] = $this->availableUnits;
         }
@@ -41,6 +43,7 @@ class FeatureAccessVariant2ConsumptionVariant3 extends FeatureAccessVariant2Cons
             period: FeatureAccessVariant2ConsumptionVariant3Period::fromArray($data["period"]),
             unitsUsed: $data["units_used"],
             spent: FeatureAccessVariant2ConsumptionVariant3Spent::fromArray($data["spent"]),
+            unlimited: $data["unlimited"],
             availableUnits: $data["available_units"] ?? null,
             unitPrice: isset($data["unit_price"]) ? FeatureAccessVariant2ConsumptionVariant3UnitPrice::fromArray($data["unit_price"]) : null,
         );

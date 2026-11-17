@@ -7,23 +7,31 @@ namespace Commet\Models;
 class SubscriptionBalance implements \JsonSerializable
 {
     public function __construct(
-        public readonly float $remaining,
+        public readonly bool $unlimited,
         public readonly float $included,
         public readonly string $currency,
-        public readonly float $plan,
         public readonly float $purchased,
-        public readonly float $total,
+        public readonly ?float $remaining = null,
+        public readonly ?float $plan = null,
+        public readonly ?float $total = null,
     ) {}
 
     public function jsonSerialize(): object
     {
         $values = [];
-        $values["remaining"] = $this->remaining;
+        $values["unlimited"] = $this->unlimited;
+        if ($this->remaining !== null) {
+            $values["remaining"] = $this->remaining;
+        }
         $values["included"] = $this->included;
         $values["currency"] = $this->currency;
-        $values["plan"] = $this->plan;
+        if ($this->plan !== null) {
+            $values["plan"] = $this->plan;
+        }
         $values["purchased"] = $this->purchased;
-        $values["total"] = $this->total;
+        if ($this->total !== null) {
+            $values["total"] = $this->total;
+        }
         return (object) $values;
     }
 
@@ -33,12 +41,13 @@ class SubscriptionBalance implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            remaining: $data["remaining"],
+            unlimited: $data["unlimited"],
             included: $data["included"],
             currency: $data["currency"],
-            plan: $data["plan"],
             purchased: $data["purchased"],
-            total: $data["total"],
+            remaining: $data["remaining"] ?? null,
+            plan: $data["plan"] ?? null,
+            total: $data["total"] ?? null,
         );
     }
 }

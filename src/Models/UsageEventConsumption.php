@@ -9,8 +9,9 @@ class UsageEventConsumption implements \JsonSerializable
     public function __construct(
         public readonly string $model,
         public readonly float $deducted,
-        public readonly float $remaining,
+        public readonly bool $unlimited,
         public readonly bool $blocked,
+        public readonly ?float $remaining = null,
         public readonly ?UsageEventConsumptionPlanCreditLimit $planCreditLimit = null,
         public readonly ?UsageEventConsumptionPlanBalanceLimit $planBalanceLimit = null,
     ) {}
@@ -20,7 +21,10 @@ class UsageEventConsumption implements \JsonSerializable
         $values = [];
         $values["model"] = $this->model;
         $values["deducted"] = $this->deducted;
-        $values["remaining"] = $this->remaining;
+        $values["unlimited"] = $this->unlimited;
+        if ($this->remaining !== null) {
+            $values["remaining"] = $this->remaining;
+        }
         $values["blocked"] = $this->blocked;
         if ($this->planCreditLimit !== null) {
             $values["planCreditLimit"] = $this->planCreditLimit;
@@ -39,8 +43,9 @@ class UsageEventConsumption implements \JsonSerializable
         return new self(
             model: $data["model"],
             deducted: $data["deducted"],
-            remaining: $data["remaining"],
+            unlimited: $data["unlimited"],
             blocked: $data["blocked"],
+            remaining: $data["remaining"] ?? null,
             planCreditLimit: isset($data["plan_credit_limit"]) ? UsageEventConsumptionPlanCreditLimit::fromArray($data["plan_credit_limit"]) : null,
             planBalanceLimit: isset($data["plan_balance_limit"]) ? UsageEventConsumptionPlanBalanceLimit::fromArray($data["plan_balance_limit"]) : null,
         );
