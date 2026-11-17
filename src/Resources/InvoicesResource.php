@@ -75,27 +75,18 @@ class InvoicesResource
     }
 
     /**
-     * Mark an outstanding invoice as "paid" or "void" and return the updated invoice. Cannot change the status of already paid or voided invoices.
-     * @return Invoice
+     * Deprecated. No longer changes the invoice. An invoice is paid when its charge settles: to collect a past-due subscription, reactivate it or send the customer a recovery link.
+     * @return null
+     * @deprecated
      */
     public function updateStatus(
         string $id,
-        string $status,
         ?string $idempotencyKey = null,
-    ): Invoice {
-        $response = $this->http->patch(
+    ): mixed {
+        return $this->http->patch(
             "/invoices/{$id}/status",
-            HttpClient::buildBody([
-                "status" => $status,
-            ]),
             idempotencyKey: $idempotencyKey,
-        );
-
-        if (!is_array($response->data)) {
-            throw new \UnexpectedValueException("Invalid Invoice response payload");
-        }
-
-        return Invoice::fromArray($response->data);
+        )->data;
     }
 
     /**

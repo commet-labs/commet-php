@@ -12,7 +12,8 @@ class FeatureAccessVariant2ConsumptionVariant2 extends FeatureAccessVariant2Cons
         public readonly float $unitsUsed,
         public readonly int $creditsPerUnit,
         public readonly float $creditsConsumed,
-        public readonly int $availableUnits,
+        public readonly bool $unlimited,
+        public readonly ?int $availableUnits = null,
     ) {}
 
     public function jsonSerialize(): object
@@ -23,7 +24,10 @@ class FeatureAccessVariant2ConsumptionVariant2 extends FeatureAccessVariant2Cons
         $values["unitsUsed"] = $this->unitsUsed;
         $values["creditsPerUnit"] = $this->creditsPerUnit;
         $values["creditsConsumed"] = $this->creditsConsumed;
-        $values["availableUnits"] = $this->availableUnits;
+        $values["unlimited"] = $this->unlimited;
+        if ($this->availableUnits !== null) {
+            $values["availableUnits"] = $this->availableUnits;
+        }
         return (object) $values;
     }
 
@@ -38,7 +42,8 @@ class FeatureAccessVariant2ConsumptionVariant2 extends FeatureAccessVariant2Cons
             unitsUsed: $data["units_used"],
             creditsPerUnit: $data["credits_per_unit"],
             creditsConsumed: $data["credits_consumed"],
-            availableUnits: $data["available_units"],
+            unlimited: $data["unlimited"],
+            availableUnits: $data["available_units"] ?? null,
         );
     }
 }

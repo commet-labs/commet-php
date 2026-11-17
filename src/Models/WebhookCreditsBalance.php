@@ -7,17 +7,23 @@ namespace Commet\Models;
 class WebhookCreditsBalance implements \JsonSerializable
 {
     public function __construct(
-        public readonly float $planCredits,
+        public readonly bool $unlimited,
         public readonly float $purchasedCredits,
-        public readonly float $totalCredits,
+        public readonly ?float $planCredits = null,
+        public readonly ?float $totalCredits = null,
     ) {}
 
     public function jsonSerialize(): object
     {
         $values = [];
-        $values["planCredits"] = $this->planCredits;
+        $values["unlimited"] = $this->unlimited;
+        if ($this->planCredits !== null) {
+            $values["planCredits"] = $this->planCredits;
+        }
         $values["purchasedCredits"] = $this->purchasedCredits;
-        $values["totalCredits"] = $this->totalCredits;
+        if ($this->totalCredits !== null) {
+            $values["totalCredits"] = $this->totalCredits;
+        }
         return (object) $values;
     }
 
@@ -27,9 +33,10 @@ class WebhookCreditsBalance implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            planCredits: $data["plan_credits"],
+            unlimited: $data["unlimited"],
             purchasedCredits: $data["purchased_credits"],
-            totalCredits: $data["total_credits"],
+            planCredits: $data["plan_credits"] ?? null,
+            totalCredits: $data["total_credits"] ?? null,
         );
     }
 }

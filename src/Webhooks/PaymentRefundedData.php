@@ -15,6 +15,7 @@ final class PaymentRefundedData
         public readonly ?string $invoiceNumber,
         public readonly ?string $customerId,
         public readonly ?string $subscriptionId,
+        public readonly int $amountRefunded,
         public readonly float $refundAmount,
         public readonly string $currency,
     ) {}
@@ -32,6 +33,7 @@ final class PaymentRefundedData
             invoiceNumber: $data["invoiceNumber"] ?? null,
             customerId: $data["customerId"] ?? null,
             subscriptionId: $data["subscriptionId"] ?? null,
+            amountRefunded: $data["amountRefunded"],
             refundAmount: $data["refundAmount"],
             currency: $data["currency"],
         );

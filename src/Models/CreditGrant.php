@@ -8,6 +8,7 @@ class CreditGrant implements \JsonSerializable
 {
     public function __construct(
         public readonly int $credits,
+        public readonly string $status,
         public readonly string $object,
         public readonly bool $livemode,
     ) {}
@@ -16,6 +17,7 @@ class CreditGrant implements \JsonSerializable
     {
         $values = [];
         $values["credits"] = $this->credits;
+        $values["status"] = $this->status;
         $values["object"] = $this->object;
         $values["livemode"] = $this->livemode;
         return (object) $values;
@@ -28,6 +30,7 @@ class CreditGrant implements \JsonSerializable
     {
         return new self(
             credits: $data["credits"],
+            status: $data["status"],
             object: $data["object"],
             livemode: $data["livemode"],
         );

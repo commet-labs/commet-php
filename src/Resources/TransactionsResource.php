@@ -18,15 +18,19 @@ class TransactionsResource
     ) {}
 
     /**
-     * Issue a full refund and return the provider-neutral refund resource with its actual status.
+     * Refund a positive amount in the payment currency’s smallest unit, or omit amount to refund the remaining amount. Returns the refund resource with its actual status.
      * @return Refund
      */
     public function refund(
         string $id,
+        ?int $amount = null,
         ?string $idempotencyKey = null,
     ): Refund {
         $response = $this->http->post(
             "/transactions/{$id}/refund",
+            HttpClient::buildBody([
+                "amount" => $amount,
+            ]),
             idempotencyKey: $idempotencyKey,
         );
 

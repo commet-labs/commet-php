@@ -14,16 +14,17 @@ class UsageCheckVariant3 extends UsageCheck implements \JsonSerializable
         public readonly string $consumptionModel,
         public readonly float $unitPrice,
         public readonly float $estimatedAmount,
-        public readonly float $currentBalance,
-        public readonly float $planBalance,
+        public readonly bool $unlimited,
         public readonly float $purchasedBalance,
-        public readonly float $totalBalance,
         public readonly bool $blockOnExhaustion,
         public readonly string $currency,
         public readonly string $object,
         public readonly bool $livemode,
         public readonly ?string $reason = null,
         public readonly ?string $message = null,
+        public readonly ?float $currentBalance = null,
+        public readonly ?float $planBalance = null,
+        public readonly ?float $totalBalance = null,
         public readonly ?UsageCheckVariant3PlanBalanceLimit $planBalanceLimit = null,
     ) {}
 
@@ -43,10 +44,17 @@ class UsageCheckVariant3 extends UsageCheck implements \JsonSerializable
         $values["consumptionModel"] = $this->consumptionModel;
         $values["unitPrice"] = $this->unitPrice;
         $values["estimatedAmount"] = $this->estimatedAmount;
-        $values["currentBalance"] = $this->currentBalance;
-        $values["planBalance"] = $this->planBalance;
+        $values["unlimited"] = $this->unlimited;
+        if ($this->currentBalance !== null) {
+            $values["currentBalance"] = $this->currentBalance;
+        }
+        if ($this->planBalance !== null) {
+            $values["planBalance"] = $this->planBalance;
+        }
         $values["purchasedBalance"] = $this->purchasedBalance;
-        $values["totalBalance"] = $this->totalBalance;
+        if ($this->totalBalance !== null) {
+            $values["totalBalance"] = $this->totalBalance;
+        }
         $values["planBalanceLimit"] = $this->planBalanceLimit;
         $values["blockOnExhaustion"] = $this->blockOnExhaustion;
         $values["currency"] = $this->currency;
@@ -68,16 +76,17 @@ class UsageCheckVariant3 extends UsageCheck implements \JsonSerializable
             consumptionModel: $data["consumption_model"],
             unitPrice: $data["unit_price"],
             estimatedAmount: $data["estimated_amount"],
-            currentBalance: $data["current_balance"],
-            planBalance: $data["plan_balance"],
+            unlimited: $data["unlimited"],
             purchasedBalance: $data["purchased_balance"],
-            totalBalance: $data["total_balance"],
             blockOnExhaustion: $data["block_on_exhaustion"],
             currency: $data["currency"],
             object: $data["object"],
             livemode: $data["livemode"],
             reason: $data["reason"] ?? null,
             message: $data["message"] ?? null,
+            currentBalance: $data["current_balance"] ?? null,
+            planBalance: $data["plan_balance"] ?? null,
+            totalBalance: $data["total_balance"] ?? null,
             planBalanceLimit: isset($data["plan_balance_limit"]) ? UsageCheckVariant3PlanBalanceLimit::fromArray($data["plan_balance_limit"]) : null,
         );
     }

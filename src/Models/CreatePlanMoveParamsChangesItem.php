@@ -13,6 +13,7 @@ class CreatePlanMoveParamsChangesItem implements \JsonSerializable
         public readonly mixed $seatLimit = null,
         /** @var string[]|null */
         public readonly ?array $removeAddonIds = null,
+        public readonly ?string $currency = null,
     ) {}
 
     public function jsonSerialize(): object
@@ -31,6 +32,9 @@ class CreatePlanMoveParamsChangesItem implements \JsonSerializable
         if ($this->removeAddonIds !== null) {
             $values["removeAddonIds"] = $this->removeAddonIds;
         }
+        if ($this->currency !== null) {
+            $values["currency"] = $this->currency;
+        }
         return (object) $values;
     }
 
@@ -45,6 +49,7 @@ class CreatePlanMoveParamsChangesItem implements \JsonSerializable
             billingInterval: $data["billing_interval"] ?? null,
             seatLimit: $data["seat_limit"] ?? null,
             removeAddonIds: $data["remove_addon_ids"] ?? null,
+            currency: $data["currency"] ?? null,
         );
     }
 }

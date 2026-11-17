@@ -1,5 +1,15 @@
 # Changelog
 
+## 9.11.0
+
+- Plans can give unlimited plan credits or plan balance. `plans->create` and `plans->update` accept `unlimitedPlanCredits` and `unlimitedPlanBalance`, draft rules accept them too, and plans return them. Subscriptions, usage checks, usage events and feature access return `unlimited`, and omit the plan and total amounts when it is true.
+- Credit purchases, balance top-ups and add-on activations return a `status`: `processing` when the payment method confirms later, and the credits, balance or add-on arrive once it is confirmed.
+- Transactions return `amountRefunded`, and `transactions->refund` accepts `amount` for a partial refund.
+- A version move can charge a subscriber in USD: `subscriptions->changeVersion`, `plans->createMove`, `plans->publishDraft` and `plans->archiveExperiment` accept `currency`, and the scheduled version change returns it. New errors `currency_held_by_payment_method`, `currency_held_by_customer_credit`, `currency_held_by_balance_plan`, `currency_held_by_fixed_amount_discount`, `currency_held_by_prepaid_period` and `currency_held_by_scheduled_pause`.
+- `customers->createBatch` accepts `businessTaxId` for each customer.
+- `invoices->updateStatus` is deprecated and no longer takes a status: the API no longer changes the invoice, which is paid when its charge settles.
+- A method whose body parameters are all optional, called without any, sends an empty JSON object instead of an empty array, which the API rejected.
+
 ## 9.10.0
 
 - Plans have versions. Editing a plan publishes a new version, and existing subscriptions stay on theirs until moved. `plans->listVersions`, `plans->getVersion`, `plans->compareVersions` and `plans->createVersion` read and publish versions; `plans->createDraft`, `plans->updateDraft`, `plans->publishDraft` and the other draft methods prepare one; `plans->createExperiment`, `plans->makeExperimentCurrent`, `plans->archiveExperiment` and the other experiment methods sell a version through its own code; `plans->createMove`, `plans->cancelMove` and the other move methods move subscribers to a newer version; `plans->listSubscribersNeedingAChange` and `plans->keepSubscriberOnVersion` handle the subscribers that do not fit it.
