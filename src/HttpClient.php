@@ -257,7 +257,8 @@ class HttpClient
         $options = ['headers' => $headers];
 
         if ($jsonBody !== null) {
-            $options['json'] = $jsonBody;
+            // The API takes a JSON object, and an empty PHP array encodes as [].
+            $options['json'] = $jsonBody === [] ? new \stdClass() : $jsonBody;
         }
 
         if ($params !== null) {
