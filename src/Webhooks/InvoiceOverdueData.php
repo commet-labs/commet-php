@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Webhooks;
 
-/** Fired once when an outstanding invoice passes its due date without payment. The invoice keeps its outstanding status — overdue is a fact about the due date, not a new status. Use it to start your own dunning flow. */
+/** Fired once when an invoice is still outstanding 24 hours after its due date. The invoice keeps its outstanding status — overdue is a fact about the due date, not a new status. Use it to start your own dunning flow. */
 final class InvoiceOverdueData
 {
     public function __construct(

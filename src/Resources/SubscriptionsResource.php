@@ -49,18 +49,20 @@ class SubscriptionsResource
     }
 
     /**
-     * Activate an add-on on a subscription. Creates the activation invoice and charges a prorated amount for the current billing period; the add-on is active once the payment is confirmed. Rejected with 409 while the add-on is active or an activation of it is still processing. An add-on that the subscription's plan version does not sell is rejected with addon_unavailable.
+     * Activate an add-on on a subscription. Creates the activation invoice and charges a prorated amount for the current billing period; the add-on is active once the payment is confirmed. Without a saved payment method, send successUrl to receive a checkout that charges the activation and saves the method. Rejected with 409 while the add-on is active or an activation of it is still processing. An add-on that the subscription's plan version does not sell is rejected with addon_unavailable.
      * @return SubscriptionAddon
      */
     public function activateAddon(
         string $id,
         string $addonId,
+        ?string $successUrl = null,
         ?string $idempotencyKey = null,
     ): SubscriptionAddon {
         $response = $this->http->post(
             "/subscriptions/{$id}/addons",
             HttpClient::buildBody([
                 "addon_id" => $addonId,
+                "success_url" => $successUrl,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -151,18 +153,20 @@ class SubscriptionsResource
     }
 
     /**
-     * Top up a balance subscription. Creates the top-up invoice and charges the customer's payment method for the amount plus tax. Once the payment is confirmed, adds the amount to the subscription's purchased balance (after paying back any overage owed on the plan balance), marks the invoice paid and emits `balance.topped_up`. Purchased balance is spent after the plan balance and is kept until the subscription ends. Rejected with 400 when the subscription is not on a balance plan, its plan has top-ups turned off, or the amount is below the effective minimum: the plan's minimum top-up in the subscription currency, raised to the currency's minimum charge.
+     * Top up a balance subscription. Creates the top-up invoice and charges the customer's payment method for the amount plus tax. Once the payment is confirmed, adds the amount to the subscription's purchased balance (after paying back any overage owed on the plan balance), marks the invoice paid and emits `balance.topped_up`. Purchased balance is spent after the plan balance and is kept until the subscription ends. Without a saved payment method, send successUrl to receive a checkout that charges the top-up and saves the method. Rejected with 400 when the subscription is not on a balance plan, its plan has top-ups turned off, or the amount is below the effective minimum: the plan's minimum top-up in the subscription currency, raised to the currency's minimum charge.
      * @return BalanceTopup
      */
     public function topupBalance(
         string $id,
         int $amount,
+        ?string $successUrl = null,
         ?string $idempotencyKey = null,
     ): BalanceTopup {
         $response = $this->http->post(
             "/subscriptions/{$id}/balance/topup",
             HttpClient::buildBody([
                 "amount" => $amount,
+                "success_url" => $successUrl,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -261,13 +265,14 @@ class SubscriptionsResource
     }
 
     /**
-     * Purchase a fixed credit pack or choose a whole credit quantity at the subscription plan price and minimum. Creates the purchase invoice, charges the saved payment method and adds the purchased credits once the payment is confirmed. A credit pack that the subscription's plan version does not sell is rejected with credit_pack_unavailable.
+     * Purchase a fixed credit pack or choose a whole credit quantity at the subscription plan price and minimum. Creates the purchase invoice, charges the saved payment method and adds the purchased credits once the payment is confirmed. Without a saved payment method, send successUrl to receive a checkout that charges the purchase and saves the method. A credit pack that the subscription's plan version does not sell is rejected with credit_pack_unavailable.
      * @return CreditGrant
      */
     public function purchaseCredits(
         string $id,
         ?string $creditPackId = null,
         ?int $quantity = null,
+        ?string $successUrl = null,
         ?string $idempotencyKey = null,
     ): CreditGrant {
         $response = $this->http->post(
@@ -275,6 +280,7 @@ class SubscriptionsResource
             HttpClient::buildBody([
                 "credit_pack_id" => $creditPackId,
                 "quantity" => $quantity,
+                "success_url" => $successUrl,
             ]),
             idempotencyKey: $idempotencyKey,
         );
@@ -484,7 +490,7 @@ class SubscriptionsResource
     }
 
     /**
-     * Reactivates a subscription. A past_due subscription retries its outstanding renewal charge (recovering to active on success). A canceled subscription generates a fresh invoice, charges the saved card, and resets the billing period. On a successful charge the subscription becomes active; a declined charge returns an error with a recoveryUrl in the error details that can be sent to the customer to update their card. A canceled subscription may apply an Offer by offerId; past-due recovery cannot.
+     * Reactivates a subscription. A past_due subscription retries its outstanding renewal charge (recovering to active on success). A canceled subscription generates a fresh invoice, charges the saved card, and resets the billing period; when that invoice totals zero, for example under an Offer, it is marked paid without a charge and the subscription becomes active at once, still requiring a saved payment method. On a successful charge the subscription becomes active; a declined charge returns an error with a recoveryUrl in the error details that can be sent to the customer to update their card. A canceled subscription may apply an Offer by offerId; past-due recovery cannot.
      * @return ReactivatedSubscription
      */
     public function reactivate(

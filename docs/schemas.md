@@ -47,6 +47,8 @@ Generated from Commet API version `2026-08-27`.
 - `"mercado_pago"`
 - `"google_pay"`
 - `"smartpix"`
+- `"apple_pay"`
+- `"link"`
 
 ### PaymentProvider
 
@@ -207,7 +209,8 @@ Generated from Commet API version `2026-08-27`.
 ### BalanceTopup
 
 - `amount` (`int`, required)
-- `status` (`string`, required) — `succeeded` when the payment was confirmed and the balance was added. `processing` when the payment method confirms later: the balance is added once the payment is confirmed, and nothing is added if it is declined.
+- `status` (`string`, required) — `succeeded` when the payment was confirmed and the balance was added. `processing` when the payment method confirms later: the balance is added once the payment is confirmed, and nothing is added if it is declined. `requires_checkout` when the subscription has no saved payment method and `successUrl` was sent: the balance is added once the customer pays at `checkoutUrl`.
+- `checkoutUrl` (`string`, optional) — Hosted checkout where the customer pays the purchase and saves the payment method. Present only when `status` is `requires_checkout`.
 - `object` (`string`, required)
 - `livemode` (`bool`, required)
 
@@ -556,7 +559,8 @@ Discriminator: `type`
 ### CreditGrant
 
 - `credits` (`int`, required)
-- `status` (`string`, required) — `succeeded` when the payment was confirmed and the credits were added. `processing` when the payment method confirms later: the credits are added once the payment is confirmed, and nothing is added if it is declined.
+- `status` (`string`, required) — `succeeded` when the payment was confirmed and the credits were added. `processing` when the payment method confirms later: the credits are added once the payment is confirmed, and nothing is added if it is declined. `requires_checkout` when the subscription has no saved payment method and `successUrl` was sent: the credits are added once the customer pays at `checkoutUrl`.
+- `checkoutUrl` (`string`, optional) — Hosted checkout where the customer pays the purchase and saves the payment method. Present only when `status` is `requires_checkout`.
 - `object` (`string`, required)
 - `livemode` (`bool`, required)
 
@@ -1278,12 +1282,14 @@ Variants:
 - `PlanChangeVariant1`
 - `PlanChangeVariant2`
 - `PlanChangeVariant3`
+- `PlanChangeVariant4`
 
 Discriminator: `outcome`
 
 - `"requires_checkout"` → `PlanChangeVariant1`
 - `"scheduled"` → `PlanChangeVariant2`
 - `"completed"` → `PlanChangeVariant3`
+- `"processing"` → `PlanChangeVariant4`
 
 ### PlanChangeVariant1
 
@@ -1535,6 +1541,13 @@ Discriminator: `type`
 
 - `id` (`string`, required)
 - `name` (`string`, required)
+
+### PlanChangeVariant4
+
+- `outcome` (`string`, required)
+- `invoiceId` (`string`, required)
+- `object` (`string`, required)
+- `livemode` (`bool`, required)
 
 ### PlanCountriesItem
 
@@ -2452,8 +2465,9 @@ Discriminator: `type`
 ### SubscriptionAddon
 
 - `addonId` (`string`, required)
-- `status` (`string`, required) — `active` when the add-on is active. `processing` when the payment method confirms later: the add-on is activated once the payment is confirmed, and stays inactive if it is declined.
+- `status` (`string`, required) — `active` when the add-on is active. `processing` when the payment method confirms later: the add-on is activated once the payment is confirmed, and stays inactive if it is declined. `requires_checkout` when the subscription has no saved payment method and `successUrl` was sent: the add-on is activated once the customer pays at `checkoutUrl`.
 - `proratedCharge` (`int`, required)
+- `checkoutUrl` (`string`, optional) — Hosted checkout where the customer pays the purchase and saves the payment method. Present only when `status` is `requires_checkout`.
 - `object` (`string`, required)
 - `livemode` (`bool`, required)
 
@@ -2940,7 +2954,7 @@ Discriminator: `status`
 - `amountRefunded` (`int`, required) — Cumulative confirmed refunds in the payment currency’s smallest unit.
 - `currency` (`string`, required)
 - `provider` (`PaymentProvider`, required) — The payment provider the charge was routed to: stripe, commet, or dlocal.
-- `paymentMethod` (`PaymentMethod | null`, required) — The method used for this charge: card, oxxo, or mercado_pago. Null when unknown.
+- `paymentMethod` (`PaymentMethod | null`, required) — The method used for this charge: card, apple_pay, google_pay, link, smartpix, oxxo or mercado_pago. Null when unknown.
 - `subPaymentMethod` (`SubPaymentMethod | null`, required) — The source of funds for this charge, when reported by the provider. Null when unavailable or unknown.
 - `status` (`TransactionStatus`, required)
 - `customerEmail` (`string | null`, required)
@@ -2964,7 +2978,7 @@ Discriminator: `status`
 - `amountRefunded` (`int`, required) — Cumulative confirmed refunds in the payment currency’s smallest unit.
 - `currency` (`string`, required)
 - `provider` (`PaymentProvider`, required) — The payment provider the charge was routed to: stripe, commet, or dlocal.
-- `paymentMethod` (`PaymentMethod | null`, required) — The method used for this charge: card, oxxo, or mercado_pago. Null when unknown.
+- `paymentMethod` (`PaymentMethod | null`, required) — The method used for this charge: card, apple_pay, google_pay, link, smartpix, oxxo or mercado_pago. Null when unknown.
 - `subPaymentMethod` (`SubPaymentMethod | null`, required) — The source of funds for this charge, when reported by the provider. Null when unavailable or unknown.
 - `status` (`TransactionStatus`, required)
 - `customerEmail` (`string | null`, required)

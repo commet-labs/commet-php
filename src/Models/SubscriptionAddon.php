@@ -12,6 +12,7 @@ class SubscriptionAddon implements \JsonSerializable
         public readonly int $proratedCharge,
         public readonly string $object,
         public readonly bool $livemode,
+        public readonly ?string $checkoutUrl = null,
     ) {}
 
     public function jsonSerialize(): object
@@ -20,6 +21,9 @@ class SubscriptionAddon implements \JsonSerializable
         $values["addonId"] = $this->addonId;
         $values["status"] = $this->status;
         $values["proratedCharge"] = $this->proratedCharge;
+        if ($this->checkoutUrl !== null) {
+            $values["checkoutUrl"] = $this->checkoutUrl;
+        }
         $values["object"] = $this->object;
         $values["livemode"] = $this->livemode;
         return (object) $values;
@@ -36,6 +40,7 @@ class SubscriptionAddon implements \JsonSerializable
             proratedCharge: $data["prorated_charge"],
             object: $data["object"],
             livemode: $data["livemode"],
+            checkoutUrl: $data["checkout_url"] ?? null,
         );
     }
 }
