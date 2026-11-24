@@ -11,4 +11,6 @@ enum PaymentMethod: string
     case MercadoPago = "mercado_pago";
     case GooglePay = "google_pay";
     case Smartpix = "smartpix";
+    case ApplePay = "apple_pay";
+    case Link = "link";
 }

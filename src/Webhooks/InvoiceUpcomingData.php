@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Commet\Webhooks;
 
-/** Predictive event fired once, 3 days before an active subscription renews. Use it to notify the customer before they are charged. Carries no amount — usage-based charges are only final at renewal, when invoice.created delivers the actual invoice. */
+/** Predictive event fired once, 3 days before an active subscription renews. A subscription on a free plan issues no renewal invoice and does not fire it. Use it to notify the customer before they are charged. Carries no amount — usage-based charges are only final at renewal, when invoice.created delivers the actual invoice. */
 final class InvoiceUpcomingData
 {
     public function __construct(

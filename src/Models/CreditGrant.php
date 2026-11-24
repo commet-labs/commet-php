@@ -11,6 +11,7 @@ class CreditGrant implements \JsonSerializable
         public readonly string $status,
         public readonly string $object,
         public readonly bool $livemode,
+        public readonly ?string $checkoutUrl = null,
     ) {}
 
     public function jsonSerialize(): object
@@ -18,6 +19,9 @@ class CreditGrant implements \JsonSerializable
         $values = [];
         $values["credits"] = $this->credits;
         $values["status"] = $this->status;
+        if ($this->checkoutUrl !== null) {
+            $values["checkoutUrl"] = $this->checkoutUrl;
+        }
         $values["object"] = $this->object;
         $values["livemode"] = $this->livemode;
         return (object) $values;
@@ -33,6 +37,7 @@ class CreditGrant implements \JsonSerializable
             status: $data["status"],
             object: $data["object"],
             livemode: $data["livemode"],
+            checkoutUrl: $data["checkout_url"] ?? null,
         );
     }
 }

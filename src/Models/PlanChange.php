@@ -15,6 +15,7 @@ abstract class PlanChange
             "requires_checkout" => PlanChangeVariant1::fromArray($data),
             "scheduled" => PlanChangeVariant2::fromArray($data),
             "completed" => PlanChangeVariant3::fromArray($data),
+            "processing" => PlanChangeVariant4::fromArray($data),
             default => PlanChangeVariant1::fromArray($data),
         };
     }
